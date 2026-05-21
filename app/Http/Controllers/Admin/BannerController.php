@@ -38,14 +38,21 @@ class BannerController extends Controller
 
     private function data(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'titulo' => ['required', 'max:255'],
-            'imagem_url' => ['nullable', 'url'],
-            'link_url' => ['nullable', 'url'],
+            'imagem' => ['nullable', 'max:255'],
+            'link' => ['nullable', 'max:255'],
             'posicao' => ['required', 'max:50'],
-            'inicio_em' => ['nullable', 'date'],
-            'fim_em' => ['nullable', 'date'],
+            'data_inicio' => ['nullable', 'date'],
+            'data_fim' => ['nullable', 'date'],
             'ativo' => ['nullable', 'boolean'],
         ]) + ['ativo' => $request->boolean('ativo')];
+
+        $data['imagem_url'] = $data['imagem'] ?? null;
+        $data['link_url'] = $data['link'] ?? null;
+        $data['inicio_em'] = $data['data_inicio'] ?? null;
+        $data['fim_em'] = $data['data_fim'] ?? null;
+
+        return $data;
     }
 }

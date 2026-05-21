@@ -17,6 +17,11 @@ class SorteioController extends Controller
 
         return view('organizador.sorteios.show', [
             'jogo' => $jogo->load('pelada'),
+            'elegiveisCount' => $jogo->participantes()
+                ->where('status', 'confirmado')
+                ->whereHas('membro', fn ($query) => $query->where('status', 'ativo'))
+                ->count(),
+            'membrosPorUsuario' => $jogo->pelada->membros()->with('user')->get()->keyBy('user_id'),
             'sorteios' => $jogo->sorteios()->with('times.jogadores.user')->latest()->get(),
         ]);
     }
@@ -26,22 +31,28 @@ class SorteioController extends Controller
         $this->authorizeOwner($jogo);
         $quantidadeTimes = max(2, (int) $request->input('quantidade_times', 2));
         $participantes = $jogo->participantes()
-            ->with('user')
+            ->with(['user', 'membro'])
             ->where('status', 'confirmado')
+            ->whereHas('membro', fn ($query) => $query->where('status', 'ativo'))
             ->inRandomOrder()
             ->get();
 
-        abort_if($participantes->count() < $quantidadeTimes, 422, 'Participantes confirmados insuficientes.');
+        if ($participantes->count() < $quantidadeTimes) {
+            return back()->with('status', 'Participantes aceitos e confirmados insuficientes para sortear esses times.');
+        }
 
         $sorteio = Sorteio::create([
             'pelada_jogo_id' => $jogo->id,
             'criado_por' => $request->user()->id,
+            'tipo_sorteio' => $request->input('tipo_sorteio', 'simples'),
             'quantidade_times' => $quantidadeTimes,
+            'status' => 'publicado',
             'realizado_em' => now(),
         ]);
 
         $times = collect(range(1, $quantidadeTimes))->map(fn ($numero) => $sorteio->times()->create([
             'nome' => 'Time '.$numero,
+            'nome_time' => 'Time '.$numero,
             'ordem' => $numero,
         ]));
 
@@ -58,6 +69,6 @@ class SorteioController extends Controller
 
     private function authorizeOwner(PeladaJogo $jogo): void
     {
-        abort_unless(auth()->user()->isAdmin() || $jogo->pelada->organizador_id === auth()->id(), 403);
+        $this->redirectIfNotPeladaOwner($jogo->pelada);
     }
 }

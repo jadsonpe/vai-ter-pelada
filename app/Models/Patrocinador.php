@@ -8,7 +8,7 @@ class Patrocinador extends Model
 {
     protected $table = 'patrocinadores';
 
-    protected $fillable = ['nome', 'logo_url', 'site_url', 'ativo'];
+    protected $fillable = ['nome', 'logo', 'logo_url', 'link', 'site_url', 'telefone', 'ativo'];
 
     protected $casts = ['ativo' => 'boolean'];
 }

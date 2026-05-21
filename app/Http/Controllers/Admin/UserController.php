@@ -24,9 +24,17 @@ class UserController extends Controller
     {
         $user->update($request->validate([
             'name' => ['required', 'max:255'],
+            'apelido' => ['nullable', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'role' => ['required', 'in:admin,organizador,jogador'],
+            'status' => ['required', 'in:ativo,bloqueado,inativo'],
+            'plano' => ['required', 'in:gratis,plus,ilimitado'],
+            'limite_peladas' => ['required', 'integer', 'min:0'],
             'phone' => ['nullable', 'max:30'],
+            'cidade' => ['nullable', 'max:255'],
+            'bairro' => ['nullable', 'max:255'],
+            'posicao' => ['nullable', 'max:255'],
+            'nivel' => ['nullable', 'integer', 'between:1,5'],
             'active' => ['nullable', 'boolean'],
         ]) + ['active' => $request->boolean('active')]);
 

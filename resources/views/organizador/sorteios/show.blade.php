@@ -2,10 +2,13 @@
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         @include('shared.status')
         <h1 class="text-3xl font-bold text-slate-900">Sorteio - {{ $jogo->titulo }}</h1>
+        <p class="mt-2 text-sm text-slate-600">
+            Jogadores elegiveis: {{ $elegiveisCount }} confirmados e aceitos como membros ativos da pelada.
+        </p>
         <form method="POST" action="{{ route('organizador.jogos.sorteios.sortear', $jogo) }}" class="mt-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-5 sm:flex-row">
             @csrf
-            <input type="number" min="2" name="quantidade_times" value="2" class="rounded-md border-slate-300">
-            <button class="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white">Sortear times</button>
+            <input type="number" min="2" name="quantidade_times" value="2" class="w-full rounded-md border-slate-300 sm:w-40">
+            <button class="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white sm:w-auto">Sortear times</button>
         </form>
         <div class="mt-6 grid gap-5 md:grid-cols-2">
             @foreach($sorteios as $sorteio)
@@ -16,7 +19,7 @@
                             <div class="rounded-md bg-slate-50 p-4">
                                 <h3 class="font-semibold text-emerald-700">{{ $time->nome }}</h3>
                                 @foreach($time->jogadores as $jogador)
-                                    <p class="mt-2 text-sm">{{ $jogador->user->name }}</p>
+                                    <p class="mt-2 text-sm">{{ $membrosPorUsuario->get($jogador->user_id)?->nomeExibicao() ?: $jogador->user->name }}</p>
                                 @endforeach
                             </div>
                         @endforeach

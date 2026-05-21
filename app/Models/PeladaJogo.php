@@ -8,9 +8,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PeladaJogo extends Model
 {
-    protected $fillable = ['pelada_id', 'titulo', 'data_hora', 'capacidade', 'status'];
+    protected $fillable = [
+        'pelada_id',
+        'titulo',
+        'data_hora',
+        'data_jogo',
+        'horario',
+        'capacidade',
+        'vagas_totais',
+        'vagas_diaristas',
+        'status',
+        'observacao',
+    ];
 
-    protected $casts = ['data_hora' => 'datetime'];
+    protected $casts = [
+        'data_hora' => 'datetime',
+        'data_jogo' => 'date',
+        'horario' => 'datetime:H:i',
+    ];
 
     public function pelada(): BelongsTo
     {
@@ -25,5 +40,10 @@ class PeladaJogo extends Model
     public function sorteios(): HasMany
     {
         return $this->hasMany(Sorteio::class);
+    }
+
+    public function presencas(): HasMany
+    {
+        return $this->hasMany(Presenca::class);
     }
 }

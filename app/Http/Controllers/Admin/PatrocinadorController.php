@@ -38,11 +38,17 @@ class PatrocinadorController extends Controller
 
     private function data(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'nome' => ['required', 'max:255'],
-            'logo_url' => ['nullable', 'url'],
-            'site_url' => ['nullable', 'url'],
+            'logo' => ['nullable', 'max:255'],
+            'link' => ['nullable', 'max:255'],
+            'telefone' => ['nullable', 'max:30'],
             'ativo' => ['nullable', 'boolean'],
         ]) + ['ativo' => $request->boolean('ativo')];
+
+        $data['logo_url'] = $data['logo'] ?? null;
+        $data['site_url'] = $data['link'] ?? null;
+
+        return $data;
     }
 }

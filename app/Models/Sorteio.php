@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sorteio extends Model
 {
-    protected $fillable = ['pelada_jogo_id', 'criado_por', 'quantidade_times', 'realizado_em'];
+    protected $fillable = ['pelada_jogo_id', 'criado_por', 'tipo_sorteio', 'quantidade_times', 'status', 'realizado_em'];
 
     protected $casts = ['realizado_em' => 'datetime'];
 

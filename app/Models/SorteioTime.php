@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SorteioTime extends Model
 {
-    protected $fillable = ['sorteio_id', 'nome', 'ordem'];
+    protected $fillable = ['sorteio_id', 'nome', 'nome_time', 'ordem'];
 
     public function sorteio(): BelongsTo
     {

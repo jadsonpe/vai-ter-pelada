@@ -18,7 +18,7 @@ class EsporteController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate(['nome' => ['required', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
+        $data = $request->validate(['nome' => ['required', 'max:255'], 'icone' => ['nullable', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
         $data['slug'] = Str::slug($data['nome']);
         $data['ativo'] = $request->boolean('ativo', true);
         Esporte::create($data);
@@ -28,7 +28,7 @@ class EsporteController extends Controller
 
     public function update(Request $request, Esporte $esporte): RedirectResponse
     {
-        $data = $request->validate(['nome' => ['required', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
+        $data = $request->validate(['nome' => ['required', 'max:255'], 'icone' => ['nullable', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
         $data['slug'] = Str::slug($data['nome']);
         $data['ativo'] = $request->boolean('ativo');
         $esporte->update($data);

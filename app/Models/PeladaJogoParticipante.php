@@ -12,7 +12,9 @@ class PeladaJogoParticipante extends Model
         'user_id',
         'pelada_membro_id',
         'tipo',
+        'tipo_no_jogo',
         'status',
+        'ordem_chegada',
         'posicao_fila',
         'confirmado_em',
         'cancelado_em',
@@ -31,5 +33,10 @@ class PeladaJogoParticipante extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function membro(): BelongsTo
+    {
+        return $this->belongsTo(PeladaMembro::class, 'pelada_membro_id');
     }
 }

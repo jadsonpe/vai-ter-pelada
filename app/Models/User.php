@@ -13,10 +13,20 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'apelido',
         'email',
+        'google_id',
         'password',
         'role',
+        'status',
+        'plano',
+        'limite_peladas',
         'phone',
+        'avatar_url',
+        'cidade',
+        'bairro',
+        'posicao',
+        'nivel',
         'active',
     ];
 
@@ -31,6 +41,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
+            'nivel' => 'integer',
+            'limite_peladas' => 'integer',
         ];
     }
 
@@ -49,6 +61,21 @@ class User extends Authenticatable
         return $this->hasMany(PeladaJogoParticipante::class);
     }
 
+    public function solicitacoes(): HasMany
+    {
+        return $this->hasMany(PeladaSolicitacao::class);
+    }
+
+    public function presencas(): HasMany
+    {
+        return $this->hasMany(Presenca::class);
+    }
+
+    public function notificacoes(): HasMany
+    {
+        return $this->hasMany(Notificacao::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -56,6 +83,13 @@ class User extends Authenticatable
 
     public function isOrganizador(): bool
     {
-        return in_array($this->role, ['admin', 'organizador'], true);
+        return in_array($this->role, ['admin', 'organizador'], true) || $this->peladasOrganizadas()->exists();
+    }
+
+    public function podeCriarPelada(): bool
+    {
+        return $this->isAdmin()
+            || $this->limite_peladas === 0
+            || $this->peladasOrganizadas()->count() < ($this->limite_peladas ?: 1);
     }
 }

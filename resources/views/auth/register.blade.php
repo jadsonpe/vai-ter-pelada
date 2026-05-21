@@ -1,4 +1,15 @@
 <x-guest-layout>
+    <a href="{{ route('auth.google.redirect') }}" class="flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white font-bold text-red-500">G</span>
+        Cadastrar com Google
+    </a>
+
+    <div class="my-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-slate-200"></div>
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">ou</span>
+        <div class="h-px flex-1 bg-slate-200"></div>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
