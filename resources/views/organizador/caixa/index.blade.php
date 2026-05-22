@@ -6,17 +6,17 @@
             <div>
                 <a href="{{ route('organizador.peladas.index') }}" class="text-sm font-semibold text-emerald-700">Voltar para minhas peladas</a>
                 <h1 class="mt-2 text-3xl font-bold text-slate-900">Caixa - {{ $pelada->nome }}</h1>
-                <p class="mt-1 text-sm text-slate-600">Controle mensalidades, diarias e despesas da pelada.</p>
+                <p class="mt-1 text-sm text-slate-600">Controle mensalidades, diárias e despesas da pelada.</p>
             </div>
         </div>
 
         <form method="GET" action="{{ route('organizador.peladas.caixa.index', $pelada) }}" class="mt-6 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[180px_1fr_auto]">
             <div>
-                <label for="mes" class="text-sm font-medium text-slate-700">Mes</label>
+                <label for="mes" class="text-sm font-medium text-slate-700">Mês</label>
                 <input id="mes" type="month" name="mes" value="{{ $competencia->format('Y-m') }}" class="mt-1 w-full rounded-md border-slate-300">
             </div>
             <div>
-                <label for="jogo_id" class="text-sm font-medium text-slate-700">Rodada para diarias</label>
+                <label for="jogo_id" class="text-sm font-medium text-slate-700">Rodada para diárias</label>
                 <select id="jogo_id" name="jogo_id" class="mt-1 w-full rounded-md border-slate-300">
                     <option value="">Rodada mais recente</option>
                     @foreach($jogos as $jogo)
@@ -31,15 +31,15 @@
 
         <section class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Entradas no mes</p>
+                <p class="text-sm font-medium text-slate-500">Entradas no mês</p>
                 <p class="mt-2 text-2xl font-bold text-emerald-700">R$ {{ number_format($entradas, 2, ',', '.') }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Saidas no mes</p>
+                <p class="text-sm font-medium text-slate-500">Saídas no mês</p>
                 <p class="mt-2 text-2xl font-bold text-red-700">R$ {{ number_format($saidas, 2, ',', '.') }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Saldo do mes</p>
+                <p class="text-sm font-medium text-slate-500">Saldo do mês</p>
                 <p class="mt-2 text-2xl font-bold {{ $saldo >= 0 ? 'text-slate-900' : 'text-red-700' }}">R$ {{ number_format($saldo, 2, ',', '.') }}</p>
             </div>
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -53,7 +53,7 @@
                 <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-100 p-5">
                         <h2 class="font-semibold text-slate-900">Mensalidades de {{ $competencia->format('m/Y') }}</h2>
-                        <p class="mt-1 text-sm text-slate-600">Mensalistas ativos que devem pagar a mensalidade do mes.</p>
+                        <p class="mt-1 text-sm text-slate-600">Mensalistas ativos que devem pagar a mensalidade do mês.</p>
                     </div>
                     <div class="divide-y divide-slate-100">
                         @forelse($mensalistas as $membro)
@@ -92,7 +92,7 @@
 
                 <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-100 p-5">
-                        <h2 class="font-semibold text-slate-900">Diarias da rodada</h2>
+                        <h2 class="font-semibold text-slate-900">Diárias da rodada</h2>
                         <p class="mt-1 text-sm text-slate-600">{{ $jogoSelecionado ? $jogoSelecionado->titulo.' - '.$jogoSelecionado->data_hora->format('d/m/Y H:i') : 'Nenhuma rodada selecionada.' }}</p>
                     </div>
                     <div class="divide-y divide-slate-100">
@@ -133,14 +133,14 @@
 
             <aside class="space-y-6">
                 <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="font-semibold text-slate-900">Lancamento avulso</h2>
-                    <p class="mt-1 text-sm text-slate-600">Use para aluguel de campo, compra de bola, coletes, patrocinios ou ajustes.</p>
+                    <h2 class="font-semibold text-slate-900">Lançamento avulso</h2>
+                    <p class="mt-1 text-sm text-slate-600">Use para aluguel de campo, compra de bola, coletes, patrocínios ou ajustes.</p>
                     <form method="POST" action="{{ route('organizador.peladas.caixa.store', $pelada) }}" class="mt-4 space-y-3">
                         @csrf
                         <div class="grid gap-3 sm:grid-cols-2">
                             <label class="text-sm font-medium text-slate-700">Tipo
                                 <select name="tipo" class="mt-1 w-full rounded-md border-slate-300">
-                                    <option value="saida">Saida</option>
+                                    <option value="saida">Saída</option>
                                     <option value="entrada">Entrada</option>
                                 </select>
                             </label>
@@ -148,13 +148,13 @@
                                 <select name="categoria" class="mt-1 w-full rounded-md border-slate-300">
                                     <option value="aluguel">Aluguel</option>
                                     <option value="material">Material</option>
-                                    <option value="patrocinio">Patrocinio</option>
+                                    <option value="patrocinio">Patrocínio</option>
                                     <option value="ajuste">Ajuste</option>
                                     <option value="outros">Outros</option>
                                 </select>
                             </label>
                         </div>
-                        <label class="text-sm font-medium text-slate-700">Descricao
+                        <label class="text-sm font-medium text-slate-700">Descrição
                             <input name="descricao" class="mt-1 w-full rounded-md border-slate-300" placeholder="Ex: Aluguel da quadra">
                         </label>
                         <div class="grid gap-3 sm:grid-cols-2">
@@ -168,13 +168,13 @@
                         <label class="text-sm font-medium text-slate-700">Forma de pagamento
                             <input name="forma_pagamento" class="mt-1 w-full rounded-md border-slate-300" placeholder="Pix, dinheiro, cartão">
                         </label>
-                        <button class="w-full rounded-md bg-slate-900 px-4 py-2 font-semibold text-white">Registrar lancamento</button>
+                        <button class="w-full rounded-md bg-slate-900 px-4 py-2 font-semibold text-white">Registrar lançamento</button>
                     </form>
                 </section>
 
                 <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-100 p-5">
-                        <h2 class="font-semibold text-slate-900">Extrato do mes</h2>
+                        <h2 class="font-semibold text-slate-900">Extrato do mês</h2>
                     </div>
                     <div class="divide-y divide-slate-100">
                         @forelse($movimentacoes as $movimentacao)
@@ -190,7 +190,7 @@
                                 </div>
                             </div>
                         @empty
-                            <p class="p-5 text-sm text-slate-600">Nenhum lancamento neste mes.</p>
+                            <p class="p-5 text-sm text-slate-600">Nenhum lançamento neste mês.</p>
                         @endforelse
                     </div>
                 </section>

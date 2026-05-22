@@ -26,7 +26,7 @@
                 @empty
                     <div class="rounded-lg border border-white/10 bg-white/10 p-5">
                         <p class="text-sm text-emerald-200">Banner</p>
-                        <h2 class="mt-1 text-xl font-semibold">Espaco para campanhas e comunicados</h2>
+                        <h2 class="mt-1 text-xl font-semibold">Espaço para campanhas e comunicados</h2>
                     </div>
                 @endforelse
             </div>

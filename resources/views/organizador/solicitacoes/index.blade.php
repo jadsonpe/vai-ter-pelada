@@ -1,14 +1,14 @@
 <x-app-layout>
     <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         @include('shared.status')
-        <h1 class="text-3xl font-bold text-slate-900">Solicitacoes - {{ $pelada->nome }}</h1>
+        <h1 class="text-3xl font-bold text-slate-900">Solicitações - {{ $pelada->nome }}</h1>
         <div class="mt-6 divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
             @forelse($solicitacoes as $solicitacao)
                 @php($isConvite = str_starts_with($solicitacao->tipo_solicitacao ?? '', 'convite_'))
                 <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="font-semibold">{{ $solicitacao->user->name }}</p>
-                        <p class="mt-1 text-xs font-semibold uppercase text-emerald-700">{{ $isConvite ? 'convite enviado - '.str_replace('convite_', '', $solicitacao->tipo_solicitacao) : str_replace('_', ' ', $solicitacao->tipo_solicitacao ?: $solicitacao->tipo) }}</p>
+                        <p class="mt-1 text-xs font-semibold uppercase text-emerald-700">{{ $isConvite ? 'Convite enviado - '.str_replace('convite_', '', $solicitacao->tipo_solicitacao) : str_replace('_', ' ', $solicitacao->tipo_solicitacao ?: $solicitacao->tipo) }}</p>
                         <p class="mt-1 text-xs text-slate-500">Recebida em {{ $solicitacao->created_at->format('d/m/Y H:i') }}</p>
                         @if($solicitacao->user->phone)
                             <p class="mt-1 text-sm text-slate-700">WhatsApp: <a class="font-semibold text-emerald-700" href="https://wa.me/+55{{ preg_replace('/\D+/', '', $solicitacao->user->phone) }}" target="_blank">{{ $solicitacao->user->phone }}</a></p>

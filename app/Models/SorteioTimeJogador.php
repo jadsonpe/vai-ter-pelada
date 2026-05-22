@@ -9,7 +9,12 @@ class SorteioTimeJogador extends Model
 {
     protected $table = 'sorteio_time_jogadores';
 
-    protected $fillable = ['sorteio_time_id', 'user_id', 'ordem'];
+    protected $fillable = ['sorteio_time_id', 'pelada_jogo_participante_id', 'user_id', 'ordem'];
+
+    public function participante(): BelongsTo
+    {
+        return $this->belongsTo(PeladaJogoParticipante::class, 'pelada_jogo_participante_id');
+    }
 
     public function time(): BelongsTo
     {

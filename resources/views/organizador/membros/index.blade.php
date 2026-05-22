@@ -6,7 +6,7 @@
             @csrf
             <div class="md:col-span-2">
                 <h2 class="font-semibold text-slate-900">Convidar jogador</h2>
-                <p class="mt-1 text-sm text-slate-600">Informe o e-mail de um usuario cadastrado. Ele recebera um convite e precisa aceitar para entrar na pelada.</p>
+                <p class="mt-1 text-sm text-slate-600">Informe o e-mail de um usuário cadastrado. Ele receberá um convite e precisa aceitar para entrar na pelada.</p>
             </div>
             <div>
                 <label for="email" class="text-sm font-medium text-slate-700">E-mail do jogador</label>

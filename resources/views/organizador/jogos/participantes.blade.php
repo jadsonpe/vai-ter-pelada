@@ -28,7 +28,7 @@
             </div>
             <x-input-error :messages="$errors->get('pelada_membro_id')" class="mt-2" />
             @if($mensalistasDisponiveis->isEmpty())
-                <p class="mt-3 text-sm text-slate-500">Todos os mensalistas ativos ja estao confirmados, na fila ou nao ha mensalistas ativos cadastrados nesta pelada.</p>
+                <p class="mt-3 text-sm text-slate-500">Todos os mensalistas ativos já estão confirmados, na fila ou não há mensalistas ativos cadastrados nesta pelada.</p>
             @endif
         </section>
 
@@ -58,7 +58,7 @@
             </section>
             <section class="rounded-lg border border-slate-200 bg-white p-5">
                 <h2 class="font-semibold text-slate-900">Fila de espera</h2>
-                <p class="mt-1 text-sm text-slate-600">Quando a rodada esta lotada, novas confirmacoes entram aqui. Ao remover um confirmado, o primeiro da fila e promovido automaticamente, priorizando mensalistas.</p>
+                <p class="mt-1 text-sm text-slate-600">Quando a rodada está lotada, novas confirmações entram aqui. Ao remover um confirmado, o primeiro da fila é promovido automaticamente, priorizando mensalistas.</p>
                 <div class="mt-3 divide-y divide-slate-100">
                     @forelse($jogo->participantes->where('status', 'fila')->sortBy('posicao_fila') as $participante)
                         <p class="py-2 text-sm">#{{ $participante->posicao_fila }} {{ $participante->membro?->nomeExibicao() ?: $participante->user->name }} - {{ $participante->tipo }}</p>

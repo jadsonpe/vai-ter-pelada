@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-slate-900">Peladas abertas</h1>
-                <p class="mt-2 text-slate-600">Encontre peladas ativas e rodadas programadas para os proximos 7 dias.</p>
+                <p class="mt-2 text-slate-600">Encontre peladas ativas e rodadas programadas para os próximos 7 dias.</p>
             </div>
             <a href="{{ route('organizador.peladas.create') }}" class="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white sm:w-auto">Criar pelada</a>
         </div>
@@ -44,7 +44,7 @@
 
         <section class="mt-10">
             <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <h2 class="text-2xl font-bold text-slate-900">Rodadas nos proximos 7 dias</h2>
+                <h2 class="text-2xl font-bold text-slate-900">Rodadas nos próximos 7 dias</h2>
                 <span class="text-sm font-semibold text-slate-500">{{ $rodadas->count() }} encontradas</span>
             </div>
 
@@ -66,7 +66,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os proximos 7 dias com esses filtros.</p>
+                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os próximos 7 dias com esses filtros.</p>
                 @endforelse
             </div>
         </section>

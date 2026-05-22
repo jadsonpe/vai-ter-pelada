@@ -12,14 +12,14 @@
         <form method="POST" action="{{ route('organizador.peladas.jogos.store', $pelada) }}" class="mt-6 grid gap-3 rounded-lg border border-slate-200 bg-white p-5 md:grid-cols-4">
             @csrf
             <div>
-                <label for="titulo" class="text-sm font-medium text-slate-700">Titulo</label>
+                <label for="titulo" class="text-sm font-medium text-slate-700">Título</label>
                 <input id="titulo" name="titulo" value="{{ $editingJogoId ? '' : old('titulo') }}" required class="mt-1 w-full rounded-md border-slate-300" placeholder="Rodada #1">
                 @unless($editingJogoId)
                     <x-input-error :messages="$errors->get('titulo')" class="mt-2" />
                 @endunless
             </div>
             <div>
-                <label for="data_hora" class="text-sm font-medium text-slate-700">Data e horario</label>
+                <label for="data_hora" class="text-sm font-medium text-slate-700">Data e horário</label>
                 <input id="data_hora" type="datetime-local" name="data_hora" value="{{ $editingJogoId ? '' : old('data_hora') }}" required class="mt-1 w-full rounded-md border-slate-300">
                 @unless($editingJogoId)
                     <x-input-error :messages="$errors->get('data_hora')" class="mt-2" />
@@ -40,7 +40,7 @@
                 @endunless
             </div>
             <div class="md:col-span-4">
-                <label for="observacao" class="text-sm font-medium text-slate-700">Observacao</label>
+                <label for="observacao" class="text-sm font-medium text-slate-700">Observação</label>
                 <textarea id="observacao" name="observacao" rows="2" class="mt-1 w-full rounded-md border-slate-300" placeholder="Recado opcional para esta rodada">{{ $editingJogoId ? '' : old('observacao') }}</textarea>
                 @unless($editingJogoId)
                     <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
@@ -71,14 +71,14 @@
                             @method('PATCH')
                             <input type="hidden" name="editing_jogo_id" value="{{ $jogo->id }}">
                             <div>
-                                <label for="titulo_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Titulo</label>
+                                <label for="titulo_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Título</label>
                                 <input id="titulo_{{ $jogo->id }}" name="titulo" value="{{ (string) $editingJogoId === (string) $jogo->id ? old('titulo', $jogo->titulo) : $jogo->titulo }}" required class="mt-1 w-full rounded-md border-slate-300" placeholder="Rodada #1">
                                 @if((string) $editingJogoId === (string) $jogo->id)
                                     <x-input-error :messages="$errors->get('titulo')" class="mt-2" />
                                 @endif
                             </div>
                             <div>
-                                <label for="data_hora_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Data e horario</label>
+                                <label for="data_hora_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Data e horário</label>
                                 <input id="data_hora_{{ $jogo->id }}" type="datetime-local" name="data_hora" value="{{ (string) $editingJogoId === (string) $jogo->id ? old('data_hora', $jogo->data_hora->format('Y-m-d\TH:i')) : $jogo->data_hora->format('Y-m-d\TH:i') }}" required class="mt-1 w-full rounded-md border-slate-300">
                                 @if((string) $editingJogoId === (string) $jogo->id)
                                     <x-input-error :messages="$errors->get('data_hora')" class="mt-2" />
@@ -110,14 +110,14 @@
                                 @endif
                             </div>
                             <div class="md:col-span-3">
-                                <label for="observacao_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Observacao</label>
+                                <label for="observacao_{{ $jogo->id }}" class="text-sm font-medium text-slate-700">Observação</label>
                                 <textarea id="observacao_{{ $jogo->id }}" name="observacao" rows="2" class="mt-1 w-full rounded-md border-slate-300" placeholder="Recado opcional para esta rodada">{{ (string) $editingJogoId === (string) $jogo->id ? old('observacao', $jogo->observacao) : $jogo->observacao }}</textarea>
                                 @if((string) $editingJogoId === (string) $jogo->id)
                                     <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
                                 @endif
                             </div>
                             <div class="flex justify-end md:col-span-4">
-                                <button class="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white">Salvar alteracoes</button>
+                                <button class="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white">Salvar alterações</button>
                             </div>
                         </form>
                     </details>

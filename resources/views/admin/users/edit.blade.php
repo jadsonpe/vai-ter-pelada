@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold text-slate-900">Editar usuario</h1>
+        <h1 class="text-3xl font-bold text-slate-900">Editar usuário</h1>
         <form method="POST" action="{{ route('admin.users.update', $user) }}" class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-white p-5">
             @csrf @method('PUT')
             <input name="name" value="{{ old('name', $user->name) }}" class="rounded-md border-slate-300">
@@ -23,7 +23,7 @@
             </select>
             <div class="grid gap-4 sm:grid-cols-2">
                 <select name="plano" class="rounded-md border-slate-300">
-                    @foreach(['gratis','plus','ilimitado'] as $plano)<option value="{{ $plano }}" @selected(($user->plano ?: 'gratis') === $plano)>{{ $plano }}</option>@endforeach
+                    @foreach(['gratis' => 'Grátis', 'plus' => 'Plus', 'ilimitado' => 'Ilimitado'] as $valor => $rotulo)<option value="{{ $valor }}" @selected(($user->plano ?: 'gratis') === $valor)>{{ $rotulo }}</option>@endforeach
                 </select>
                 <input type="number" min="0" name="limite_peladas" value="{{ old('limite_peladas', $user->limite_peladas ?: 1) }}" class="rounded-md border-slate-300" placeholder="Limite de peladas">
             </div>

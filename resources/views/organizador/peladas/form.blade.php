@@ -14,11 +14,11 @@
                         Remover imagem enviada
                     </label>
                 @elseif($pelada->exists && ($padrao = $pelada->esporte?->imagemPadraoUrl()))
-                    <x-pelada-imagem variant="preview" :src="$padrao" :alt="'Imagem padrao do '.$pelada->esporte->nome" class="mt-2 opacity-90" />
-                    <p class="mt-1 text-xs text-slate-500">Imagem padrao do esporte. Envie um arquivo abaixo para substituir.</p>
+                    <x-pelada-imagem variant="preview" :src="$padrao" :alt="'Imagem padrão do '.$pelada->esporte->nome" class="mt-2 opacity-90" />
+                    <p class="mt-1 text-xs text-slate-500">Imagem padrão do esporte. Envie um arquivo abaixo para substituir.</p>
                 @endif
                 <input type="file" name="imagem" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
-                <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Maximo 2 MB. Sem envio, usa a imagem padrao do esporte (public/images/esportes/).</p>
+                <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Máximo 2 MB. Sem envio, usa a imagem padrão do esporte (public/images/esportes/).</p>
                 <x-input-error :messages="$errors->get('imagem')" class="mt-2" />
             </div>
             <label class="text-sm font-medium">Esporte
@@ -29,16 +29,16 @@
                 </select>
             </label>
             <label class="text-sm font-medium">Nome <input name="nome" value="{{ old('nome', $pelada->nome) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
-            <label class="text-sm font-medium">Descricao <textarea name="descricao" class="mt-1 w-full rounded-md border-slate-300">{{ old('descricao', $pelada->descricao) }}</textarea></label>
+            <label class="text-sm font-medium">Descrição <textarea name="descricao" class="mt-1 w-full rounded-md border-slate-300">{{ old('descricao', $pelada->descricao) }}</textarea></label>
             <div class="grid gap-4 sm:grid-cols-2">
                 <label class="text-sm font-medium">Cidade <input name="cidade" value="{{ old('cidade', $pelada->cidade) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
                 <label class="text-sm font-medium">Bairro <input name="bairro" value="{{ old('bairro', $pelada->bairro) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
             </div>
             <label class="text-sm font-medium">Nome do local/arena <input name="local_nome" value="{{ old('local_nome', $pelada->local_nome ?: $pelada->local) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
-            <label class="text-sm font-medium">Endereco <input name="endereco" value="{{ old('endereco', $pelada->endereco) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
+            <label class="text-sm font-medium">Endereço <input name="endereco" value="{{ old('endereco', $pelada->endereco) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
             <div class="grid gap-4 sm:grid-cols-3">
-                <label class="text-sm font-medium">Dia semana <input type="number" name="dia_semana" min="0" max="6" value="{{ old('dia_semana', $pelada->dia_semana) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
-                <label class="text-sm font-medium">Horario <input type="time" name="horario" value="{{ old('horario', optional($pelada->horario)->format('H:i')) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
+                <label class="text-sm font-medium">Dia da semana <input type="number" name="dia_semana" min="0" max="6" value="{{ old('dia_semana', $pelada->dia_semana) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
+                <label class="text-sm font-medium">Horário <input type="time" name="horario" value="{{ old('horario', optional($pelada->horario)->format('H:i')) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
                 <label class="text-sm font-medium">Vagas totais <input type="number" name="vagas_totais" value="{{ old('vagas_totais', $pelada->vagas_totais ?: $pelada->capacidade ?: 20) }}" class="mt-1 w-full rounded-md border-slate-300"></label>
             </div>
             <div class="grid gap-4 sm:grid-cols-3">

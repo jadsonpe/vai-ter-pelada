@@ -46,7 +46,7 @@
         </div>
 
         <section class="mt-8 rounded-lg border border-slate-200 bg-white p-5">
-            <h2 class="font-semibold text-slate-900">Convites e solicitacoes</h2>
+            <h2 class="font-semibold text-slate-900">Convites e solicitações</h2>
             <div class="mt-3 divide-y divide-slate-100">
                 @forelse($solicitacoes as $solicitacao)
                     @php($isConvite = str_starts_with($solicitacao->tipo_solicitacao ?? '', 'convite_'))
@@ -77,7 +77,7 @@
                         @endif
                     </div>
                 @empty
-                    <p class="py-3 text-sm text-slate-500">Nenhum convite ou solicitacao encontrada.</p>
+                    <p class="py-3 text-sm text-slate-500">Nenhum convite ou solicitação encontrada.</p>
                 @endforelse
             </div>
         </section>

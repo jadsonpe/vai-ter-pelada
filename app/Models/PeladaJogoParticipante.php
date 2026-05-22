@@ -18,12 +18,32 @@ class PeladaJogoParticipante extends Model
         'posicao_fila',
         'confirmado_em',
         'cancelado_em',
+        'presente_local',
+        'ordem_presenca',
+        'nome_avulso',
     ];
 
     protected $casts = [
         'confirmado_em' => 'datetime',
         'cancelado_em' => 'datetime',
+        'presente_local' => 'boolean',
     ];
+
+    public function nomeExibicao(): string
+    {
+        if (filled($this->nome_avulso)) {
+            return $this->nome_avulso;
+        }
+
+        return $this->membro?->nomeExibicao()
+            ?: $this->user?->name
+            ?: 'Jogador';
+    }
+
+    public function isAvulso(): bool
+    {
+        return filled($this->nome_avulso) && ! $this->user_id;
+    }
 
     public function jogo(): BelongsTo
     {

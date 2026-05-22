@@ -6,7 +6,7 @@
                 <h1 class="text-3xl font-bold text-slate-900">Peladas que organizo</h1>
                 <p class="mt-1 text-sm text-slate-600">Crie uma pelada para se tornar o organizador dela e gerenciar membros, rodadas e sorteios.</p>
                 <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Plano {{ auth()->user()->plano ?? 'gratis' }}: {{ $peladas->count() }}/{{ auth()->user()->limite_peladas ?: 1 }} pelada criada
+                    Plano {{ match(auth()->user()->plano ?? 'gratis') { 'gratis' => 'Grátis', 'plus' => 'Plus', 'ilimitado' => 'Ilimitado', default => auth()->user()->plano } }}: {{ $peladas->count() }}/{{ auth()->user()->limite_peladas ?: 1 }} {{ $peladas->count() === 1 ? 'pelada criada' : 'peladas criadas' }}
                 </p>
             </div>
             <a href="{{ route('organizador.peladas.create') }}" class="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white sm:w-auto">
@@ -29,12 +29,12 @@
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>
-                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitacoes</a>
+                        <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitações</a>
                     </div>
                 </article>
             @empty
                 <div class="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600">
-                    Voce ainda nao criou nenhuma pelada.
+                    Você ainda não criou nenhuma pelada.
                 </div>
             @endforelse
         </div>
@@ -59,13 +59,13 @@
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>
-                                    <a class="text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitacoes</a>
+                                    <a class="text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitações</a>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-4 text-sm text-slate-600">Voce ainda nao criou nenhuma pelada.</td>
+                            <td colspan="4" class="p-4 text-sm text-slate-600">Você ainda não criou nenhuma pelada.</td>
                         </tr>
                     @endforelse
                 </tbody>

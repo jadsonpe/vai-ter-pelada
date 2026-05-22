@@ -8,9 +8,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sorteio extends Model
 {
-    protected $fillable = ['pelada_jogo_id', 'criado_por', 'tipo_sorteio', 'quantidade_times', 'status', 'realizado_em'];
+    protected $fillable = [
+        'pelada_jogo_id',
+        'criado_por',
+        'tipo_sorteio',
+        'quantidade_times',
+        'jogadores_por_time',
+        'usar_ordem_manual',
+        'status',
+        'realizado_em',
+    ];
 
-    protected $casts = ['realizado_em' => 'datetime'];
+    protected $casts = [
+        'realizado_em' => 'datetime',
+        'usar_ordem_manual' => 'boolean',
+    ];
 
     public function jogo(): BelongsTo
     {
@@ -19,6 +31,11 @@ class Sorteio extends Model
 
     public function times(): HasMany
     {
-        return $this->hasMany(SorteioTime::class);
+        return $this->hasMany(SorteioTime::class)->orderBy('ordem');
+    }
+
+    public function sobras(): HasMany
+    {
+        return $this->hasMany(SorteioSobra::class)->orderBy('ordem');
     }
 }

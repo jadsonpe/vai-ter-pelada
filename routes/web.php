@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('solicitacoes/{solicitacao}/aprovar', [SolicitacaoController::class, 'aprovar'])->name('solicitacoes.aprovar');
         Route::patch('solicitacoes/{solicitacao}/recusar', [SolicitacaoController::class, 'recusar'])->name('solicitacoes.recusar');
         Route::get('jogos/{jogo}/sorteios', [SorteioController::class, 'show'])->name('jogos.sorteios.show');
+        Route::post('jogos/{jogo}/sorteios/presencas', [SorteioController::class, 'salvarPresencas'])->name('jogos.sorteios.presencas');
+        Route::post('jogos/{jogo}/sorteios/avulsos', [SorteioController::class, 'adicionarAvulso'])->name('jogos.sorteios.avulsos');
         Route::post('jogos/{jogo}/sorteios', [SorteioController::class, 'sortear'])->name('jogos.sorteios.sortear');
     });
 
