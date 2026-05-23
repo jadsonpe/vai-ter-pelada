@@ -64,7 +64,7 @@ class PublicController extends Controller
 
         return view('public.peladas', [
             'peladas' => $peladasQuery->latest()->paginate(12)->withQueryString(),
-            'rodadas' => $rodadasQuery->orderBy('data_hora')->get(),
+            'rodadas' => $rodadasQuery->orderBy('data_hora')->paginate(6)->withQueryString(),
             'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
             'cidades' => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade'),
             'bairros' => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro'),

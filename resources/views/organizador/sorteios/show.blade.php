@@ -10,7 +10,7 @@
 
         {{-- Inclusão rápida --}}
         <section class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-5">
-            <h2 class="font-semibold text-slate-900">Inclusão rápida (avulso)</h2>
+            <h2 class="font-semibold text-slate-900">Adicionar jogador(avulso)</h2>
             <p class="mt-1 text-sm text-slate-600">Adicione quem chegou e não estava na lista de confirmados do app.</p>
             <form method="POST" action="{{ route('organizador.jogos.sorteios.avulsos', $jogo) }}" class="mt-3 flex flex-col gap-2 sm:flex-row">
                 @csrf
