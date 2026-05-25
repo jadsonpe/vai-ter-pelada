@@ -35,7 +35,7 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

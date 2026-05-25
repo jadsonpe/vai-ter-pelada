@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\AvaliacaoPartida;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,5 +46,10 @@ class PeladaJogo extends Model
     public function presencas(): HasMany
     {
         return $this->hasMany(Presenca::class);
+    }
+
+    public function avaliacoes(): HasMany
+    {
+        return $this->hasMany(AvaliacaoPartida::class, 'pelada_jogo_id');
     }
 }

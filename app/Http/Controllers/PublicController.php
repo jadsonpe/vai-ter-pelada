@@ -9,12 +9,19 @@ use App\Models\PeladaJogo;
 use App\Models\Patrocinador;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PublicController extends Controller
 {
-    public function home(): View
+    public function home(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            return redirect()->route(Auth::user()->isAdmin() ? 'admin.dashboard' : 'dashboard');
+        }
+
         return view('public.home', [
             'banners' => Banner::where('ativo', true)->latest()->get(),
             'peladas' => Pelada::with(['esporte', 'organizador'])->where('ativa', true)->latest()->take(6)->get(),
@@ -28,6 +35,44 @@ class PublicController extends Controller
             ->where('ativa', true)
             ->where('status', 'ativa');
 
+        // Search text (nome, descricao, local, bairro, cidade)
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $peladasQuery->where(function ($query) use ($q) {
+                if ($this->supportsFullText()) {
+                    $query->whereFullText(['nome', 'descricao', 'local_nome', 'endereco', 'bairro', 'cidade'], $q);
+                } else {
+                    $query->where('nome', 'like', "%{$q}%")
+                        ->orWhere('descricao', 'like', "%{$q}%")
+                        ->orWhere('local_nome', 'like', "%{$q}%")
+                        ->orWhere('endereco', 'like', "%{$q}%")
+                        ->orWhere('bairro', 'like', "%{$q}%")
+                        ->orWhere('cidade', 'like', "%{$q}%");
+                }
+            });
+        }
+
+        // Price filtering (mensalista / diarista / ambos)
+        $priceType = $request->get('price_type', 'both');
+        $priceMin = $request->input('price_min');
+        $priceMax = $request->input('price_max');
+
+        if ($priceMin !== null || $priceMax !== null) {
+            $min = $priceMin !== null ? (float) $priceMin : 0;
+            $max = $priceMax !== null ? (float) $priceMax : PHP_FLOAT_MAX;
+
+            if ($priceType === 'mensalista') {
+                $peladasQuery->whereBetween('valor_mensalista', [$min, $max]);
+            } elseif ($priceType === 'diarista') {
+                $peladasQuery->whereBetween('valor_diarista', [$min, $max]);
+            } else {
+                $peladasQuery->where(function ($query) use ($min, $max) {
+                    $query->whereBetween('valor_mensalista', [$min, $max])
+                        ->orWhereBetween('valor_diarista', [$min, $max]);
+                });
+            }
+        }
+
         if ($request->filled('cidade')) {
             $peladasQuery->where('cidade', $request->cidade);
         }
@@ -38,6 +83,40 @@ class PublicController extends Controller
 
         if ($request->filled('esporte_id')) {
             $peladasQuery->where('esporte_id', $request->esporte_id);
+        }
+
+        // Sorting
+        $sort = $request->get('sort');
+        if ($sort === 'price_asc') {
+            if ($priceType === 'diarista') {
+                $peladasQuery->orderBy('valor_diarista');
+            } elseif ($priceType === 'mensalista') {
+                $peladasQuery->orderBy('valor_mensalista');
+            } else {
+                $peladasQuery->orderByRaw(
+                    'CASE
+                        WHEN valor_mensalista IS NULL THEN valor_diarista
+                        WHEN valor_diarista IS NULL THEN valor_mensalista
+                        WHEN valor_mensalista <= valor_diarista THEN valor_mensalista
+                        ELSE valor_diarista
+                     END'
+                );
+            }
+        } elseif ($sort === 'price_desc') {
+            if ($priceType === 'diarista') {
+                $peladasQuery->orderByDesc('valor_diarista');
+            } elseif ($priceType === 'mensalista') {
+                $peladasQuery->orderByDesc('valor_mensalista');
+            } else {
+                $peladasQuery->orderByRaw(
+                    'CASE
+                        WHEN valor_mensalista IS NULL THEN valor_diarista
+                        WHEN valor_diarista IS NULL THEN valor_mensalista
+                        WHEN valor_mensalista >= valor_diarista THEN valor_mensalista
+                        ELSE valor_diarista
+                     END DESC'
+                );
+            }
         }
 
         $rodadasQuery = PeladaJogo::with(['pelada.esporte', 'pelada.organizador'])
@@ -60,6 +139,38 @@ class PublicController extends Controller
                 if ($request->filled('esporte_id')) {
                     $query->where('esporte_id', $request->esporte_id);
                 }
+                if ($request->filled('q')) {
+                    $q = $request->q;
+                    $query->where(function ($q2) use ($q) {
+                        if ($this->supportsFullText()) {
+                            $q2->whereFullText(['nome', 'descricao', 'local_nome', 'endereco', 'bairro', 'cidade'], $q);
+                        } else {
+                            $q2->where('nome', 'like', "%{$q}%")
+                                ->orWhere('descricao', 'like', "%{$q}%")
+                                ->orWhere('local_nome', 'like', "%{$q}%")
+                                ->orWhere('endereco', 'like', "%{$q}%")
+                                ->orWhere('bairro', 'like', "%{$q}%")
+                                ->orWhere('cidade', 'like', "%{$q}%");
+                        }
+                    });
+                }
+
+                if (($request->input('price_min') !== null) || ($request->input('price_max') !== null)) {
+                    $priceType = $request->get('price_type', 'both');
+                    $min = $request->input('price_min') !== null ? (float) $request->input('price_min') : 0;
+                    $max = $request->input('price_max') !== null ? (float) $request->input('price_max') : PHP_FLOAT_MAX;
+
+                    if ($priceType === 'mensalista') {
+                        $query->whereBetween('valor_mensalista', [$min, $max]);
+                    } elseif ($priceType === 'diarista') {
+                        $query->whereBetween('valor_diarista', [$min, $max]);
+                    } else {
+                        $query->where(function ($q3) use ($min, $max) {
+                            $q3->whereBetween('valor_mensalista', [$min, $max])
+                                ->orWhereBetween('valor_diarista', [$min, $max]);
+                        });
+                    }
+                }
             });
 
         return view('public.peladas', [
@@ -68,13 +179,18 @@ class PublicController extends Controller
             'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
             'cidades' => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade'),
             'bairros' => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro'),
-            'filtros' => $request->only(['cidade', 'bairro', 'esporte_id']),
+            'filtros' => $request->only(['cidade', 'bairro', 'esporte_id', 'q', 'price_type', 'price_min', 'price_max', 'sort']),
         ]);
+    }
+
+    private function supportsFullText(): bool
+    {
+        return in_array(DB::getDriverName(), ['mysql', 'mariadb'], true);
     }
 
     public function pelada(Pelada $pelada): View
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         return view('public.pelada', [
             'pelada' => $pelada->load(['esporte', 'organizador', 'jogos.participantes.user']),
@@ -93,10 +209,22 @@ class PublicController extends Controller
     public function ranking(): View
     {
         return view('public.ranking', [
-            'jogadores' => User::withCount(['participacoes' => fn ($query) => $query->where('status', 'confirmado')])
-                ->where('role', 'jogador')
+            'jogadores' => User::withCount(['participacoes' => fn ($query) => $query->where('status', '=', 'confirmado')])
+                ->withAvg('avaliacoesRecebidas', 'estrelas')
+                ->withCount('avaliacoesRecebidas')
+                ->where('role', '=', 'jogador')
+                ->orderByDesc('avaliacoes_recebidas_avg_estrelas')
                 ->orderByDesc('participacoes_count')
-                ->take(30)
+                ->paginate(15),
+            'weeklyLeaderboard' => User::withSum(['userPoints as weekly_points' => fn ($query) => $query->where('created_at', '>=', now()->subWeek())], 'valor')
+                ->where('role', 'jogador')
+                ->orderByDesc('weekly_points')
+                ->take(10)
+                ->get(),
+            'monthlyLeaderboard' => User::withSum(['userPoints as monthly_points' => fn ($query) => $query->where('created_at', '>=', now()->subMonth())], 'valor')
+                ->where('role', 'jogador')
+                ->orderByDesc('monthly_points')
+                ->take(10)
                 ->get(),
         ]);
     }

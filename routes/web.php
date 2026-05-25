@@ -18,11 +18,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Public\ArenaController;
 use App\Http\Controllers\Public\PatrocinadorController as PublicPatrocinadorController;
+use App\Http\Controllers\Jogador\AvaliacaoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/peladas', [PublicController::class, 'peladas'])->name('peladas.index');
-Route::get('/peladas/{pelada:slug}', [PublicController::class, 'pelada'])->name('peladas.show');
+Route::get('/peladas/{pelada:slug}', [PublicController::class, 'pelada'])->middleware('auth')->name('peladas.show');
 Route::get('/ranking', [PublicController::class, 'ranking'])->name('ranking');
 Route::get('/arenas', [ArenaController::class, 'index'])->name('arenas.index');
 Route::get('/patrocinadores', [PublicPatrocinadorController::class, 'index'])->name('patrocinadores.index');
@@ -32,11 +33,14 @@ Route::get('/dashboard', JogadorDashboardController::class)
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil.edit');
+    Route::patch('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
+    Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
+        Route::get('/avaliacoes', [AvaliacaoController::class, 'index'])->name('avaliacoes.index');
+        Route::post('/avaliacoes', [AvaliacaoController::class, 'store'])->name('avaliacoes.store');
+
         Route::get('/minhas-peladas', [JogadorPeladaController::class, 'minhas'])->name('peladas.minhas');
         Route::post('/jogos/{jogo}/confirmar', [JogadorPeladaController::class, 'confirmar'])->name('jogos.confirmar');
         Route::delete('/jogos/{jogo}/cancelar', [JogadorPeladaController::class, 'cancelar'])->name('jogos.cancelar');

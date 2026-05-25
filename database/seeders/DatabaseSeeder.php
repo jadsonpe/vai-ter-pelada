@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Esporte;
 use App\Models\User;
+use Database\Seeders\DemoDataSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,5 +28,7 @@ class DatabaseSeeder extends Seeder
                 ['nome' => $nome, 'ativo' => true]
             );
         }
+
+        $this->call(DemoDataSeeder::class);
     }
 }

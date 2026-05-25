@@ -1,0 +1,57 @@
+<section>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900">
+            Alterar senha
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600">
+            Atualize sua senha para manter sua conta segura.
+        </p>
+    </header>
+
+    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+        @csrf
+        @method('put')
+
+        @if(auth()->user()->google_id)
+            <div class="mb-2 text-sm text-gray-700">
+                Você entrou usando sua conta Google e provavelmente não conhece a senha atual. Use o link abaixo para redefinir sua senha por email.
+                <div class="mt-2">
+                    <a href="{{ route('password.request') }}" class="text-sm text-emerald-700 underline">Redefinir senha por email</a>
+                </div>
+            </div>
+        @endif
+
+        <div>
+            <x-input-label for="update_password_current_password" value="Senha atual" />
+            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="update_password_password" value="Nova senha" />
+            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="update_password_password_confirmation" value="Confirmar nova senha" />
+            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center gap-4">
+            <x-primary-button>Salvar</x-primary-button>
+
+            @if (session('status') === 'password-updated')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600"
+                >Salvo.</p>
+            @endif
+        </div>
+    </form>
+</section>

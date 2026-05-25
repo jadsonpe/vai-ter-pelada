@@ -27,14 +27,14 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'phone' => ['required', 'string', 'max:20'],
-            'cidade' => ['required', 'string', 'max:80'],
-            'bairro' => ['required', 'string', 'max:80'],
-            'logradouro' => ['required', 'string', 'max:120'],
-            'numero' => ['required', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'cidade' => ['nullable', 'string', 'max:80'],
+            'bairro' => ['nullable', 'string', 'max:80'],
+            'logradouro' => ['nullable', 'string', 'max:120'],
+            'numero' => ['nullable', 'string', 'max:20'],
             'complemento' => ['nullable', 'string', 'max:80'],
-            'estado' => ['required', 'string', 'max:80'],
-            'cep' => ['required', 'string', 'max:20'],
+            'estado' => ['nullable', 'string', 'max:80'],
+            'cep' => ['nullable', 'string', 'max:20'],
         ];
     }
 }
