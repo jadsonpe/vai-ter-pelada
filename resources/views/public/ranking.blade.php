@@ -8,9 +8,12 @@
                 <div class="mt-6 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
                     @foreach($jogadores as $jogador)
                         <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <span class="font-semibold text-slate-900">{{ ($jogadores->currentPage() - 1) * 15 + $loop->iteration }}. {{ $jogador->name }}</span>
-                                <p class="mt-1 text-sm text-slate-500">{{ $jogador->avaliacoes_recebidas_count }} avaliações • Média {{ number_format($jogador->avaliacoes_recebidas_avg ?? 0, 2) }}/5</p>
+                            <div class="flex items-center gap-3">
+                                <x-user-avatar :user="$jogador" size="sm" />
+                                <div>
+                                    <span class="font-semibold text-slate-900">{{ ($jogadores->currentPage() - 1) * 15 + $loop->iteration }}. {{ $jogador->name }}</span>
+                                    <p class="mt-1 text-sm text-slate-500">{{ $jogador->avaliacoes_recebidas_count }} avaliações • Média {{ number_format($jogador->avaliacoes_recebidas_avg ?? 0, 2) }}/5</p>
+                                </div>
                             </div>
                             <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">{{ $jogador->participacoes_count }} presenças</span>
                         </div>
@@ -29,7 +32,7 @@
                     <div class="mt-5 space-y-3">
                         @foreach($weeklyLeaderboard as $jogador)
                             <div class="flex items-center justify-between rounded-3xl border border-slate-200 px-4 py-3">
-                                <span class="font-medium text-slate-900">{{ $loop->iteration }}. {{ $jogador->name }}</span>
+                                <span class="flex items-center gap-2 font-medium text-slate-900"><x-user-avatar :user="$jogador" size="xs" /> {{ $loop->iteration }}. {{ $jogador->name }}</span>
                                 <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">{{ $jogador->weekly_points ?? 0 }} pts</span>
                             </div>
                         @endforeach
@@ -42,7 +45,7 @@
                     <div class="mt-5 space-y-3">
                         @foreach($monthlyLeaderboard as $jogador)
                             <div class="flex items-center justify-between rounded-3xl border border-slate-200 px-4 py-3">
-                                <span class="font-medium text-slate-900">{{ $loop->iteration }}. {{ $jogador->name }}</span>
+                                <span class="flex items-center gap-2 font-medium text-slate-900"><x-user-avatar :user="$jogador" size="xs" /> {{ $loop->iteration }}. {{ $jogador->name }}</span>
                                 <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">{{ $jogador->monthly_points ?? 0 }} pts</span>
                             </div>
                         @endforeach

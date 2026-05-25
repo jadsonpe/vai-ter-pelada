@@ -39,10 +39,13 @@
             <div class="divide-y divide-slate-100">
                 @forelse($pelada->membros as $membro)
                     <div class="grid gap-3 p-4 lg:grid-cols-[1fr_180px_160px_130px_auto] lg:items-center">
-                        <div>
-                            <p class="font-semibold text-slate-900">{{ $membro->nomeExibicao() }}</p>
-                            <p class="text-sm text-slate-500">{{ $membro->user->name }}</p>
-                            <p class="text-xs text-slate-400">{{ $membro->user->email }}</p>
+                        <div class="flex items-center gap-3">
+                            <x-user-avatar :user="$membro->user" size="sm" />
+                            <div>
+                                <p class="font-semibold text-slate-900">{{ $membro->nomeExibicao() }}</p>
+                                <p class="text-sm text-slate-500">{{ $membro->user->name }}</p>
+                                <p class="text-xs text-slate-400">{{ $membro->user->email }}</p>
+                            </div>
                         </div>
                         <input name="membros[{{ $membro->id }}][apelido]" value="{{ old("membros.$membro->id.apelido", $membro->apelido) }}" class="w-full rounded-md border-slate-300" placeholder="Apelido">
                         <select name="membros[{{ $membro->id }}][tipo]" class="w-full rounded-md border-slate-300">

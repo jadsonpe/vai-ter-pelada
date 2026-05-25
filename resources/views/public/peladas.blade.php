@@ -1,10 +1,10 @@
-<x-app-layout>
+﻿<x-app-layout>
     @php
-        $sportIcon = fn (string $name): string => match (strtolower($name)) {
+        $sportIcon = fn (string $name): string => match (str($name)->lower()->ascii()->toString()) {
             'futebol', 'futebol society' => 'futebol_flat.png',
             'society' => 'society_flat.png',
             'basquete', 'basket' => 'basquete_flat.png',
-            'vôlei', 'volei' => 'volei_flat.png',
+            'volei', 'volei' => 'volei_flat.png',
             default => 'ui_player.png',
         };
 
@@ -14,7 +14,7 @@
         <div class="rounded-3xl bg-slate-950 px-6 py-8 text-white shadow-lg sm:px-8">
             <p class="text-sm uppercase tracking-[0.3em] text-emerald-400">Peladas</p>
             <h1 class="mt-4 text-4xl font-semibold tracking-tight">Encontre a pelada certa</h1>
-            <p class="mt-4 max-w-2xl text-slate-300">Filtre por esporte, cidade, bairro e faixa de preço para achar peladas e rodadas com o melhor custo-benefício.</p>
+            <p class="mt-4 max-w-2xl text-slate-300">Filtre por esporte, cidade, bairro e faixa de preco para achar peladas e rodadas com o melhor custo-beneficio.</p>
 
             <div class="mt-8 grid gap-3 sm:grid-cols-2">
                 <div class="rounded-3xl bg-white/5 p-4">
@@ -22,13 +22,13 @@
                     <p class="mt-2 text-2xl font-semibold text-white">{{ $peladas->total() }}</p>
                 </div>
                 <div class="rounded-3xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Rodadas nos próximos 7 dias</p>
+                    <p class="text-sm text-slate-400">Rodadas nos proximos 7 dias</p>
                     <p class="mt-2 text-2xl font-semibold text-white">{{ $rodadas->total() }}</p>
                 </div>
             </div>
         </div>
 
-        <!-- Filtro rápido por esporte (select) -->
+        <!-- Filtro rapido por esporte (select) -->
         <div class="mt-8">
             <form method="GET" action="{{ route('peladas.index') }}" class="flex items-center gap-3">
                 <span class="text-sm font-medium text-slate-700">Esporte:</span>
@@ -55,7 +55,7 @@
             </form>
         </div>
 
-        <!-- Painel expansível de filtros -->
+        <!-- Painel expansivel de filtros -->
         <div class="mt-8">
             <button type="button" id="filter-toggle" class="flex w-full items-center justify-between rounded-2xl bg-emerald-600 px-6 py-3 text-white font-semibold transition hover:bg-emerald-500">
                 <span>Mais filtros</span>
@@ -67,7 +67,7 @@
             <div id="filter-panel" class="hidden mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4 mb-6">
                     <div>
-                        <p class="text-sm font-medium text-slate-700">Filtros avançados</p>
+                        <p class="text-sm font-medium text-slate-700">Filtros avancados</p>
                         <p class="mt-1 text-sm text-slate-500">Refine sua busca em tempo real.</p>
                     </div>
                     <a href="{{ route('peladas.index') }}" class="text-sm font-semibold text-emerald-600">Limpar todos</a>
@@ -104,7 +104,7 @@
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="price_type" class="text-sm font-medium text-slate-700">Tipo de preço</label>
+                            <label for="price_type" class="text-sm font-medium text-slate-700">Tipo de preco</label>
                             <select id="price_type" name="price_type" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
                                 <option value="both" @selected(($filtros['price_type'] ?? 'both') === 'both')>Ambos</option>
                                 <option value="mensalista" @selected(($filtros['price_type'] ?? '') === 'mensalista')>Mensalista</option>
@@ -114,20 +114,20 @@
                         <div>
                             <label for="sort" class="text-sm font-medium text-slate-700">Ordenar</label>
                             <select id="sort" name="sort" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
-                                <option value="">Padrão</option>
-                                <option value="price_asc" @selected(($filtros['sort'] ?? '') === 'price_asc')>Preço: menor primeiro</option>
-                                <option value="price_desc" @selected(($filtros['sort'] ?? '') === 'price_desc')>Preço: maior primeiro</option>
+                                <option value="">Padrao</option>
+                                <option value="price_asc" @selected(($filtros['sort'] ?? '') === 'price_asc')>Preco: menor primeiro</option>
+                                <option value="price_desc" @selected(($filtros['sort'] ?? '') === 'price_desc')>Preco: maior primeiro</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="price_min" class="text-sm font-medium text-slate-700">Preço mínimo</label>
+                            <label for="price_min" class="text-sm font-medium text-slate-700">Preco minimo</label>
                             <input id="price_min" name="price_min" type="number" step="0.01" value="{{ $filtros['price_min'] ?? '' }}" class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900" />
                         </div>
                         <div>
-                            <label for="price_max" class="text-sm font-medium text-slate-700">Preço máximo</label>
+                            <label for="price_max" class="text-sm font-medium text-slate-700">Preco maximo</label>
                             <input id="price_max" name="price_max" type="number" step="0.01" value="{{ $filtros['price_max'] ?? '' }}" class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900" />
                         </div>
                     </div>
@@ -147,9 +147,9 @@
                         'bairro' => ['Bairro' => $value],
                         'esporte_id' => ['Esporte' => optional(App\Models\Esporte::find($value))->nome ?: 'Selecionado'],
                         'price_type' => ['Tipo' => $value === 'both' ? 'Ambos' : ucfirst($value)],
-                        'price_min' => ['Preço mínimo' => "R$ {$value}"],
-                        'price_max' => ['Preço máximo' => "R$ {$value}"],
-                        'sort' => ['Ordenação' => $value === 'price_asc' ? 'Menor preço' : 'Maior preço'],
+                        'price_min' => ['Preco minimo' => "R$ {$value}"],
+                        'price_max' => ['Preco maximo' => "R$ {$value}"],
+                        'sort' => ['Ordenacao' => $value === 'price_asc' ? 'Menor preco' : 'Maior preco'],
                         default => [$key => $value],
                     };
                 });
@@ -178,8 +178,8 @@
         <section class="mt-10">
             <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Peladas agendadas para os próximos 7 dias</h2>
-                    <p class="mt-1 text-sm text-slate-500">Ache uma perto de você e solicite participação.</p>
+                    <h2 class="text-2xl font-bold text-slate-900">Peladas agendadas para os proximos 7 dias</h2>
+                    <p class="mt-1 text-sm text-slate-500">Ache uma perto de voce e solicite participacao.</p>
                 </div>
                 <span class="text-sm font-semibold text-slate-500">{{ $rodadas->total() }} encontradas</span>
             </div>
@@ -208,7 +208,7 @@
                                 <div>
                                     <p class="text-slate-500">Local</p>
                                     <p class="mt-0.5 font-semibold text-slate-900">{{ $rodada->pelada->local_nome ?: $rodada->pelada->local }}</p>
-                                    <p class="text-slate-500">{{ $rodada->pelada->bairro }}{{ $rodada->pelada->cidade ? ' · '.$rodada->pelada->cidade : '' }}</p>
+                                    <p class="text-slate-500">{{ $rodada->pelada->bairro }}{{ $rodada->pelada->cidade ? ' - '.$rodada->pelada->cidade : '' }}</p>
                                 </div>
                                 <div>
                                     <p class="text-slate-500">Data e hora</p>
@@ -223,7 +223,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os próximos 7 dias com esses filtros.</p>
+                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os proximos 7 dias com esses filtros.</p>
                 @endforelse
             </div>
 
@@ -234,7 +234,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900">Todas as peladas ativas</h2>
-                    <p class="mt-1 text-sm text-slate-500">Clique nas peladas e solicite participação ao organizador.</p>
+                    <p class="mt-1 text-sm text-slate-500">Clique nas peladas e solicite participacao ao organizador.</p>
                 </div>
                 <span class="text-sm font-semibold text-slate-500">{{ $peladas->total() }} encontradas</span>
             </div>
@@ -255,7 +255,7 @@
                             <div>
                                 <h3 class="text-xl font-semibold text-slate-900">{{ $pelada->nome }}</h3>
                                 <p class="mt-2 text-sm text-slate-600">{{ $pelada->local_nome ?: $pelada->local }}</p>
-                                <p class="text-sm text-slate-500">{{ $pelada->bairro }}{{ $pelada->cidade ? ' · '.$pelada->cidade : '' }}</p>
+                                <p class="text-sm text-slate-500">{{ $pelada->bairro }}{{ $pelada->cidade ? ' - '.$pelada->cidade : '' }}</p>
                             </div>
 
                             <div class="grid gap-3 sm:grid-cols-2">
@@ -274,7 +274,7 @@
                                     <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-800">Aceita diarista</span>
                                 @endif
                                 @if($pelada->requer_aprovacao)
-                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Requer aprovação</span>
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Requer aprovacao</span>
                                 @else
                                     <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-800">Entrada imediata</span>
                                 @endif
@@ -290,3 +290,4 @@
         </section>
     </div>
 </x-app-layout>
+

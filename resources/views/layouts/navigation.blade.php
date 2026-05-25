@@ -26,8 +26,9 @@
                 @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900">
-                                {{ Auth::user()->name }}
+                            <button class="inline-flex items-center gap-2 rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900">
+                                <x-user-avatar :user="Auth::user()" size="xs" />
+                                <span class="max-w-36 truncate">{{ Auth::user()->name }}</span>
                                 @if($notificacoesNaoLidas)
                                     <span class="ms-2 rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">{{ $notificacoesNaoLidas }}</span>
                                 @endif
@@ -63,8 +64,8 @@
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
         <div class="space-y-1 pb-3 pt-2">
             <x-responsive-nav-link :href="route('peladas.index')" :active="request()->routeIs('peladas.*')">Peladas</x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-responsive-nav-link>
+            {{-- <x-responsive-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-responsive-nav-link> --}}
+            {{-- <x-responsive-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-responsive-nav-link> --}}
             @auth
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.*')">Jogador</x-responsive-nav-link>

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -27,6 +29,7 @@ class User extends Authenticatable
         'limite_peladas',
         'phone',
         'avatar_url',
+        'avatar_path',
         'cidade',
         'bairro',
         'logradouro',
@@ -184,5 +187,23 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function avatarUrl(): ?string
+    {
+        if ($this->avatar_path) {
+            return Storage::disk('public')->url($this->avatar_path);
+        }
+
+        return $this->avatar_url;
+    }
+
+    public function initials(): string
+    {
+        return Str::of($this->apelido ?: $this->name ?: 'Jogador')
+            ->trim()
+            ->substr(0, 1)
+            ->upper()
+            ->toString();
     }
 }

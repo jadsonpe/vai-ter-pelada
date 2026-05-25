@@ -1,11 +1,11 @@
-<section>
+﻿<section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            Informações do jogador
+            Informacoes do jogador
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            Atualize seus dados de contato e endereço. Esses dados são importantes para organizar as peladas corretamente.
+            Atualize seus dados de contato e endereco. Esses dados sao importantes para organizar as peladas corretamente.
         </p>
     </header>
 
@@ -13,9 +13,28 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('perfil.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('perfil.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <x-user-avatar :user="$user" size="xl" />
+                <div class="flex-1">
+                    <x-input-label for="avatar" value="Foto do jogador" />
+                    <input id="avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
+                    <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Maximo 2 MB. Essa foto aparecera nas listas de membros, avaliacoes e sorteios.</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+
+                    @if($user->avatar_path)
+                        <label class="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" name="remover_avatar" value="1" @checked(old('remover_avatar'))>
+                            Remover foto enviada
+                        </label>
+                    @endif
+                </div>
+            </div>
+        </div>
 
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="space-y-4">
@@ -85,7 +104,7 @@
             </div>
 
             <div>
-                <x-input-label for="numero" value="Número" />
+                <x-input-label for="numero" value="Numero" />
                 <x-text-input id="numero" name="numero" type="text" class="mt-1 block w-full" :value="old('numero', $user->numero)" required autocomplete="off" />
                 <x-input-error class="mt-2" :messages="$errors->get('numero')" />
             </div>
@@ -100,16 +119,16 @@
         @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
             <div>
                 <p class="text-sm mt-2 text-gray-800">
-                    Seu endereço de email ainda não foi verificado.
+                    Seu endereco de email ainda nao foi verificado.
 
                     <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Clique aqui para reenviar o email de verificação.
+                        Clique aqui para reenviar o email de verificacao.
                     </button>
                 </p>
 
                 @if (session('status') === 'verification-link-sent')
                     <p class="mt-2 font-medium text-sm text-green-600">
-                        Um novo link de verificação foi enviado para o seu email.
+                        Um novo link de verificacao foi enviado para o seu email.
                     </p>
                 @endif
             </div>
@@ -166,20 +185,20 @@
                 const digits = onlyDigits(cep?.value);
 
                 if (digits.length !== 8) {
-                    setStatus('Informe um CEP com 8 números.', 'error');
+                    setStatus('Informe um CEP com 8 numeros.', 'error');
                     return;
                 }
 
                 buscar.disabled = true;
                 buscar.textContent = 'Buscando...';
-                setStatus('Consultando endereço pelo CEP...');
+                setStatus('Consultando endereco pelo CEP...');
 
                 try {
                     const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
                     const data = await response.json();
 
                     if (!response.ok || data.erro) {
-                        setStatus('CEP não encontrado. Confira o número informado.', 'error');
+                        setStatus('CEP nao encontrado. Confira o numero informado.', 'error');
                         return;
                     }
 
@@ -189,13 +208,13 @@
                     fields.estado.value = data.uf || fields.estado.value;
                     cep.value = formatCep(digits);
 
-                    setStatus('Endereço preenchido automaticamente.', 'success');
+                    setStatus('Endereco preenchido automaticamente.', 'success');
 
                     if (fields.numero && !fields.numero.value) {
                         fields.numero.focus();
                     }
                 } catch (error) {
-                    setStatus('Não foi possível consultar o CEP agora. Tente novamente.', 'error');
+                    setStatus('Nao foi possivel consultar o CEP agora. Tente novamente.', 'error');
                 } finally {
                     buscar.disabled = false;
                     buscar.textContent = 'Buscar';
@@ -216,3 +235,4 @@
         })();
     </script>
 </section>
+

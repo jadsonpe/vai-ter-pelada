@@ -59,9 +59,12 @@
                         @forelse($mensalistas as $membro)
                             @php($pagamento = $mensalidadesPagas->get($membro->id))
                             <div class="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_120px_110px_210px] lg:items-center">
-                                <div class="min-w-0">
-                                    <p class="font-semibold text-slate-900">{{ $membro->nomeExibicao() }}</p>
-                                    <p class="truncate text-sm text-slate-500">{{ $membro->user->email }}</p>
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <x-user-avatar :user="$membro->user" size="xs" />
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-slate-900">{{ $membro->nomeExibicao() }}</p>
+                                        <p class="truncate text-sm text-slate-500">{{ $membro->user->email }}</p>
+                                    </div>
                                 </div>
                                 <span class="inline-flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-semibold lg:w-auto {{ $pagamento ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800' }}">
                                     {{ $pagamento ? 'Pago' : 'Pendente' }}
@@ -100,9 +103,12 @@
                         @forelse($participantesDiaristas as $participante)
                             @php($pagamento = $diariasPagas->get($participante->id))
                             <div class="grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_120px_110px_210px] lg:items-center">
-                                <div class="min-w-0">
-                                    <p class="font-semibold text-slate-900">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</p>
-                                    <p class="truncate text-sm text-slate-500">{{ $participante->user->email }}</p>
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <x-user-avatar :user="$participante->user" size="xs" />
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-slate-900">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</p>
+                                        <p class="truncate text-sm text-slate-500">{{ $participante->user->email }}</p>
+                                    </div>
                                 </div>
                                 <span class="inline-flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-semibold lg:w-auto {{ $pagamento ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800' }}">
                                     {{ $pagamento ? 'Pago' : 'Pendente' }}

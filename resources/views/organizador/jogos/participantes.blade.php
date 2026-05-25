@@ -40,6 +40,7 @@
                         <div class="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                             <div class="flex min-w-0 items-center gap-3">
                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                <x-user-avatar :user="$participante->user" size="xs" />
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-slate-900">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</p>
                                     <p class="text-xs font-semibold uppercase text-slate-500">{{ $participante->tipo }}</p>

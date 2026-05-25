@@ -34,9 +34,12 @@
                             @foreach($item->avaliados as $participante)
                                 <div class="px-6 py-5">
                                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                        <div>
-                                            <p class="text-base font-semibold text-slate-900">{{ $participante->user->name }}</p>
-                                            <p class="text-sm text-slate-500">Presente na partida e disponível para avaliação.</p>
+                                        <div class="flex items-center gap-3">
+                                            <x-user-avatar :user="$participante->user" size="sm" />
+                                            <div>
+                                                <p class="text-base font-semibold text-slate-900">{{ $participante->user->name }}</p>
+                                                <p class="text-sm text-slate-500">Presente na partida e disponível para avaliação.</p>
+                                            </div>
                                         </div>
                                         <details class="group w-full sm:w-auto">
                                             <summary class="inline-flex cursor-pointer items-center justify-between rounded-full border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:px-5">

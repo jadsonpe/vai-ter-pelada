@@ -53,6 +53,11 @@
                                     class="presente-check rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                     @checked($participante->presente_local)
                                 >
+                                @if($participante->user)
+                                    <x-user-avatar :user="$participante->user" size="xs" />
+                                @else
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">A</span>
+                                @endif
                                 <span class="min-w-0 flex-1">
                                     <span class="font-medium text-slate-900">{{ $participante->nomeExibicao() }}</span>
                                     <span class="mt-0.5 block text-xs text-slate-500">
@@ -140,7 +145,14 @@
                                                         ?: $jogador->user?->name
                                                         ?: 'Jogador';
                                                 @endphp
-                                                <li class="text-sm text-slate-700">{{ $jogador->ordem }}. {{ $nome }}</li>
+                                                <li class="flex items-center gap-2 text-sm text-slate-700">
+                                                    @if($jogador->user)
+                                                        <x-user-avatar :user="$jogador->user" size="xs" />
+                                                    @else
+                                                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">A</span>
+                                                    @endif
+                                                    <span>{{ $jogador->ordem }}. {{ $nome }}</span>
+                                                </li>
                                             @endforeach
                                         </ul>
                                     </div>

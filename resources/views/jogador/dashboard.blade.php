@@ -18,13 +18,7 @@
 
                 <div class="rounded-lg border border-white/10 bg-white/10 p-5">
                     <div class="flex items-center gap-4">
-                        @if(auth()->user()->avatar_url)
-                            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="h-16 w-16 rounded-full border-2 border-emerald-300 object-cover">
-                        @else
-                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-2xl font-bold text-slate-950">
-                                {{ str(auth()->user()->name)->substr(0, 1)->upper() }}
-                            </div>
-                        @endif
+                        <x-user-avatar :user="auth()->user()" size="lg" class="border-2 border-emerald-300" />
                         <div>
                             <p class="font-semibold">{{ auth()->user()->name }}</p>
                             <p class="text-sm text-slate-300">{{ auth()->user()->email }}</p>
