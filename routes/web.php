@@ -27,6 +27,9 @@ Route::get('/peladas/{pelada:slug}', [PublicController::class, 'pelada'])->middl
 Route::get('/ranking', [PublicController::class, 'ranking'])->name('ranking');
 Route::get('/arenas', [ArenaController::class, 'index'])->name('arenas.index');
 Route::get('/patrocinadores', [PublicPatrocinadorController::class, 'index'])->name('patrocinadores.index');
+Route::get('/termos-de-uso', [PublicController::class, 'termos'])->name('termos');
+Route::get('/politica-de-privacidade', [PublicController::class, 'privacidade'])->name('privacidade');
+Route::view('/conta-bloqueada', 'auth.conta-bloqueada')->name('conta.bloqueada');
 
 Route::get('/dashboard', JogadorDashboardController::class)
     ->middleware(['auth', 'verified'])

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\AvaliacaoPartida;
+use App\Notifications\ResetPasswordNotification;
 use App\Models\UserBadge;
 use App\Models\UserPoint;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -178,5 +179,10 @@ class User extends Authenticatable
         return $this->isAdmin()
             || $this->limite_peladas === 0
             || $this->peladasOrganizadas()->count() < ($this->limite_peladas ?: 1);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

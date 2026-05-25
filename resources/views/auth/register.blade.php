@@ -50,6 +50,13 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <p class="mt-4 text-xs leading-5 text-slate-500">
+            Ao cadastrar, voce concorda com os
+            <a href="{{ route('termos') }}" class="font-semibold text-emerald-700 hover:text-emerald-800" target="_blank">Termos de Uso</a>
+            e declara ciencia da
+            <a href="{{ route('privacidade') }}" class="font-semibold text-emerald-700 hover:text-emerald-800" target="_blank">Politica de Privacidade</a>.
+        </p>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 Já tem conta?

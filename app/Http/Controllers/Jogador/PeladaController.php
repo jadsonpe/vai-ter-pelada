@@ -17,14 +17,62 @@ class PeladaController extends Controller
 {
     public function minhas(Request $request): View
     {
+        $membrosQuery = $request->user()->memberships()
+            ->with([
+                'pelada.esporte',
+                'pelada.jogos' => fn ($query) => $query
+                    ->whereIn('status', ['aberto', 'fechado'])
+                    ->where('data_hora', '>=', now()->startOfDay())
+                    ->orderBy('data_hora'),
+                'pelada.jogos.participantes' => fn ($query) => $query->where('user_id', $request->user()->id),
+            ]);
+
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+
+            $membrosQuery->whereHas('pelada', function ($query) use ($search) {
+                $query->where('nome', 'like', "%{$search}%")
+                    ->orWhere('local_nome', 'like', "%{$search}%")
+                    ->orWhere('local', 'like', "%{$search}%")
+                    ->orWhere('cidade', 'like', "%{$search}%")
+                    ->orWhere('bairro', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('tipo') && in_array($request->input('tipo'), ['mensalista', 'diarista'], true)) {
+            $membrosQuery->where('tipo', $request->input('tipo'));
+        }
+
+        if ($request->filled('status') && in_array($request->input('status'), ['ativo', 'pendente', 'bloqueado', 'saiu', 'inativo'], true)) {
+            $membrosQuery->where('status', $request->input('status'));
+        }
+
+        $solicitacoesBase = PeladaSolicitacao::with('pelada')
+            ->where('user_id', $request->user()->id)
+            ->latest();
+
+        $convitesQuery = (clone $solicitacoesBase)
+            ->where('tipo_solicitacao', 'like', 'convite_%');
+
+        if ($request->filled('convite_status') && in_array($request->input('convite_status'), ['pendente', 'aprovada', 'recusada'], true)) {
+            $convitesQuery->where('status', $request->input('convite_status'));
+        }
+
+        $solicitacoesQuery = (clone $solicitacoesBase)
+            ->where(function ($query) {
+                $query->whereNull('tipo_solicitacao')
+                    ->orWhere('tipo_solicitacao', 'not like', 'convite_%');
+            });
+
+        if ($request->filled('solicitacao_status') && in_array($request->input('solicitacao_status'), ['pendente', 'aprovada', 'recusada'], true)) {
+            $solicitacoesQuery->where('status', $request->input('solicitacao_status'));
+        }
+
         return view('jogador.minhas-peladas', [
-            'membros' => $request->user()->memberships()
-                ->with([
-                    'pelada.esporte',
-                    'pelada.jogos.participantes' => fn ($query) => $query->where('user_id', $request->user()->id),
-                ])
-                ->get(),
-            'solicitacoes' => PeladaSolicitacao::with('pelada')->where('user_id', $request->user()->id)->latest()->get(),
+            'membros' => $membrosQuery->get(),
+            'convites' => $convitesQuery->get(),
+            'solicitacoes' => $solicitacoesQuery->get(),
+            'filtros' => $request->only(['q', 'tipo', 'status', 'convite_status', 'solicitacao_status']),
         ]);
     }
 

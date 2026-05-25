@@ -53,7 +53,8 @@ class PeladaController extends Controller
         $data['slug'] = Str::slug($data['nome']).'-'.Str::lower(Str::random(5));
         $data['local'] = $data['local_nome'];
         $data['capacidade'] = $data['vagas_totais'];
-        $data['ativa'] = $data['status'] === 'ativa';
+        $data['status'] = 'ativa';
+        $data['ativa'] = true;
 
         $pelada = Pelada::create($data);
         $this->syncImagem($request, $pelada);
@@ -110,25 +111,23 @@ class PeladaController extends Controller
         return $request->validate([
             'esporte_id' => ['required', 'exists:esportes,id'],
             'nome' => ['required', 'max:255'],
-            'descricao' => ['nullable'],
+            'descricao' => ['nullable', 'max:200'],
             'cidade' => ['nullable', 'max:255'],
             'bairro' => ['nullable', 'max:255'],
             'local_nome' => ['required', 'max:255'],
             'endereco' => ['nullable', 'max:255'],
-            'dia_semana' => ['nullable', 'integer', 'between:0,6'],
             'horario' => ['nullable', 'date_format:H:i'],
             'vagas_totais' => ['required', 'integer', 'min:2'],
             'vagas_diaristas' => ['nullable', 'integer', 'min:0'],
-            'aceita_diarista' => ['nullable', 'boolean'],
             'valor_mensalista' => ['nullable', 'numeric', 'min:0'],
             'valor_diarista' => ['nullable', 'numeric', 'min:0'],
-            'status' => ['required', 'in:ativa,pausada,encerrada'],
+            'status' => ['nullable', 'in:ativa,pausada,encerrada'],
             'regras' => ['nullable'],
             'whatsapp_contato' => ['nullable', 'max:30'],
             'imagem' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'remover_imagem' => ['nullable', 'boolean'],
         ]) + [
-            'aceita_diarista' => $request->boolean('aceita_diarista'),
+            'aceita_diarista' => true,
             'requer_aprovacao' => true,
             'vagas_diaristas' => (int) $request->input('vagas_diaristas', 0),
         ];

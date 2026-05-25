@@ -16,16 +16,20 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="h-24 w-auto" />
-                </a>
-            </div>
+        <div class="flex min-h-screen flex-col bg-gray-100">
+            <main class="flex flex-1 flex-col items-center justify-center px-4 py-8">
+                <div>
+                    <a href="/">
+                        <x-application-logo class="h-24 w-auto" />
+                    </a>
+                </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+                <div class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
+                    {{ $slot }}
+                </div>
+            </main>
+
+            @include('partials.legal-footer')
         </div>
     </body>
 </html>

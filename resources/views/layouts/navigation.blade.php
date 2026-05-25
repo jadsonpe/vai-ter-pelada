@@ -8,8 +8,8 @@
                 </a>
                 <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('peladas.index')" :active="request()->routeIs('peladas.*')">Peladas</x-nav-link>
-                    <x-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-nav-link>
-                    <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link>
+                    {{-- <x-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-nav-link> --}}
+                    {{-- <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link> --}}
                     @auth
                         @php($notificacoesNaoLidas = auth()->user()->notificacoes()->whereNull('lida_em')->count())
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>

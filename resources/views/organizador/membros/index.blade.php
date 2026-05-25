@@ -1,7 +1,13 @@
 <x-app-layout>
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         @include('shared.status')
-        <h1 class="text-3xl font-bold text-slate-900">Membros - {{ $pelada->nome }}</h1>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('organizador.peladas.index') }}" class="text-sm font-semibold text-emerald-700">Voltar</a>
+                <h1 class="mt-2 text-3xl font-bold text-slate-900">Membros - {{ $pelada->nome }}</h1>
+            </div>
+            <a href="{{ route('organizador.peladas.index') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Minhas peladas</a>
+        </div>
         <form method="POST" action="{{ route('organizador.peladas.membros.store', $pelada) }}" class="mt-6 grid gap-3 rounded-lg border border-slate-200 bg-white p-5 md:grid-cols-[1fr_180px]">
             @csrf
             <div class="md:col-span-2">

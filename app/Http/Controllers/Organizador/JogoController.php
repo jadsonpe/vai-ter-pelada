@@ -18,7 +18,10 @@ class JogoController extends Controller
         $this->authorizeOwner($pelada);
 
         return view('organizador.jogos.index', [
-            'pelada' => $pelada->load('jogos.participantes.user'),
+            'pelada' => $pelada->load([
+                'jogos' => fn ($query) => $query->orderByDesc('data_hora')->orderByDesc('id'),
+                'jogos.participantes.user',
+            ]),
         ]);
     }
 
@@ -27,13 +30,13 @@ class JogoController extends Controller
         $this->authorizeOwner($pelada);
 
         $data = $request->validate([
-            'titulo' => ['required', 'max:255'],
             'data_hora' => ['required', 'date'],
             'vagas_totais' => ['nullable', 'integer', 'min:2'],
             'vagas_diaristas' => ['nullable', 'integer', 'min:0'],
             'observacao' => ['nullable'],
         ]);
 
+        $data['titulo'] = $this->proximoTituloRodada($pelada);
         $data['data_jogo'] = date('Y-m-d', strtotime($data['data_hora']));
         $data['horario'] = date('H:i:s', strtotime($data['data_hora']));
         $data['capacidade'] = $data['vagas_totais'] ?: $pelada->vagas_totais;
@@ -48,7 +51,6 @@ class JogoController extends Controller
         $this->authorizeOwner($jogo->pelada);
 
         $data = $request->validate([
-            'titulo' => ['required', 'max:255'],
             'data_hora' => ['required', 'date'],
             'vagas_totais' => ['nullable', 'integer', 'min:2'],
             'vagas_diaristas' => ['nullable', 'integer', 'min:0'],
@@ -138,6 +140,11 @@ class JogoController extends Controller
     private function authorizeOwner(Pelada $pelada): void
     {
         $this->redirectIfNotPeladaOwner($pelada);
+    }
+
+    private function proximoTituloRodada(Pelada $pelada): string
+    {
+        return 'Rodada '.($pelada->jogos()->count() + 1);
     }
 
     private function promoverFila(PeladaJogo $jogo): void

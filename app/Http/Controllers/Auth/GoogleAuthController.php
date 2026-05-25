@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,8 @@ class GoogleAuthController extends Controller
             ->orWhere('email', $googleUser->getEmail())
             ->first();
 
+        $created = false;
+
         if ($user) {
             $user->update([
                 'google_id' => $user->google_id ?: $googleUser->getId(),
@@ -47,6 +50,11 @@ class GoogleAuthController extends Controller
                 'active' => true,
                 'email_verified_at' => now(),
             ]);
+            $created = true;
+        }
+
+        if ($created) {
+            $user->notify(new WelcomeUserNotification());
         }
 
         Auth::login($user, true);

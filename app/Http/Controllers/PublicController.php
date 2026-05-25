@@ -16,6 +16,8 @@ use Illuminate\View\View;
 
 class PublicController extends Controller
 {
+    private const SEARCH_COLUMNS = ['nome', 'descricao', 'local_nome', 'endereco', 'bairro', 'cidade'];
+
     public function home(): View|RedirectResponse
     {
         if (Auth::check()) {
@@ -40,7 +42,7 @@ class PublicController extends Controller
             $q = $request->q;
             $peladasQuery->where(function ($query) use ($q) {
                 if ($this->supportsFullText()) {
-                    $query->whereFullText(['nome', 'descricao', 'local_nome', 'endereco', 'bairro', 'cidade'], $q);
+                    $query->whereFullText(self::SEARCH_COLUMNS, $q);
                 } else {
                     $query->where('nome', 'like', "%{$q}%")
                         ->orWhere('descricao', 'like', "%{$q}%")
@@ -143,7 +145,7 @@ class PublicController extends Controller
                     $q = $request->q;
                     $query->where(function ($q2) use ($q) {
                         if ($this->supportsFullText()) {
-                            $q2->whereFullText(['nome', 'descricao', 'local_nome', 'endereco', 'bairro', 'cidade'], $q);
+                            $q2->whereFullText(self::SEARCH_COLUMNS, $q);
                         } else {
                             $q2->where('nome', 'like', "%{$q}%")
                                 ->orWhere('descricao', 'like', "%{$q}%")
@@ -185,15 +187,55 @@ class PublicController extends Controller
 
     private function supportsFullText(): bool
     {
-        return in_array(DB::getDriverName(), ['mysql', 'mariadb'], true);
+        $driver = DB::getDriverName();
+
+        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+            return false;
+        }
+
+        try {
+            $dbName = DB::connection()->getDatabaseName();
+            $columnPlaceholders = implode(', ', array_fill(0, count(self::SEARCH_COLUMNS), '?'));
+
+            $result = DB::selectOne(
+                "SELECT 1 AS supported
+                 FROM information_schema.STATISTICS
+                 WHERE table_schema = ?
+                    AND table_name = ?
+                    AND index_type = 'FULLTEXT'
+                 GROUP BY index_name
+                 HAVING COUNT(*) = ?
+                    AND SUM(column_name IN ({$columnPlaceholders})) = ?
+                 LIMIT 1",
+                [
+                    $dbName,
+                    'peladas',
+                    count(self::SEARCH_COLUMNS),
+                    ...self::SEARCH_COLUMNS,
+                    count(self::SEARCH_COLUMNS),
+                ]
+            );
+
+            return (bool) $result;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public function pelada(Pelada $pelada): View
     {
         $user = Auth::user();
+        $rodadas = $pelada->jogos()
+            ->with(['participantes.user'])
+            ->whereIn('status', ['aberto', 'fechado'])
+            ->where('data_hora', '>=', now()->startOfDay())
+            ->orderBy('data_hora')
+            ->paginate(6, ['*'], 'rodadas_page')
+            ->withQueryString();
 
         return view('public.pelada', [
-            'pelada' => $pelada->load(['esporte', 'organizador', 'jogos.participantes.user']),
+            'pelada' => $pelada->load(['esporte', 'organizador']),
+            'rodadas' => $rodadas,
             'membro' => $user ? $pelada->membros()->where('user_id', $user->id)->first() : null,
             'isOwner' => $user && $pelada->organizador_id === $user->id,
             'solicitacaoPendente' => $user
@@ -227,5 +269,15 @@ class PublicController extends Controller
                 ->take(10)
                 ->get(),
         ]);
+    }
+
+    public function termos(): View
+    {
+        return view('public.termos');
+    }
+
+    public function privacidade(): View
+    {
+        return view('public.privacidade');
     }
 }
