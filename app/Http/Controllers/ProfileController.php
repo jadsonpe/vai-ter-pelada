@@ -22,6 +22,8 @@ class ProfileController extends Controller
         return view('perfil.edit', [
             'user' => $request->user()->load(['esportePerfis.esporte', 'playerProfile.socialLinks']),
             'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
+            'imageCoverOptions' => PlayerProfile::imageCoverOptions(),
+            'gradientCoverOptions' => PlayerProfile::gradientCoverOptions(),
         ]);
     }
 
@@ -87,25 +89,25 @@ class ProfileController extends Controller
         $profileData = $request->validated()['player_profile'] ?? [];
         $slugBase = $user->apelido ?: $user->name ?: 'peladeiro';
 
+        $coverMode = $profileData['cover_mode'] ?? ($profileData['banner_preset'] ?? null ? 'image' : 'gradient');
+
         $profile->fill([
             'esporte_principal_id' => $profileData['esporte_principal_id'] ?? null,
             'posicao_favorita' => $profileData['posicao_favorita'] ?? null,
             'headline' => $profileData['headline'] ?? null,
             'bio' => $profileData['bio'] ?? null,
+            'banner_theme' => $coverMode === 'gradient'
+                ? ($profileData['banner_theme'] ?? $profile->defaultCoverTheme())
+                : null,
+            'banner_preset' => $coverMode === 'image'
+                ? ($profileData['banner_preset'] ?? null)
+                : null,
             'slug' => PlayerProfile::uniqueSlug($slugBase, $profile->id),
         ]);
 
-        if ($request->boolean('player_profile.remover_banner') && $profile->banner_path) {
+        if ($profile->banner_path) {
             Storage::disk('public')->delete($profile->banner_path);
             $profile->banner_path = null;
-        }
-
-        if ($request->hasFile('player_profile.banner')) {
-            if ($profile->banner_path) {
-                Storage::disk('public')->delete($profile->banner_path);
-            }
-
-            $profile->banner_path = $request->file('player_profile.banner')->store('player-banners', 'public');
         }
 
         $profile->save();

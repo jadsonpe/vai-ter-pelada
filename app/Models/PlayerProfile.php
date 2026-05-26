@@ -20,6 +20,8 @@ class PlayerProfile extends Model
         'headline',
         'bio',
         'banner_path',
+        'banner_preset',
+        'banner_theme',
         'publico',
     ];
 
@@ -98,7 +100,97 @@ class PlayerProfile extends Model
 
     public function bannerUrl(): ?string
     {
-        return $this->banner_path ? Storage::disk('public')->url($this->banner_path) : null;
+        if ($this->banner_preset) {
+            return asset('images/player-covers/'.$this->banner_preset);
+        }
+
+        return null;
+    }
+
+    public function coverUrl(): string
+    {
+        return $this->bannerUrl() ?: '';
+    }
+
+    public static function imageCoverOptions(): array
+    {
+        return [
+            'f1.png' => 'Futebol 1',
+            'f2.png' => 'Futebol 2',
+            'f3.png' => 'Futebol 3',
+            'f4.png' => 'Futebol 4',
+            'futsal1.png' => 'Futsal 1',
+            'futsal2.png' => 'Futsal 2',
+            'futsal3.png' => 'Futsal 3',
+            's1.png' => 'Society 1',
+            's2.png' => 'Society 2',
+            'society3.png' => 'Society 3',
+            'basquete1.png' => 'Basquete 1',
+            'basquete2.png' => 'Basquete 2',
+            'basquete3.png' => 'Basquete 3',
+            'volei1.png' => 'Volei 1',
+            'volei2.png' => 'Volei 2',
+        ];
+    }
+
+    public static function coverOptions(): array
+    {
+        return self::imageCoverOptions();
+    }
+
+    public static function gradientCoverOptions(): array
+    {
+        return [
+            'verde_campo' => [
+                'label' => 'Verde campo',
+                'style' => 'linear-gradient(135deg, #10b981 0%, #064e3b 42%, #020617 100%)',
+            ],
+            'noturno' => [
+                'label' => 'Noturno',
+                'style' => 'linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #020617 100%)',
+            ],
+            'fogo' => [
+                'label' => 'Energia',
+                'style' => 'linear-gradient(135deg, #f97316 0%, #be123c 46%, #020617 100%)',
+            ],
+            'quadra' => [
+                'label' => 'Quadra azul',
+                'style' => 'linear-gradient(135deg, #38bdf8 0%, #1d4ed8 45%, #020617 100%)',
+            ],
+            'ouro' => [
+                'label' => 'Ouro',
+                'style' => 'linear-gradient(135deg, #facc15 0%, #15803d 45%, #020617 100%)',
+            ],
+            'roxo' => [
+                'label' => 'Competitivo',
+                'style' => 'linear-gradient(135deg, #a855f7 0%, #0f766e 48%, #020617 100%)',
+            ],
+        ];
+    }
+
+    public function defaultCoverTheme(): string
+    {
+        $sport = Str::lower($this->esportePrincipal?->slug ?: $this->esportePrincipal?->nome ?: '');
+
+        return match (true) {
+            str_contains($sport, 'basquete') => 'fogo',
+            str_contains($sport, 'volei') => 'quadra',
+            str_contains($sport, 'futsal') => 'noturno',
+            str_contains($sport, 'society') => 'ouro',
+            default => 'verde_campo',
+        };
+    }
+
+    public function coverStyle(): string
+    {
+        if ($this->bannerUrl()) {
+            return "background-image: linear-gradient(90deg, rgba(2,6,23,.92), rgba(2,6,23,.45)), url('{$this->bannerUrl()}'); background-size: cover; background-position: center;";
+        }
+
+        $theme = self::gradientCoverOptions()[$this->banner_theme ?: $this->defaultCoverTheme()]
+            ?? self::gradientCoverOptions()['verde_campo'];
+
+        return "background-image: {$theme['style']};";
     }
 
     public function coverClass(): string

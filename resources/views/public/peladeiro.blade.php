@@ -16,7 +16,7 @@
         $mainPosition = $profile->posicao_favorita
             ?: $jogador->esportePerfis->firstWhere('esporte_id', $profile->esporte_principal_id)?->posicao
             ?: 'Posicao livre';
-        $coverStyle = $profile->bannerUrl() ? "background-image: linear-gradient(90deg, rgba(2,6,23,.92), rgba(2,6,23,.45)), url('{$profile->bannerUrl()}')" : null;
+        $coverStyle = $profile->coverStyle();
         $statCards = [
             ['label' => 'Jogos', 'value' => $stats['jogos']],
             ['label' => 'Vitorias', 'value' => $stats['vitorias']],
@@ -32,7 +32,7 @@
     <div class="bg-slate-950 text-white">
         <section
             class="relative overflow-hidden bg-gradient-to-br {{ $profile->coverClass() }}"
-            @if($coverStyle) style="{{ $coverStyle }}; background-size: cover; background-position: center;" @endif
+            style="{{ $coverStyle }}"
         >
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,.22),transparent_32%),linear-gradient(180deg,transparent,rgba(2,6,23,.96))]"></div>
             <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -121,7 +121,7 @@
                             <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ $rankingSocial }}</span>
                         </div>
                         <div class="mt-5 grid gap-3 sm:grid-cols-5">
-                            @foreach(['Perna de Pau', 'Reserva de Luxo', 'Craque do Baba', 'Rei da Quadra', 'Dono da Bola'] as $level)
+                            @foreach(['Novato', 'Perna de Pau', 'Reserva de Luxo', 'Craque do Baba', 'Rei da Quadra', 'Dono da Bola'] as $level)
                                 <div class="rounded-md border {{ $level === $rankingSocial ? 'border-emerald-300 bg-emerald-300/15 text-emerald-100' : 'border-white/10 bg-slate-900/50 text-slate-400' }} p-3 text-center text-xs font-black uppercase tracking-wide">
                                     {{ $level }}
                                 </div>

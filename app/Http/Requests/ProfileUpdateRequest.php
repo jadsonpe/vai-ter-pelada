@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Models\PlayerProfile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -45,8 +46,9 @@ class ProfileUpdateRequest extends FormRequest
             'player_profile.posicao_favorita' => ['nullable', 'string', 'max:80'],
             'player_profile.headline' => ['nullable', 'string', 'max:120'],
             'player_profile.bio' => ['nullable', 'string', 'max:500'],
-            'player_profile.banner' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:3072'],
-            'player_profile.remover_banner' => ['nullable', 'boolean'],
+            'player_profile.cover_mode' => ['nullable', Rule::in(['gradient', 'image'])],
+            'player_profile.banner_theme' => ['nullable', Rule::in(array_keys(PlayerProfile::gradientCoverOptions()))],
+            'player_profile.banner_preset' => ['nullable', Rule::in(array_keys(PlayerProfile::imageCoverOptions()))],
             'social_links' => ['nullable', 'array'],
             'social_links.instagram' => ['nullable', 'url', 'max:255'],
             'social_links.tiktok' => ['nullable', 'url', 'max:255'],

@@ -78,17 +78,75 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <x-input-label for="banner" value="Imagem de capa" />
-                    @if($playerProfile->bannerUrl())
-                        <img src="{{ $playerProfile->bannerUrl() }}" alt="Capa do perfil" class="mt-2 h-32 w-full rounded-lg object-cover">
-                        <label class="mt-2 flex items-center gap-2 text-sm text-slate-600">
-                            <input type="checkbox" name="player_profile[remover_banner]" value="1" @checked(old('player_profile.remover_banner'))>
-                            Remover capa enviada
-                        </label>
-                    @endif
-                    <input id="banner" type="file" name="player_profile[banner]" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-800">
-                    <p class="mt-1 text-xs text-slate-500">Opcional. Sem envio, o sistema usa uma capa esportiva baseada no esporte principal.</p>
-                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.banner')" />
+                    @php
+                        $selectedMode = old('player_profile.cover_mode', $playerProfile->banner_preset ? 'image' : 'gradient');
+                        $selectedTheme = old('player_profile.banner_theme', $playerProfile->banner_theme ?: $playerProfile->defaultCoverTheme());
+                        $selectedCover = old('player_profile.banner_preset', $playerProfile->banner_preset);
+                        $selectedGradient = $gradientCoverOptions[$selectedTheme] ?? $gradientCoverOptions[$playerProfile->defaultCoverTheme()];
+                        $selectedImageUrl = $selectedCover ? asset('images/player-covers/'.$selectedCover) : null;
+                        $previewStyle = $selectedMode === 'image' && $selectedImageUrl
+                            ? "background-image: linear-gradient(90deg, rgba(2,6,23,.82), rgba(2,6,23,.22)), url('{$selectedImageUrl}'); background-size: cover; background-position: center;"
+                            : "background-image: {$selectedGradient['style']};";
+                    @endphp
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="flex flex-col gap-4 lg:flex-row">
+                            <div class="lg:w-80">
+                                <x-input-label value="Capa do perfil publico" />
+                                <div data-cover-preview class="mt-3 flex h-36 items-end overflow-hidden rounded-xl border border-slate-200 p-4 shadow-inner" style="{{ $previewStyle }}">
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-200">Vai Ter Pelada</p>
+                                        <p class="mt-1 text-xl font-black text-white">{{ $user->apelido ?: $user->name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="player_profile[cover_mode]" value="gradient" class="peer sr-only js-cover-mode" @checked($selectedMode === 'gradient')>
+                                        <span class="block rounded-md px-4 py-2 text-sm font-bold text-slate-600 peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow-sm">Gradiente</span>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="player_profile[cover_mode]" value="image" class="peer sr-only js-cover-mode" @checked($selectedMode === 'image')>
+                                        <span class="block rounded-md px-4 py-2 text-sm font-bold text-slate-600 peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow-sm">Imagem</span>
+                                    </label>
+                                </div>
+
+                                <div data-gradient-panel class="mt-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Cores</p>
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        @foreach($gradientCoverOptions as $themeKey => $theme)
+                                            <label class="cursor-pointer" title="{{ $theme['label'] }}">
+                                                <input type="radio" name="player_profile[banner_theme]" value="{{ $themeKey }}" class="peer sr-only js-cover-gradient" data-cover-style="background-image: {{ $theme['style'] }};" @checked($selectedTheme === $themeKey)>
+                                                <span class="block h-11 w-11 rounded-full border-2 border-white shadow ring-1 ring-slate-300 transition peer-checked:scale-105 peer-checked:ring-4 peer-checked:ring-emerald-300" style="background-image: {{ $theme['style'] }}"></span>
+                                                <span class="sr-only">{{ $theme['label'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div data-image-panel class="{{ $selectedMode === 'image' ? '' : 'hidden' }} mt-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Imagens prontas</p>
+                                    <div class="mt-2 grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($imageCoverOptions as $coverFile => $coverLabel)
+                                <label class="group cursor-pointer">
+                                    @php($imageUrl = asset('images/player-covers/'.$coverFile))
+                                    <input type="radio" name="player_profile[banner_preset]" value="{{ $coverFile }}" class="peer sr-only js-cover-image" data-cover-style="background-image: linear-gradient(90deg, rgba(2,6,23,.82), rgba(2,6,23,.22)), url('{{ $imageUrl }}'); background-size: cover; background-position: center;" @checked($selectedCover === $coverFile)>
+                                    <span class="block overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm transition peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-200 group-hover:border-emerald-300">
+                                        <img src="{{ $imageUrl }}" alt="{{ $coverLabel }}" class="h-20 w-full object-cover" loading="lazy">
+                                        <span class="block truncate px-2 py-1.5 text-xs font-semibold text-slate-700">{{ $coverLabel }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.cover_mode')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.banner_theme')" />
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.banner_preset')" />
                 </div>
             </div>
         </div>
@@ -349,6 +407,61 @@
             });
 
             buscar?.addEventListener('click', buscarCep);
+        })();
+
+        (() => {
+            const modeInputs = document.querySelectorAll('input[name="player_profile[cover_mode]"]');
+            const gradientInputs = document.querySelectorAll('.js-cover-gradient');
+            const imageInputs = document.querySelectorAll('.js-cover-image');
+            const preview = document.querySelector('[data-cover-preview]');
+            const imagePanel = document.querySelector('[data-image-panel]');
+            const gradientPanel = document.querySelector('[data-gradient-panel]');
+
+            function setMode(mode) {
+                const input = document.querySelector(`input[name="player_profile[cover_mode]"][value="${mode}"]`);
+                if (input) {
+                    input.checked = true;
+                }
+
+                imagePanel?.classList.toggle('hidden', mode !== 'image');
+                gradientPanel?.classList.toggle('opacity-50', mode === 'image');
+            }
+
+            function updatePreview(input) {
+                if (!preview || !input?.dataset.coverStyle) {
+                    return;
+                }
+
+                preview.style.cssText = input.dataset.coverStyle;
+            }
+
+            gradientInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    setMode('gradient');
+                    updatePreview(input);
+                    imageInputs.forEach((image) => image.checked = false);
+                });
+            });
+
+            imageInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    setMode('image');
+                    updatePreview(input);
+                });
+            });
+
+            modeInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    if (input.value === 'gradient') {
+                        imageInputs.forEach((image) => image.checked = false);
+                        updatePreview(document.querySelector('.js-cover-gradient:checked'));
+                    }
+
+                    setMode(input.value);
+                });
+            });
+
+            setMode(document.querySelector('input[name="player_profile[cover_mode]"]:checked')?.value || 'gradient');
         })();
     </script>
 </section>

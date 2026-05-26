@@ -193,7 +193,13 @@ SVG;
 
     private function rankingSocial(PlayerProfile $profile, User $user): string
     {
-        $score = $profile->reputation_score + $user->points_total + ($user->rating_count * 10);
+        $votesCount = $profile->votes()->count();
+        $ratingCount = $user->rating_count;
+        $score = $profile->reputation_score + $user->points_total + ($ratingCount * 10);
+
+        if ($score <= 0 && $ratingCount === 0 && $votesCount === 0) {
+            return 'Novato';
+        }
 
         return match (true) {
             $score >= 1000 => 'Dono da Bola',
