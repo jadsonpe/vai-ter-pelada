@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -141,8 +142,8 @@ class PlayerProfileController extends Controller
 
         imagefilledrectangle($image, 72, 72, 1128, 558, $panel);
         imagerectangle($image, 72, 72, 1128, 558, $emerald);
-        imagefilledellipse($image, 930, 315, 260, 260, $circle);
-        imageellipse($image, 930, 315, 260, 260, $emerald);
+        imagefilledellipse($image, 930, 315, 280, 280, $circle);
+        imageellipse($image, 930, 315, 280, 280, $emerald);
 
         $boldFont = $this->fontPath(true);
         $regularFont = $this->fontPath();
@@ -153,8 +154,12 @@ class PlayerProfileController extends Controller
         imagefilledrectangle($image, 108, 368, 560, 450, $emerald);
         $this->drawText($image, $level, 136, 422, 32, $dark, $boldFont);
         $this->drawText($image, 'Reputacao + pontos: '.$score, 108, 505, 26, $muted, $regularFont);
-        $this->drawText($image, 'PERFIL', 850, 300, 40, $white, $boldFont);
-        $this->drawText($image, 'PUBLICO', 830, 356, 40, $emerald, $boldFont);
+        if (! $this->drawAvatar($image, $user, 930, 300, 220)) {
+            imagefilledellipse($image, 930, 300, 220, 220, $emerald);
+            $this->drawText($image, $user->initials(), 895, 330, 64, $dark, $boldFont);
+        }
+
+        $this->drawText($image, 'PERFIL PUBLICO', 800, 470, 24, $white, $boldFont);
 
         ob_start();
         imagepng($image, null, 6);
@@ -239,6 +244,64 @@ class PlayerProfileController extends Controller
         }
 
         imagestring($image, 5, $x, $y - 18, $text, $color);
+    }
+
+    private function drawAvatar($image, User $user, int $centerX, int $centerY, int $size): bool
+    {
+        $avatar = $this->loadAvatarImage($user);
+
+        if (! $avatar) {
+            return false;
+        }
+
+        $sourceWidth = imagesx($avatar);
+        $sourceHeight = imagesy($avatar);
+        $crop = min($sourceWidth, $sourceHeight);
+        $sourceX = (int) (($sourceWidth - $crop) / 2);
+        $sourceY = (int) (($sourceHeight - $crop) / 2);
+        $target = imagecreatetruecolor($size, $size);
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+        imagecopyresampled($target, $avatar, 0, 0, $sourceX, $sourceY, $size, $size, $crop, $crop);
+
+        $mask = imagecreatetruecolor($size, $size);
+        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
+        imagefill($mask, 0, 0, $transparent);
+        $opaque = imagecolorallocate($mask, 255, 255, 255);
+        imagefilledellipse($mask, (int) ($size / 2), (int) ($size / 2), $size, $size, $opaque);
+
+        for ($x = 0; $x < $size; $x++) {
+            for ($y = 0; $y < $size; $y++) {
+                $alpha = imagecolorat($mask, $x, $y) & 0x7F;
+                if ($alpha === 127) {
+                    imagesetpixel($target, $x, $y, imagecolorallocatealpha($target, 0, 0, 0, 127));
+                }
+            }
+        }
+
+        imagecopy($image, $target, (int) ($centerX - $size / 2), (int) ($centerY - $size / 2), 0, 0, $size, $size);
+        imagedestroy($avatar);
+        imagedestroy($target);
+        imagedestroy($mask);
+
+        return true;
+    }
+
+    private function loadAvatarImage(User $user)
+    {
+        $contents = null;
+
+        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
+            $contents = Storage::disk('public')->get($user->avatar_path);
+        } elseif ($user->avatar_url && str_starts_with($user->avatar_url, 'http')) {
+            $contents = @file_get_contents($user->avatar_url);
+        }
+
+        if (! $contents) {
+            return null;
+        }
+
+        return @imagecreatefromstring($contents) ?: null;
     }
 
     private function fontPath(bool $bold = false): ?string
