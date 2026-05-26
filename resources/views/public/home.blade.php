@@ -1,4 +1,22 @@
 <x-app-layout>
+    @section('title', 'Vai Ter Pelada | Organize, encontre e jogue peladas')
+
+    @push('meta')
+        <meta name="description" content="Vai Ter Pelada e a plataforma para encontrar peladas, organizar rodadas, confirmar presenca e criar seu perfil de jogador.">
+        <meta property="og:title" content="Vai Ter Pelada">
+        <meta property="og:description" content="Organize, encontre e jogue peladas.">
+        <meta property="og:url" content="{{ url('/') }}">
+        <meta property="og:image" content="{{ asset('assets/img/logo/vai-ter-pelada-logo-1024.png') }}">
+        <meta property="og:image:secure_url" content="{{ asset('assets/img/logo/vai-ter-pelada-logo-1024.png') }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1024">
+        <meta property="og:image:height" content="1024">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Vai Ter Pelada">
+        <meta name="twitter:description" content="Organize, encontre e jogue peladas.">
+        <meta name="twitter:image" content="{{ asset('assets/img/logo/vai-ter-pelada-logo-1024.png') }}">
+    @endpush
+
     <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
         @include('shared.status')
     </div>
