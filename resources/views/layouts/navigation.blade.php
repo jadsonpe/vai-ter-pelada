@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="border-b border-slate-200 bg-white">
+<nav class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 justify-between">
             <div class="flex min-w-0">
@@ -11,7 +11,9 @@
                     {{-- <x-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-nav-link> --}}
                     {{-- <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link> --}}
                     @auth
-                        @php($notificacoesNaoLidas = auth()->user()->notificacoes()->whereNull('lida_em')->count())
+                        @php
+                            $notificacoesNaoLidas = auth()->user()->notificacoes()->whereNull('lida_em')->count();
+                        @endphp
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                         <x-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.*')">Jogador</x-nav-link>
                         <x-nav-link :href="route('organizador.peladas.index')" :active="request()->routeIs('organizador.*')">Organizar</x-nav-link>
@@ -50,33 +52,93 @@
                 @endauth
             </div>
 
-            <div class="-me-2 flex items-center lg:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+            <div class="flex items-center gap-2 lg:hidden">
+                @auth
+                    @php
+                        $notificacoesMobile = auth()->user()->notificacoes()->whereNull('lida_em')->count();
+                    @endphp
+                    <a href="{{ route('dashboard') }}" class="relative inline-flex items-center rounded-full border border-slate-200 bg-slate-50 p-1.5">
+                        <x-user-avatar :user="Auth::user()" size="xs" />
+                        @if($notificacoesMobile)
+                            <span class="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
+                        @endif
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Entrar</a>
+                @endauth
             </div>
         </div>
     </div>
+</nav>
 
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
-        <div class="space-y-1 pb-3 pt-2">
-            <x-responsive-nav-link :href="route('peladas.index')" :active="request()->routeIs('peladas.*')">Peladas</x-responsive-nav-link>
-            {{-- <x-responsive-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-responsive-nav-link> --}}
-            {{-- <x-responsive-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-responsive-nav-link> --}}
-            @auth
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.*')">Jogador</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('organizador.peladas.index')" :active="request()->routeIs('organizador.*')">Organizar</x-responsive-nav-link>
-                @if(auth()->user()->isAdmin())
-                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-responsive-nav-link>
+@php
+    $mobileItemClass = function (bool $active): string {
+        return $active
+            ? 'text-emerald-700'
+            : 'text-slate-500 hover:text-emerald-700';
+    };
+@endphp
+
+<nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+    <div class="mx-auto grid max-w-lg grid-cols-5 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2">
+        <a href="{{ route('home') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('home') || request()->routeIs('dashboard')) }}">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
+            </svg>
+            <span>Inicio</span>
+        </a>
+
+        <a href="{{ route('peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('peladas.*')) }}">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="8" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8 9 4-2 4 2v5l-4 3-4-3z" />
+            </svg>
+            <span>Peladas</span>
+        </a>
+
+        @auth
+            <a href="{{ route('jogador.peladas.minhas') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.jogos.*')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 12h8M8 17h5" />
+                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                </svg>
+                <span>Minhas</span>
+            </a>
+
+            <a href="{{ route('organizador.peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('organizador.*')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                    <circle cx="12" cy="12" r="8" />
+                </svg>
+                <span>Criar</span>
+            </a>
+
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('perfil.edit') }}" class="relative flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('perfil.*') || request()->routeIs('admin.*')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="8" r="4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
+                </svg>
+                <span>{{ auth()->user()->isAdmin() ? 'Admin' : 'Perfil' }}</span>
+                @if(($notificacoesMobile ?? 0) && !auth()->user()->isAdmin())
+                    <span class="absolute right-4 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
                 @endif
-            @else
-                <x-responsive-nav-link :href="route('login')">Entrar</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('register')">Cadastrar</x-responsive-nav-link>
-            @endauth
-        </div>
+            </a>
+        @else
+            <a href="{{ route('login') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('login')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4v18h-4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 17l5-5-5-5M15 12H3" />
+                </svg>
+                <span>Entrar</span>
+            </a>
+
+            <a href="{{ route('register') }}" class="col-span-2 flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('register')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                </svg>
+                <span>Cadastrar</span>
+            </a>
+        @endauth
     </div>
 </nav>

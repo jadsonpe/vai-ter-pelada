@@ -1,4 +1,4 @@
-<footer class="border-t border-slate-200 bg-white">
+<footer class="mb-20 border-t border-slate-200 bg-white lg:mb-0">
     <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p class="leading-6">&copy; {{ date('Y') }} Vai Ter Pelada. Todos os direitos reservados.</p>
         <nav class="flex flex-wrap items-center gap-3 leading-6 sm:gap-4" aria-label="Links legais">
