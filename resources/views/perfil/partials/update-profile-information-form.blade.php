@@ -179,8 +179,8 @@
 
                 <div>
                     <x-input-label for="data_nascimento" value="Data de nascimento" />
-                    <x-text-input id="data_nascimento" name="data_nascimento" type="date" class="mt-1 block w-full" :value="old('data_nascimento', optional($user->data_nascimento)->format('Y-m-d'))" max="{{ now()->subDay()->toDateString() }}" />
-                    <p class="mt-1 text-xs text-slate-500">Opcional. Se preenchida, outros jogadores poderao ver sua idade no perfil público.</p>
+                    <x-text-input id="data_nascimento" name="data_nascimento" type="text" class="mt-1 block w-full" :value="old('data_nascimento', optional($user->data_nascimento)->format('d/m/Y'))" inputmode="numeric" autocomplete="bday" placeholder="dd/mm/aaaa" maxlength="10" />
+                    <p class="mt-1 text-xs text-slate-500">Opcional. Digite no formato dd/mm/aaaa. Se preenchida, outros jogadores poderao ver sua idade no perfil público.</p>
                     <x-input-error class="mt-2" :messages="$errors->get('data_nascimento')" />
                 </div>
             </div>
@@ -410,6 +410,25 @@
         })();
 
         (() => {
+            const birthDate = document.getElementById('data_nascimento');
+
+            function formatBirthDate(value) {
+                const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+                const parts = [];
+
+                if (digits.length > 0) parts.push(digits.slice(0, 2));
+                if (digits.length > 2) parts.push(digits.slice(2, 4));
+                if (digits.length > 4) parts.push(digits.slice(4, 8));
+
+                return parts.filter(Boolean).join('/');
+            }
+
+            birthDate?.addEventListener('input', () => {
+                birthDate.value = formatBirthDate(birthDate.value);
+            });
+        })();
+
+        (() => {
             const modeInputs = document.querySelectorAll('input[name="player_profile[cover_mode]"]');
             const gradientInputs = document.querySelectorAll('.js-cover-gradient');
             const imageInputs = document.querySelectorAll('.js-cover-image');
@@ -465,4 +484,3 @@
         })();
     </script>
 </section>
-

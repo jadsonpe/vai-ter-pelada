@@ -6,10 +6,26 @@ use App\Models\User;
 use App\Models\PlayerProfile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $birthDate = trim((string) $this->input('data_nascimento'));
+
+        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $birthDate)) {
+            $parsed = Carbon::createFromFormat('d/m/Y', $birthDate);
+
+            if ($parsed !== false) {
+                $this->merge([
+                    'data_nascimento' => $parsed->format('Y-m-d'),
+                ]);
+            }
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
