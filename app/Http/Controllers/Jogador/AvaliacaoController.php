@@ -41,6 +41,19 @@ class AvaliacaoController extends Controller
 
         return view('jogador.avaliacoes.index', [
             'pendingGames' => $pendingGames,
+            'recebidas' => $user->avaliacoesRecebidas()
+                ->with(['avaliador', 'jogo.pelada'])
+                ->latest()
+                ->take(8)
+                ->get(),
+            'feitas' => $user->avaliacoesFeitas()
+                ->with(['avaliado', 'jogo.pelada'])
+                ->latest()
+                ->take(8)
+                ->get(),
+            'mediaRecebida' => $user->rating_average,
+            'totalRecebidas' => $user->rating_count,
+            'totalFeitas' => $user->avaliacoesFeitas()->count(),
         ]);
     }
 

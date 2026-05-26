@@ -10,20 +10,24 @@
 
         $formatBRL = fn ($value): string => $value !== null && $value !== '' ? 'R$ '.number_format($value, 2, ',', '.') : '-';
     @endphp
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-3xl bg-slate-950 px-6 py-8 text-white shadow-lg sm:px-8">
-            <p class="text-sm uppercase tracking-[0.3em] text-emerald-400">Peladas</p>
-            <h1 class="mt-4 text-4xl font-semibold tracking-tight">Encontre a pelada certa</h1>
-            <p class="mt-4 max-w-2xl text-slate-300">Filtre por esporte, cidade, bairro e faixa de preco para achar peladas e rodadas com o melhor custo-beneficio.</p>
-
-            <div class="mt-8 grid gap-3 sm:grid-cols-2">
-                <div class="rounded-3xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Peladas ativas</p>
-                    <p class="mt-2 text-2xl font-semibold text-white">{{ $peladas->total() }}</p>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="rounded-lg bg-slate-950 px-5 py-5 text-white shadow-sm sm:px-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Peladas</p>
+                    <h1 class="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Encontre a pelada certa</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Busque por modalidade, cidade, bairro, categoria e valores.</p>
                 </div>
-                <div class="rounded-3xl bg-white/5 p-4">
-                    <p class="text-sm text-slate-400">Rodadas nos proximos 7 dias</p>
-                    <p class="mt-2 text-2xl font-semibold text-white">{{ $rodadas->total() }}</p>
+
+                <div class="grid grid-cols-2 gap-2 sm:min-w-[260px]">
+                    <div class="rounded-md bg-white/10 px-4 py-3">
+                        <p class="text-xs text-slate-300">Peladas</p>
+                        <p class="text-xl font-semibold">{{ $peladas->total() }}</p>
+                    </div>
+                    <div class="rounded-md bg-white/10 px-4 py-3">
+                        <p class="text-xs text-slate-300">Rodadas</p>
+                        <p class="text-xl font-semibold">{{ $rodadas->total() }}</p>
+                    </div>
                 </div>
             </div>
         </div>

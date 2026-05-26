@@ -184,6 +184,27 @@ class User extends Authenticatable
             || $this->peladasOrganizadas()->count() < ($this->limite_peladas ?: 1);
     }
 
+    public function camposPerfilPendentes(): array
+    {
+        $campos = [
+            'foto' => $this->avatarUrl(),
+            'telefone' => $this->phone,
+            'cep' => $this->cep,
+            'cidade' => $this->cidade,
+            'bairro' => $this->bairro,
+            'logradouro' => $this->logradouro,
+            'numero' => $this->numero,
+            'posicao' => $this->posicao,
+        ];
+
+        return array_keys(array_filter($campos, fn ($value) => blank($value)));
+    }
+
+    public function perfilCompleto(): bool
+    {
+        return $this->camposPerfilPendentes() === [];
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));

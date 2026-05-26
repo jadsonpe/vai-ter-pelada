@@ -38,6 +38,10 @@ Route::middleware('guest')->group(function () {
     Route::get('entrar/google/retorno', [GoogleAuthController::class, 'callback'])
         ->name('auth.google.callback');
 
+    // Compatibilidade com a URL de callback ja cadastrada no Google Console/ambiente de producao.
+    Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect']);
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback']);
+
     Route::get('esqueci-senha', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 

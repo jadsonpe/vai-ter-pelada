@@ -59,6 +59,12 @@ class GoogleAuthController extends Controller
 
         Auth::login($user, true);
 
+        if ($created || ! $user->perfilCompleto()) {
+            return redirect()
+                ->route('perfil.edit')
+                ->with('status', 'complete-profile');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 }
