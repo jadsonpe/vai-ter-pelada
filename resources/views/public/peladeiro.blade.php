@@ -7,7 +7,10 @@
         <meta property="og:description" content="{{ $profile->headline ?: 'Perfil esportivo de peladeiro com estatisticas, peladas e reputacao.' }}">
         <meta property="og:url" content="{{ $profile->shareUrl() }}">
         <meta property="og:image" content="{{ $profile->shareImageUrl() }}">
-        <meta property="og:image:type" content="image/svg+xml">
+        <meta property="og:image:secure_url" content="{{ $profile->shareImageUrl() }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
     @endpush
 
     @php

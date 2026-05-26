@@ -10,11 +10,11 @@
             <div class="rounded-lg border border-emerald-200 bg-white p-5 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="font-semibold text-slate-950">Perfil publico do peladeiro</h2>
+                        <h2 class="font-semibold text-slate-950">Perfil público do peladeiro</h2>
                         <p class="mt-1 text-sm text-slate-600">Veja como outros jogadores enxergam seu cartao esportivo, estatisticas e links sociais.</p>
                     </div>
                     <a href="{{ route('peladeiros.show', auth()->user()->publicProfile()) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                        Ver meu perfil publico
+                        Ver meu perfil público
                     </a>
                 </div>
             </div>

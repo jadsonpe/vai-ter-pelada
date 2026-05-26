@@ -118,7 +118,7 @@
                                                         <x-user-avatar :user="$participante->user" size="sm" />
                                                         <div>
                                                             <p class="font-semibold text-slate-950">{{ $participante->user->name }}</p>
-                                                            <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil publico</a>
+                                                            <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil público</a>
                                                         </div>
                                                     </div>
 

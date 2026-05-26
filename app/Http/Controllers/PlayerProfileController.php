@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PlayerProfileController extends Controller
@@ -111,44 +112,64 @@ class PlayerProfileController extends Controller
 
         $profile->load(['user', 'esportePrincipal']);
         $user = $profile->user;
-        $name = e($user->apelido ?: $user->name);
-        $sport = e($profile->esportePrincipal?->nome ?: 'Multiesporte');
-        $position = e($profile->posicao_favorita ?: 'Peladeiro');
-        $level = e($this->rankingSocial($profile, $user));
+        $name = Str::limit($user->apelido ?: $user->name, 28, '');
+        $sport = Str::limit($profile->esportePrincipal?->nome ?: 'Multiesporte', 18, '');
+        $position = Str::limit($profile->posicao_favorita ?: 'Peladeiro', 18, '');
+        $level = $this->rankingSocial($profile, $user);
         $score = number_format($profile->reputation_score + $user->points_total, 0, ',', '.');
 
-        $svg = <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#10b981"/>
-      <stop offset=".45" stop-color="#0f172a"/>
-      <stop offset="1" stop-color="#020617"/>
-    </linearGradient>
-    <radialGradient id="shine" cx=".78" cy=".18" r=".6">
-      <stop offset="0" stop-color="#34d399" stop-opacity=".48"/>
-      <stop offset="1" stop-color="#34d399" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#shine)"/>
-  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#020617" opacity=".62" stroke="#34d399" stroke-opacity=".45"/>
-  <text x="108" y="145" font-family="Arial, sans-serif" font-size="30" font-weight="800" fill="#6ee7b7" letter-spacing="6">VAI TER PELADA</text>
-  <text x="108" y="250" font-family="Arial, sans-serif" font-size="78" font-weight="900" fill="#ffffff">{$name}</text>
-  <text x="108" y="315" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#cbd5e1">{$sport} • {$position}</text>
-  <rect x="108" y="368" width="420" height="82" rx="20" fill="#10b981"/>
-  <text x="136" y="420" font-family="Arial, sans-serif" font-size="34" font-weight="900" fill="#020617">{$level}</text>
-  <text x="108" y="505" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#e2e8f0">Reputacao + pontos: {$score}</text>
-  <circle cx="928" cy="315" r="128" fill="#10b981" opacity=".18" stroke="#6ee7b7" stroke-width="8"/>
-  <text x="928" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="900" fill="#ffffff">PERFIL</text>
-  <text x="928" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="900" fill="#6ee7b7">PUBLICO</text>
-</svg>
-SVG;
+        $image = imagecreatetruecolor(1200, 630);
+        imageantialias($image, true);
 
-        return response($svg, 200, [
-            'Content-Type' => 'image/svg+xml',
-            'Cache-Control' => 'public, max-age=3600',
+        for ($x = 0; $x < 1200; $x++) {
+            $ratio = $x / 1200;
+            $color = imagecolorallocate(
+                $image,
+                (int) (16 * (1 - $ratio) + 2 * $ratio),
+                (int) (185 * (1 - $ratio) + 6 * $ratio),
+                (int) (129 * (1 - $ratio) + 23 * $ratio)
+            );
+            imageline($image, $x, 0, $x, 630, $color);
+        }
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $muted = imagecolorallocate($image, 203, 213, 225);
+        $emerald = imagecolorallocate($image, 52, 211, 153);
+        $dark = imagecolorallocate($image, 2, 6, 23);
+        $panel = imagecolorallocatealpha($image, 2, 6, 23, 30);
+        $circle = imagecolorallocatealpha($image, 16, 185, 129, 82);
+
+        imagefilledrectangle($image, 72, 72, 1128, 558, $panel);
+        imagerectangle($image, 72, 72, 1128, 558, $emerald);
+        imagefilledellipse($image, 930, 315, 260, 260, $circle);
+        imageellipse($image, 930, 315, 260, 260, $emerald);
+
+        $boldFont = $this->fontPath(true);
+        $regularFont = $this->fontPath();
+
+        $this->drawText($image, 'VAI TER PELADA', 108, 145, 28, $emerald, $boldFont);
+        $this->drawText($image, $name, 108, 255, 68, $white, $boldFont);
+        $this->drawText($image, "{$sport} | {$position}", 108, 318, 32, $muted, $regularFont);
+        imagefilledrectangle($image, 108, 368, 560, 450, $emerald);
+        $this->drawText($image, $level, 136, 422, 32, $dark, $boldFont);
+        $this->drawText($image, 'Reputacao + pontos: '.$score, 108, 505, 26, $muted, $regularFont);
+        $this->drawText($image, 'PERFIL', 850, 300, 40, $white, $boldFont);
+        $this->drawText($image, 'PUBLICO', 830, 356, 40, $emerald, $boldFont);
+
+        ob_start();
+        imagepng($image, null, 6);
+        $png = ob_get_clean();
+        imagedestroy($image);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
         ]);
+    }
+
+    public function legacyCard(PlayerProfile $profile): RedirectResponse
+    {
+        return redirect()->route('peladeiros.card', $profile, 301);
     }
 
     private function followList(PlayerProfile $profile, string $mode): View
@@ -208,5 +229,36 @@ SVG;
             $score >= 120 => 'Reserva de Luxo',
             default => 'Perna de Pau',
         };
+    }
+
+    private function drawText($image, string $text, int $x, int $y, int $size, int $color, ?string $font = null): void
+    {
+        if ($font) {
+            imagettftext($image, $size, 0, $x, $y, $color, $font, $text);
+            return;
+        }
+
+        imagestring($image, 5, $x, $y - 18, $text, $color);
+    }
+
+    private function fontPath(bool $bold = false): ?string
+    {
+        $paths = $bold
+            ? [
+                'C:\Windows\Fonts\arialbd.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            ]
+            : [
+                'C:\Windows\Fonts\arial.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            ];
+
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }

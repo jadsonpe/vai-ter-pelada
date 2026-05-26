@@ -210,6 +210,9 @@ class PlayerProfile extends Model
 
     public function shareImageUrl(): string
     {
-        return route('peladeiros.card', $this);
+        return route('peladeiros.card', [
+            'profile' => $this,
+            'v' => optional($this->updated_at)->timestamp ?: time(),
+        ]);
     }
 }

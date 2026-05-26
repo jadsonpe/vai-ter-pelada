@@ -28,10 +28,11 @@ Route::get('/peladas/{pelada:slug}', [PublicController::class, 'pelada'])->middl
 Route::get('/ranking', [PublicController::class, 'ranking'])->name('ranking');
 Route::get('/arenas', [ArenaController::class, 'index'])->name('arenas.index');
 Route::get('/patrocinadores', [PublicPatrocinadorController::class, 'index'])->name('patrocinadores.index');
-Route::get('/peladeiro/{profile:slug}', [PlayerProfileController::class, 'show'])->name('peladeiros.show');
-Route::get('/peladeiro/{profile:slug}/card.svg', [PlayerProfileController::class, 'card'])->name('peladeiros.card');
+Route::get('/peladeiro/{profile:slug}/card.png', [PlayerProfileController::class, 'card'])->name('peladeiros.card');
+Route::get('/peladeiro/{profile:slug}/card.svg', [PlayerProfileController::class, 'legacyCard'])->name('peladeiros.card.legacy');
 Route::get('/peladeiro/{profile:slug}/seguidores', [PlayerProfileController::class, 'followers'])->name('peladeiros.followers');
 Route::get('/peladeiro/{profile:slug}/seguindo', [PlayerProfileController::class, 'following'])->name('peladeiros.following');
+Route::get('/peladeiro/{profile:slug}', [PlayerProfileController::class, 'show'])->name('peladeiros.show');
 Route::get('/jogadores/{user}', [PlayerProfileController::class, 'legacy'])->name('jogadores.show');
 Route::get('/termos-de-uso', [PublicController::class, 'termos'])->name('termos');
 Route::get('/politica-de-privacidade', [PublicController::class, 'privacidade'])->name('privacidade');

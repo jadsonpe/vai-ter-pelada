@@ -43,7 +43,7 @@
 
         <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
             <div>
-                <h3 class="font-semibold text-slate-900">Perfil publico do peladeiro</h3>
+                <h3 class="font-semibold text-slate-900">Perfil público do peladeiro</h3>
                 <p class="mt-1 text-sm text-slate-600">Essas informacoes aparecem na pagina compartilhavel do jogador.</p>
             </div>
 
@@ -155,7 +155,7 @@
             <div class="space-y-4">
                 <div>
                     <x-input-label for="name" value="Nome completo" />
-                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
+                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autocomplete="name" />
                     <x-input-error class="mt-2" :messages="$errors->get('name')" />
                 </div>
 
@@ -180,7 +180,7 @@
                 <div>
                     <x-input-label for="data_nascimento" value="Data de nascimento" />
                     <x-text-input id="data_nascimento" name="data_nascimento" type="date" class="mt-1 block w-full" :value="old('data_nascimento', optional($user->data_nascimento)->format('Y-m-d'))" max="{{ now()->subDay()->toDateString() }}" />
-                    <p class="mt-1 text-xs text-slate-500">Opcional. Se preenchida, outros jogadores poderao ver sua idade no perfil publico.</p>
+                    <p class="mt-1 text-xs text-slate-500">Opcional. Se preenchida, outros jogadores poderao ver sua idade no perfil público.</p>
                     <x-input-error class="mt-2" :messages="$errors->get('data_nascimento')" />
                 </div>
             </div>
@@ -241,7 +241,7 @@
         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div>
                 <h3 class="font-semibold text-slate-900">Posicoes por esporte</h3>
-                <p class="mt-1 text-sm text-slate-600">Opcional. Preencha apenas as modalidades em que voce quer mostrar sua posicao no perfil publico.</p>
+                <p class="mt-1 text-sm text-slate-600">Opcional. Preencha apenas as modalidades em que voce quer mostrar sua posicao no perfil público.</p>
             </div>
 
             @php($perfisPorEsporte = $user->esportePerfis->keyBy('esporte_id'))
@@ -268,7 +268,7 @@
         <div class="rounded-lg border border-slate-200 bg-white p-4">
             <div>
                 <h3 class="font-semibold text-slate-900">Redes sociais</h3>
-                <p class="mt-1 text-sm text-slate-600">Mostramos apenas os links preenchidos no perfil publico.</p>
+                <p class="mt-1 text-sm text-slate-600">Mostramos apenas os links preenchidos no perfil público.</p>
             </div>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
