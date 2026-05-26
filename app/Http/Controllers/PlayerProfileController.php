@@ -111,59 +111,26 @@ class PlayerProfileController extends Controller
     {
         abort_unless($profile->publico, 404);
 
-        $profile->load(['user', 'esportePrincipal']);
+        $profile->load(['user']);
         $user = $profile->user;
-        $name = Str::limit($user->apelido ?: $user->name, 28, '');
-        $sport = Str::limit($profile->esportePrincipal?->nome ?: 'Multiesporte', 18, '');
-        $position = Str::limit($profile->posicao_favorita ?: 'Peladeiro', 18, '');
-        $level = $this->rankingSocial($profile, $user);
-        $score = number_format($profile->reputation_score + $user->points_total, 0, ',', '.');
-
-        $image = imagecreatetruecolor(1200, 630);
+        $image = imagecreatetruecolor(800, 800);
         imageantialias($image, true);
+        imagealphablending($image, true);
 
-        for ($x = 0; $x < 1200; $x++) {
-            $ratio = $x / 1200;
-            $color = imagecolorallocate(
-                $image,
-                (int) (16 * (1 - $ratio) + 2 * $ratio),
-                (int) (185 * (1 - $ratio) + 6 * $ratio),
-                (int) (129 * (1 - $ratio) + 23 * $ratio)
-            );
-            imageline($image, $x, 0, $x, 630, $color);
+        $avatar = $this->loadAvatarImage($user);
+
+        if ($avatar) {
+            $this->drawSquareImage($image, $avatar, 800);
+        } else {
+            $this->drawInitialsImage($image, $user);
         }
-
-        $white = imagecolorallocate($image, 255, 255, 255);
-        $muted = imagecolorallocate($image, 203, 213, 225);
-        $emerald = imagecolorallocate($image, 52, 211, 153);
-        $dark = imagecolorallocate($image, 2, 6, 23);
-        $panel = imagecolorallocatealpha($image, 2, 6, 23, 30);
-        $circle = imagecolorallocatealpha($image, 16, 185, 129, 82);
-
-        imagefilledrectangle($image, 72, 72, 1128, 558, $panel);
-        imagerectangle($image, 72, 72, 1128, 558, $emerald);
-        imagefilledellipse($image, 930, 315, 280, 280, $circle);
-        imageellipse($image, 930, 315, 280, 280, $emerald);
-
-        $boldFont = $this->fontPath(true);
-        $regularFont = $this->fontPath();
-
-        $this->drawText($image, 'VAI TER PELADA', 108, 145, 28, $emerald, $boldFont);
-        $this->drawText($image, $name, 108, 255, 68, $white, $boldFont);
-        $this->drawText($image, "{$sport} | {$position}", 108, 318, 32, $muted, $regularFont);
-        imagefilledrectangle($image, 108, 368, 560, 450, $emerald);
-        $this->drawText($image, $level, 136, 422, 32, $dark, $boldFont);
-        $this->drawText($image, 'Reputacao + pontos: '.$score, 108, 505, 26, $muted, $regularFont);
-        if (! $this->drawAvatar($image, $user, 930, 300, 220)) {
-            imagefilledellipse($image, 930, 300, 220, 220, $emerald);
-            $this->drawText($image, $user->initials(), 895, 330, 64, $dark, $boldFont);
-        }
-
-        $this->drawText($image, 'PERFIL PUBLICO', 800, 470, 24, $white, $boldFont);
 
         ob_start();
         imagepng($image, null, 6);
         $png = ob_get_clean();
+        if ($avatar) {
+            imagedestroy($avatar);
+        }
         imagedestroy($image);
 
         return response($png, 200, [
@@ -246,45 +213,23 @@ class PlayerProfileController extends Controller
         imagestring($image, 5, $x, $y - 18, $text, $color);
     }
 
-    private function drawAvatar($image, User $user, int $centerX, int $centerY, int $size): bool
+    private function drawSquareImage($image, $avatar, int $size): void
     {
-        $avatar = $this->loadAvatarImage($user);
-
-        if (! $avatar) {
-            return false;
-        }
-
         $sourceWidth = imagesx($avatar);
         $sourceHeight = imagesy($avatar);
         $crop = min($sourceWidth, $sourceHeight);
         $sourceX = (int) (($sourceWidth - $crop) / 2);
         $sourceY = (int) (($sourceHeight - $crop) / 2);
-        $target = imagecreatetruecolor($size, $size);
-        imagealphablending($target, false);
-        imagesavealpha($target, true);
-        imagecopyresampled($target, $avatar, 0, 0, $sourceX, $sourceY, $size, $size, $crop, $crop);
 
-        $mask = imagecreatetruecolor($size, $size);
-        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
-        imagefill($mask, 0, 0, $transparent);
-        $opaque = imagecolorallocate($mask, 255, 255, 255);
-        imagefilledellipse($mask, (int) ($size / 2), (int) ($size / 2), $size, $size, $opaque);
+        imagecopyresampled($image, $avatar, 0, 0, $sourceX, $sourceY, $size, $size, $crop, $crop);
+    }
 
-        for ($x = 0; $x < $size; $x++) {
-            for ($y = 0; $y < $size; $y++) {
-                $alpha = imagecolorat($mask, $x, $y) & 0x7F;
-                if ($alpha === 127) {
-                    imagesetpixel($target, $x, $y, imagecolorallocatealpha($target, 0, 0, 0, 127));
-                }
-            }
-        }
-
-        imagecopy($image, $target, (int) ($centerX - $size / 2), (int) ($centerY - $size / 2), 0, 0, $size, $size);
-        imagedestroy($avatar);
-        imagedestroy($target);
-        imagedestroy($mask);
-
-        return true;
+    private function drawInitialsImage($image, User $user): void
+    {
+        $background = imagecolorallocate($image, 16, 185, 129);
+        $text = imagecolorallocate($image, 2, 6, 23);
+        imagefilledrectangle($image, 0, 0, 800, 800, $background);
+        $this->drawText($image, $user->initials(), 315, 455, 140, $text, $this->fontPath(true));
     }
 
     private function loadAvatarImage(User $user)
