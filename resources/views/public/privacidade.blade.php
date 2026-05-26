@@ -43,6 +43,7 @@
                 <h3 class="mt-5 font-semibold text-slate-900">Dados de peladas, membros e jogos</h3>
                 <ul class="mt-2 list-disc space-y-1 pl-5 leading-7 text-slate-700">
                     <li>Peladas criadas, organizadas ou integradas pelo usuario.</li>
+                    <li>Categoria da pelada, data de fundacao, modalidade, local, cidade, bairro, valores, vagas, regras e status.</li>
                     <li>Tipo de membro: mensalista ou diarista.</li>
                     <li>Status na pelada: ativo, pendente, bloqueado, saiu ou inativo.</li>
                     <li>Data de entrada, data desde quando e mensalista, prioridade, observacoes e apelido dentro da pelada.</li>

@@ -112,6 +112,8 @@ class PeladaController extends Controller
             'esporte_id' => ['required', 'exists:esportes,id'],
             'nome' => ['required', 'max:255'],
             'descricao' => ['nullable', 'max:200'],
+            'data_fundacao' => ['nullable', 'date', 'before_or_equal:today'],
+            'categoria' => ['required', 'in:adulto,infantil'],
             'cidade' => ['nullable', 'max:255'],
             'bairro' => ['nullable', 'max:255'],
             'local_nome' => ['required', 'max:255'],

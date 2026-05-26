@@ -142,14 +142,15 @@
                                     <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
                                         {{ $pelada->esporte->nome }}
                                     </span>
-                                    @if($pelada->data)
-                                        <span class="text-xs text-slate-500">{{ $pelada->data->format('d/m/Y') }}</span>
-                                    @endif
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">{{ $pelada->categoriaLabel() }}</span>
                                 </div>
                                 <h3 class="mt-3 text-lg font-semibold text-slate-900 group-hover:text-emerald-600">{{ $pelada->nome }}</h3>
                                 <p class="mt-1 text-sm text-slate-600">
                                     📍 {{ $pelada->local_nome ?: $pelada->local }}
                                 </p>
+                                @if($pelada->data_fundacao)
+                                    <p class="mt-2 text-xs font-medium text-slate-500">Desde {{ $pelada->data_fundacao->format('d/m/Y') }}</p>
+                                @endif
                                 <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                                     <p class="text-xs text-slate-500">Organizador: {{ $pelada->organizador->name }}</p>
                                     <span class="text-xs font-medium text-emerald-600 group-hover:underline">Ver detalhes →</span>

@@ -8,12 +8,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pelada extends Model
 {
+    public const CATEGORIAS = [
+        'adulto' => 'Adulto',
+        'infantil' => 'Infantil',
+    ];
+
     protected $fillable = [
         'organizador_id',
         'esporte_id',
         'nome',
         'slug',
         'descricao',
+        'data_fundacao',
+        'categoria',
         'imagem',
         'cidade',
         'bairro',
@@ -40,9 +47,15 @@ class Pelada extends Model
         'aceita_diarista' => 'boolean',
         'requer_aprovacao' => 'boolean',
         'horario' => 'datetime:H:i',
+        'data_fundacao' => 'date',
         'valor_mensalista' => 'decimal:2',
         'valor_diarista' => 'decimal:2',
     ];
+
+    public function categoriaLabel(): string
+    {
+        return self::CATEGORIAS[$this->categoria ?: 'adulto'] ?? ucfirst((string) $this->categoria);
+    }
 
     public function getRouteKeyName(): string
     {

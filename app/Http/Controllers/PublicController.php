@@ -87,6 +87,10 @@ class PublicController extends Controller
             $peladasQuery->where('esporte_id', $request->esporte_id);
         }
 
+        if ($request->filled('categoria')) {
+            $peladasQuery->where('categoria', $request->categoria);
+        }
+
         // Sorting
         $sort = $request->get('sort');
         if ($sort === 'price_asc') {
@@ -141,6 +145,11 @@ class PublicController extends Controller
                 if ($request->filled('esporte_id')) {
                     $query->where('esporte_id', $request->esporte_id);
                 }
+
+                if ($request->filled('categoria')) {
+                    $query->where('categoria', $request->categoria);
+                }
+
                 if ($request->filled('q')) {
                     $q = $request->q;
                     $query->where(function ($q2) use ($q) {
@@ -181,7 +190,8 @@ class PublicController extends Controller
             'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
             'cidades' => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade'),
             'bairros' => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro'),
-            'filtros' => $request->only(['cidade', 'bairro', 'esporte_id', 'q', 'price_type', 'price_min', 'price_max', 'sort']),
+            'categorias' => Pelada::CATEGORIAS,
+            'filtros' => $request->only(['cidade', 'bairro', 'esporte_id', 'categoria', 'q', 'price_type', 'price_min', 'price_max', 'sort']),
         ]);
     }
 

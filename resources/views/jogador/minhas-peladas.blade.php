@@ -110,6 +110,9 @@
                                             {{ $membro->pelada->esporte->nome }}
                                         </span>
                                     @endif
+                                    <span class="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
+                                        {{ $membro->pelada->categoriaLabel() }}
+                                    </span>
                                 </div>
                                 <h3 class="mt-3 text-lg font-bold text-slate-950">{{ $membro->pelada->nome }}</h3>
                                 <p class="mt-1 text-sm text-slate-600">
@@ -121,6 +124,9 @@
                                 </p>
                                 @if($membro->data_entrada)
                                     <p class="mt-1 text-xs text-slate-500">Entrada em {{ $membro->data_entrada->format('d/m/Y') }}</p>
+                                @endif
+                                @if($membro->pelada->data_fundacao)
+                                    <p class="mt-1 text-xs text-slate-500">Pelada fundada em {{ $membro->pelada->data_fundacao->format('d/m/Y') }}</p>
                                 @endif
                             </div>
                             <a href="{{ route('peladas.show', $membro->pelada) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">
@@ -204,9 +210,12 @@
                                         <span class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 {{ $statusClasses[$convite->status] ?? 'bg-slate-100 text-slate-700 ring-slate-200' }}">
                                             {{ ucfirst($convite->status) }}
                                         </span>
-                                        <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                                            Convite para {{ $tipoLabels[$tipoConvite] ?? $tipoConvite }}
-                                        </span>
+                                    <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                                        Convite para {{ $tipoLabels[$tipoConvite] ?? $tipoConvite }}
+                                    </span>
+                                    <span class="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
+                                        {{ $convite->pelada->categoriaLabel() }}
+                                    </span>
                                     </div>
                                     <p class="mt-3 font-semibold text-slate-950">{{ $convite->pelada->nome }}</p>
                                     <p class="mt-1 text-xs text-slate-500">Recebido em {{ $convite->created_at->format('d/m/Y H:i') }}</p>
@@ -270,6 +279,9 @@
                                         </span>
                                         <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                             {{ $tipoLabels[$tipoSolicitacao] ?? str_replace('_', ' ', ucfirst($tipoSolicitacao)) }}
+                                        </span>
+                                        <span class="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
+                                            {{ $solicitacao->pelada->categoriaLabel() }}
                                         </span>
                                     </div>
                                     <p class="mt-3 font-semibold text-slate-950">{{ $solicitacao->pelada->nome }}</p>

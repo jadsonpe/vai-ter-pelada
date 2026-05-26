@@ -226,6 +226,8 @@ class DemoDataSeeder extends Seeder
                     'esporte_id' => $esportes[$data['esporte_slug']] ?? $esportes->first(),
                     'nome' => $data['nome'],
                     'descricao' => $data['descricao'],
+                    'data_fundacao' => now()->subMonths(rand(6, 36))->toDateString(),
+                    'categoria' => $data['categoria'] ?? 'adulto',
                     'local' => $data['local'],
                     'cidade' => $data['cidade'],
                     'bairro' => $data['bairro'],

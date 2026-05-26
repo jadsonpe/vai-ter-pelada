@@ -23,6 +23,9 @@
                         <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                             {{ ucfirst($pelada->status) }}
                         </span>
+                        <span class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white">
+                            {{ $pelada->categoriaLabel() }}
+                        </span>
                     </div>
 
                     <h1 class="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl">{{ $pelada->nome }}</h1>
@@ -48,6 +51,14 @@
                         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
                             <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vagas diaristas</span>
                             <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->vagas_diaristas ?: 0 }}</p>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Categoria</span>
+                            <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->categoriaLabel() }}</p>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fundacao</span>
+                            <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->data_fundacao ? $pelada->data_fundacao->format('d/m/Y') : 'Nao informada' }}</p>
                         </div>
                     </div>
                 </div>

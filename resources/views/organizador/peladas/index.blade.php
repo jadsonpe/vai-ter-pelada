@@ -21,7 +21,10 @@
                         <div class="min-w-0 flex-1">
                             <h2 class="truncate font-semibold text-slate-900">{{ $pelada->nome }}</h2>
                             <p class="mt-1 text-sm text-slate-600">{{ $pelada->esporte->nome }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $pelada->capacidade }} vagas</p>
+                            <p class="mt-1 text-sm text-slate-500">{{ $pelada->capacidade }} vagas - {{ $pelada->categoriaLabel() }}</p>
+                            @if($pelada->data_fundacao)
+                                <p class="mt-1 text-xs text-slate-500">Desde {{ $pelada->data_fundacao->format('d/m/Y') }}</p>
+                            @endif
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 border-t border-slate-100 p-4 text-sm font-semibold">
@@ -41,7 +44,7 @@
 
         <div class="mt-6 hidden overflow-hidden rounded-lg border border-slate-200 bg-white md:block">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Pelada</th><th class="p-3">Esporte</th><th class="p-3">Vagas</th><th class="p-3"></th></tr></thead>
+                <thead class="bg-slate-50 text-slate-600"><tr><th class="p-3">Pelada</th><th class="p-3">Esporte</th><th class="p-3">Categoria</th><th class="p-3">Fundacao</th><th class="p-3">Vagas</th><th class="p-3"></th></tr></thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($peladas as $pelada)
                         <tr>
@@ -52,6 +55,8 @@
                                 </div>
                             </td>
                             <td class="p-3">{{ $pelada->esporte->nome }}</td>
+                            <td class="p-3">{{ $pelada->categoriaLabel() }}</td>
+                            <td class="p-3">{{ $pelada->data_fundacao ? $pelada->data_fundacao->format('d/m/Y') : '-' }}</td>
                             <td class="p-3">{{ $pelada->capacidade }}</td>
                             <td class="p-3">
                                 <div class="flex flex-wrap justify-end gap-3 font-semibold">
@@ -65,7 +70,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-4 text-sm text-slate-600">Você ainda não criou nenhuma pelada.</td>
+                            <td colspan="6" class="p-4 text-sm text-slate-600">Você ainda não criou nenhuma pelada.</td>
                         </tr>
                     @endforelse
                 </tbody>

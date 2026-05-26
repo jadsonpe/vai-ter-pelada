@@ -42,6 +42,24 @@
                 <x-input-error :messages="$errors->get('nome')" class="mt-2" />
             </label>
 
+            <div class="grid gap-4 sm:grid-cols-2">
+                <label class="text-sm font-medium">
+                    Data de fundacao
+                    <input type="date" name="data_fundacao" value="{{ old('data_fundacao', optional($pelada->data_fundacao)->format('Y-m-d')) }}" max="{{ now()->toDateString() }}" class="mt-1 w-full rounded-md border-slate-300">
+                    <x-input-error :messages="$errors->get('data_fundacao')" class="mt-2" />
+                </label>
+
+                <label class="text-sm font-medium">
+                    Categoria
+                    <select name="categoria" class="mt-1 w-full rounded-md border-slate-300">
+                        @foreach(\App\Models\Pelada::CATEGORIAS as $valor => $rotulo)
+                            <option value="{{ $valor }}" @selected(old('categoria', $pelada->categoria ?: 'adulto') === $valor)>{{ $rotulo }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('categoria')" class="mt-2" />
+                </label>
+            </div>
+
             <div>
                 <label for="descricao" class="text-sm font-medium">Descrição da Pelada</label>
                 <textarea id="descricao" name="descricao" maxlength="200" rows="3" class="mt-1 w-full rounded-md border-slate-300" placeholder="Ex: Pelada semanal para quem curte jogo organizado, ambiente respeitoso e boa resenha depois da partida.">{{ old('descricao', $pelada->descricao) }}</textarea>

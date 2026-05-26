@@ -64,6 +64,8 @@ class LargeDemoSeeder extends Seeder
                 'organizador_id' => $organizador->id,
                 'esporte_id' => $esporteId,
                 'nome' => "Pelada Demo $i",
+                'data_fundacao' => now()->subMonths(rand(3, 48))->toDateString(),
+                'categoria' => rand(1, 5) === 1 ? 'infantil' : 'adulto',
                 'descricao' => 'Pelada de demonstração para testes automatizados e manuais.',
                 'local' => "Quadra Demo $i",
                 'cidade' => $cidade,

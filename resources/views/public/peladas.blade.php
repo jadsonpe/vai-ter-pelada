@@ -102,13 +102,22 @@
                         </div>
                     </div>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-3">
                         <div>
                             <label for="price_type" class="text-sm font-medium text-slate-700">Tipo de preco</label>
                             <select id="price_type" name="price_type" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
                                 <option value="both" @selected(($filtros['price_type'] ?? 'both') === 'both')>Ambos</option>
                                 <option value="mensalista" @selected(($filtros['price_type'] ?? '') === 'mensalista')>Mensalista</option>
                                 <option value="diarista" @selected(($filtros['price_type'] ?? '') === 'diarista')>Diarista</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="categoria" class="text-sm font-medium text-slate-700">Categoria</label>
+                            <select id="categoria" name="categoria" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
+                                <option value="">Todas</option>
+                                @foreach($categorias as $valor => $rotulo)
+                                    <option value="{{ $valor }}" @selected(($filtros['categoria'] ?? '') === $valor)>{{ $rotulo }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
@@ -146,6 +155,7 @@
                         'cidade' => ['Cidade' => $value],
                         'bairro' => ['Bairro' => $value],
                         'esporte_id' => ['Esporte' => optional(App\Models\Esporte::find($value))->nome ?: 'Selecionado'],
+                        'categoria' => ['Categoria' => $categorias[$value] ?? ucfirst($value)],
                         'price_type' => ['Tipo' => $value === 'both' ? 'Ambos' : ucfirst($value)],
                         'price_min' => ['Preco minimo' => "R$ {$value}"],
                         'price_max' => ['Preco maximo' => "R$ {$value}"],
@@ -196,7 +206,10 @@
                                     <img src="{{ asset('assets/img/icons/'.$sportIcon($rodada->pelada->esporte->nome)) }}" alt="{{ $rodada->pelada->esporte->nome }}" class="h-4 w-4" />
                                     {{ $rodada->pelada->esporte->nome }}
                                 </span>
-                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">{{ ucfirst($rodada->status) }}</span>
+                                <div class="flex flex-wrap justify-end gap-2">
+                                    <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">{{ ucfirst($rodada->status) }}</span>
+                                    <span class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white">{{ $rodada->pelada->categoriaLabel() }}</span>
+                                </div>
                             </div>
 
                             <div>
@@ -256,6 +269,12 @@
                                 <h3 class="text-xl font-semibold text-slate-900">{{ $pelada->nome }}</h3>
                                 <p class="mt-2 text-sm text-slate-600">{{ $pelada->local_nome ?: $pelada->local }}</p>
                                 <p class="text-sm text-slate-500">{{ $pelada->bairro }}{{ $pelada->cidade ? ' - '.$pelada->cidade : '' }}</p>
+                                <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                                    <span class="rounded-full bg-slate-950 px-2.5 py-1 text-white">{{ $pelada->categoriaLabel() }}</span>
+                                    @if($pelada->data_fundacao)
+                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Desde {{ $pelada->data_fundacao->format('d/m/Y') }}</span>
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="grid gap-3 sm:grid-cols-2">
