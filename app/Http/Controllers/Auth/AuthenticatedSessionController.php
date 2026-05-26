@@ -14,9 +14,13 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.login');
+        $this->storeIntendedUrl($request);
+
+        return view('auth.login', [
+            'intendedUrl' => $request->session()->get('url.intended'),
+        ]);
     }
 
     /**
@@ -43,5 +47,18 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    private function storeIntendedUrl(Request $request): void
+    {
+        $redirect = $request->query('redirect');
+
+        if (! is_string($redirect) || $redirect === '') {
+            return;
+        }
+
+        if (str_starts_with($redirect, url('/')) || str_starts_with($redirect, '/')) {
+            $request->session()->put('url.intended', $redirect);
+        }
     }
 }

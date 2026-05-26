@@ -85,7 +85,10 @@
                                 </form>
                             @endif
                         @else
-                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-bold text-slate-100 hover:bg-white/10">Seguir</a>
+                            <div class="grid gap-2 sm:col-span-2 sm:grid-cols-2 lg:col-span-1 lg:grid-cols-1">
+                                <a href="{{ route('register', ['redirect' => $profile->shareUrl()]) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300">Cadastrar</a>
+                                <a href="{{ route('login', ['redirect' => $profile->shareUrl()]) }}" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-bold text-slate-100 hover:bg-white/10">Entrar</a>
+                            </div>
                         @endauth
                     </div>
                 </div>
@@ -97,11 +100,69 @@
                 <a href="{{ route('peladeiros.followers', $profile) }}" class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20 hover:border-emerald-300/60">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Seguidores</p>
                     <p class="mt-2 text-3xl font-black text-white">{{ $followersCount }}</p>
+                    <p class="mt-1 text-sm font-semibold text-emerald-200">Ver quem segue</p>
                 </a>
                 <a href="{{ route('peladeiros.following', $profile) }}" class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20 hover:border-emerald-300/60">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Seguindo</p>
                     <p class="mt-2 text-3xl font-black text-white">{{ $followingCount }}</p>
+                    <p class="mt-1 text-sm font-semibold text-emerald-200">Ver perfis seguidos</p>
                 </a>
+            </section>
+
+            <section class="grid gap-4 lg:grid-cols-2">
+                <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-black">Quem segue</h2>
+                            <p class="mt-1 text-sm text-slate-400">Jogadores que acompanham este perfil.</p>
+                        </div>
+                        <a href="{{ route('peladeiros.followers', $profile) }}" class="shrink-0 text-sm font-bold text-emerald-300 hover:text-emerald-200">Ver todos</a>
+                    </div>
+
+                    <div class="mt-4 grid gap-2">
+                        @forelse($followersPreview as $follower)
+                            @php
+                                $followerProfile = $follower->playerProfile ?: $follower->publicProfile();
+                            @endphp
+                            <a href="{{ route('peladeiros.show', $followerProfile) }}" class="flex items-center gap-3 rounded-md bg-slate-900/70 px-3 py-2 hover:bg-slate-900">
+                                <x-user-avatar :user="$follower" size="sm" />
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm font-bold text-white">{{ $follower->apelido ?: $follower->name }}</span>
+                                    <span class="block truncate text-xs text-slate-400">{{ $followerProfile->esportePrincipal?->nome ?: 'Peladeiro' }}</span>
+                                </span>
+                            </a>
+                        @empty
+                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao ha seguidores.</p>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-black">Perfis seguidos</h2>
+                            <p class="mt-1 text-sm text-slate-400">Peladeiros que este jogador acompanha.</p>
+                        </div>
+                        <a href="{{ route('peladeiros.following', $profile) }}" class="shrink-0 text-sm font-bold text-emerald-300 hover:text-emerald-200">Ver todos</a>
+                    </div>
+
+                    <div class="mt-4 grid gap-2">
+                        @forelse($followingPreview as $followed)
+                            @php
+                                $followedProfile = $followed->playerProfile ?: $followed->publicProfile();
+                            @endphp
+                            <a href="{{ route('peladeiros.show', $followedProfile) }}" class="flex items-center gap-3 rounded-md bg-slate-900/70 px-3 py-2 hover:bg-slate-900">
+                                <x-user-avatar :user="$followed" size="sm" />
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm font-bold text-white">{{ $followed->apelido ?: $followed->name }}</span>
+                                    <span class="block truncate text-xs text-slate-400">{{ $followedProfile->esportePrincipal?->nome ?: 'Peladeiro' }}</span>
+                                </span>
+                            </a>
+                        @empty
+                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao segue outros peladeiros.</p>
+                        @endforelse
+                    </div>
+                </div>
             </section>
 
             <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -143,22 +204,23 @@
 
                         <div class="mt-5 grid gap-4 md:grid-cols-2">
                             @forelse($peladas as $membro)
+                                @continue(! $membro->pelada)
                                 @php
-                                    $pelada = $membro->pelada;
-                                    $position = $jogador->esportePerfis->firstWhere('esporte_id', $pelada->esporte_id)?->posicao ?: $profile->posicao_favorita ?: 'Flex';
+                                    $memberPelada = $membro->pelada;
+                                    $position = $jogador->esportePerfis->firstWhere('esporte_id', $memberPelada->esporte_id)?->posicao ?: $profile->posicao_favorita ?: 'Flex';
                                 @endphp
-                                <a href="{{ route('peladas.show', $pelada) }}" class="group overflow-hidden rounded-lg border border-white/10 bg-slate-900/70 hover:border-emerald-300/60">
-                                    <x-pelada-imagem :src="$pelada->imagemUrl()" :alt="$pelada->nome" class="h-32 w-full object-cover opacity-90 transition group-hover:scale-[1.02]" />
+                                <a href="{{ route('peladas.show', $memberPelada) }}" class="group overflow-hidden rounded-lg border border-white/10 bg-slate-900/70 hover:border-emerald-300/60">
+                                    <x-pelada-imagem :src="$memberPelada->imagemUrl()" :alt="$memberPelada->nome" class="h-32 w-full object-cover opacity-90 transition group-hover:scale-[1.02]" />
                                     <div class="p-4">
                                         <div class="flex items-start justify-between gap-3">
                                             <div>
-                                                <p class="font-black text-white">{{ $pelada->nome }}</p>
-                                                <p class="mt-1 text-sm text-slate-400">{{ collect([$pelada->bairro, $pelada->cidade])->filter()->implode(' - ') }}</p>
+                                                <p class="font-black text-white">{{ $memberPelada->nome }}</p>
+                                                <p class="mt-1 text-sm text-slate-400">{{ collect([$memberPelada->bairro, $memberPelada->cidade])->filter()->implode(' - ') }}</p>
                                             </div>
-                                            <span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-bold text-emerald-200">{{ $pelada->categoriaLabel() }}</span>
+                                            <span class="rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-bold text-emerald-200">{{ $memberPelada->categoriaLabel() }}</span>
                                         </div>
                                         <div class="mt-4 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide text-slate-300">
-                                            <span class="rounded-full bg-white/10 px-2.5 py-1">{{ $pelada->esporte->nome }}</span>
+                                            <span class="rounded-full bg-white/10 px-2.5 py-1">{{ $memberPelada->esporte?->nome ?: 'Esporte' }}</span>
                                             <span class="rounded-full bg-white/10 px-2.5 py-1">{{ $position }}</span>
                                         </div>
                                     </div>
@@ -216,7 +278,11 @@
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <h2 class="text-xl font-black">Conquistas</h2>
                         <div class="mt-4 flex flex-wrap gap-2">
-                            @php($achievements = $profile->achievements->map(fn ($achievement) => $achievement->title)->merge($jogador->badges->map(fn ($badge) => $badge->nome)))
+                            @php
+                                $achievements = $profile->achievements
+                                    ->map(fn ($achievement) => $achievement->title)
+                                    ->merge($jogador->badges->map(fn ($badge) => $badge->nome));
+                            @endphp
                             @forelse($achievements as $achievement)
                                 <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-100">{{ $achievement }}</span>
                             @empty

@@ -141,11 +141,16 @@
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <h2 class="text-xl font-bold text-slate-950">Quero participar</h2>
-                                <p class="mt-2 text-sm text-slate-600">Entre na sua conta para pedir participacao ou confirmar presenca nas rodadas.</p>
+                                <p class="mt-2 text-sm text-slate-600">Crie sua conta ou entre para pedir participacao e confirmar presenca nas rodadas.</p>
                             </div>
-                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
-                                Entrar para participar
-                            </a>
+                            <div class="flex flex-col gap-2 sm:flex-row">
+                                <a href="{{ route('register', ['redirect' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
+                                    Cadastrar para participar
+                                </a>
+                                <a href="{{ route('login', ['redirect' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                    Entrar
+                                </a>
+                            </div>
                         </div>
                     @else
                         @if($isOwner)
@@ -266,7 +271,10 @@
                                         </span>
                                     @endif
                                 @else
-                                    <a href="{{ route('login') }}" class="inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 sm:w-auto">Entrar para confirmar</a>
+                                    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                                        <a href="{{ route('register', ['redirect' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Cadastrar</a>
+                                        <a href="{{ route('login', ['redirect' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Entrar</a>
+                                    </div>
                                 @endauth
                             </article>
                         @empty

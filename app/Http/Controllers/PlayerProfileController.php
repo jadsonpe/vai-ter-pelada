@@ -40,6 +40,18 @@ class PlayerProfileController extends Controller
         $stats = $this->stats($profile, $jogosConfirmados);
         $followersCount = $user->followers()->count();
         $followingCount = $user->following()->count();
+        $followersPreview = $user->followers()
+            ->with(['playerProfile.esportePrincipal'])
+            ->whereHas('playerProfile', fn ($query) => $query->where('publico', true))
+            ->orderByPivot('created_at', 'desc')
+            ->take(6)
+            ->get();
+        $followingPreview = $user->following()
+            ->with(['playerProfile.esportePrincipal'])
+            ->whereHas('playerProfile', fn ($query) => $query->where('publico', true))
+            ->orderByPivot('created_at', 'desc')
+            ->take(6)
+            ->get();
         $isFollowing = auth()->check() && auth()->id() !== $user->id
             ? auth()->user()->isFollowing($user)
             : false;
@@ -51,6 +63,8 @@ class PlayerProfileController extends Controller
             'stats' => $stats,
             'followersCount' => $followersCount,
             'followingCount' => $followingCount,
+            'followersPreview' => $followersPreview,
+            'followingPreview' => $followingPreview,
             'isFollowing' => $isFollowing,
             'socialLinks' => $profile->socialLinks->keyBy('platform'),
             'rankingSocial' => $this->rankingSocial($profile, $user),
@@ -153,6 +167,7 @@ class PlayerProfileController extends Controller
 
         $users = $query
             ->with(['playerProfile.esportePrincipal'])
+            ->whereHas('playerProfile', fn ($query) => $query->where('publico', true))
             ->orderByPivot('created_at', 'desc')
             ->paginate(24);
 

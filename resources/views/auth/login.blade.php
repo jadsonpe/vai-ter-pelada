@@ -2,6 +2,14 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+        <h1 class="text-lg font-bold text-slate-950">Acesse sua conta</h1>
+        <p class="mt-1 text-sm text-slate-700">Para participar, seguir jogadores ou confirmar presenca, entre ou crie sua conta gratis.</p>
+        <a href="{{ route('register', $intendedUrl ? ['redirect' => $intendedUrl] : []) }}" class="mt-3 inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
+            Criar conta gratis
+        </a>
+    </div>
+
     <a href="{{ route('auth.google.redirect') }}" class="flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
         <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white font-bold text-red-500">G</span>
         Entrar com Google
