@@ -7,7 +7,9 @@ use App\Notifications\ResetPasswordNotification;
 use App\Models\UserBadge;
 use App\Models\UserPoint;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +30,7 @@ class User extends Authenticatable
         'plano',
         'limite_peladas',
         'phone',
+        'data_nascimento',
         'avatar_url',
         'avatar_path',
         'cidade',
@@ -55,6 +58,7 @@ class User extends Authenticatable
             'active' => 'boolean',
             'nivel' => 'integer',
             'limite_peladas' => 'integer',
+            'data_nascimento' => 'date',
         ];
     }
 
@@ -88,9 +92,36 @@ class User extends Authenticatable
         return $this->hasMany(UserPoint::class);
     }
 
+    public function esportePerfis(): HasMany
+    {
+        return $this->hasMany(UserEsportePerfil::class);
+    }
+
+    public function playerProfile(): HasOne
+    {
+        return $this->hasOne(PlayerProfile::class);
+    }
+
     public function badges(): HasMany
     {
         return $this->hasMany(UserBadge::class);
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'player_follows', 'followed_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'player_follows', 'follower_id', 'followed_id')
+            ->withTimestamps();
+    }
+
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->whereKey($user->id)->exists();
     }
 
     public function solicitacoes(): HasMany
@@ -194,7 +225,6 @@ class User extends Authenticatable
             'bairro' => $this->bairro,
             'logradouro' => $this->logradouro,
             'numero' => $this->numero,
-            'posicao' => $this->posicao,
         ];
 
         return array_keys(array_filter($campos, fn ($value) => blank($value)));
@@ -226,5 +256,15 @@ class User extends Authenticatable
             ->substr(0, 1)
             ->upper()
             ->toString();
+    }
+
+    public function idade(): ?int
+    {
+        return $this->data_nascimento ? $this->data_nascimento->age : null;
+    }
+
+    public function publicProfile(): PlayerProfile
+    {
+        return PlayerProfile::ensureForUser($this);
     }
 }

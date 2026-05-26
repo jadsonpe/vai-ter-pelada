@@ -40,9 +40,11 @@
                 @forelse($pelada->membros as $membro)
                     <div class="grid gap-3 p-4 lg:grid-cols-[1fr_180px_160px_130px_auto] lg:items-center">
                         <div class="flex items-center gap-3">
-                            <x-user-avatar :user="$membro->user" size="sm" />
+                            <a href="{{ route('peladeiros.show', $membro->user->publicProfile()) }}" class="shrink-0">
+                                <x-user-avatar :user="$membro->user" size="sm" />
+                            </a>
                             <div>
-                                <p class="font-semibold text-slate-900">{{ $membro->nomeExibicao() }}</p>
+                                <a href="{{ route('peladeiros.show', $membro->user->publicProfile()) }}" class="font-semibold text-slate-900 hover:text-emerald-700">{{ $membro->nomeExibicao() }}</a>
                                 <p class="text-sm text-slate-500">{{ $membro->user->name }}</p>
                                 <p class="text-xs text-slate-400">{{ $membro->user->email }}</p>
                             </div>

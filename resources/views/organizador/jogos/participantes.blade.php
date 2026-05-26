@@ -40,9 +40,19 @@
                         <div class="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                             <div class="flex min-w-0 items-center gap-3">
                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                                <x-user-avatar :user="$participante->user" size="xs" />
+                                @if($participante->user)
+                                    <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="shrink-0">
+                                        <x-user-avatar :user="$participante->user" size="xs" />
+                                    </a>
+                                @else
+                                    <x-user-avatar :user="$participante->user" size="xs" />
+                                @endif
                                 <div class="min-w-0">
-                                    <p class="truncate text-sm font-medium text-slate-900">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</p>
+                                    @if($participante->user)
+                                        <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="truncate text-sm font-medium text-slate-900 hover:text-emerald-700">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</a>
+                                    @else
+                                        <p class="truncate text-sm font-medium text-slate-900">{{ $participante->nomeExibicao() }}</p>
+                                    @endif
                                     <p class="text-xs font-semibold uppercase text-slate-500">{{ $participante->tipo }}</p>
                                 </div>
                             </div>
@@ -62,7 +72,14 @@
                 <p class="mt-1 text-sm text-slate-600">Quando a rodada está lotada, novas confirmações entram aqui. Ao remover um confirmado, o primeiro da fila é promovido automaticamente, priorizando mensalistas.</p>
                 <div class="mt-3 divide-y divide-slate-100">
                     @forelse($jogo->participantes->where('status', 'fila')->sortBy('posicao_fila') as $participante)
-                        <p class="py-2 text-sm">#{{ $participante->posicao_fila }} {{ $participante->membro?->nomeExibicao() ?: $participante->user->name }} - {{ $participante->tipo }}</p>
+                        <p class="py-2 text-sm">#{{ $participante->posicao_fila }}
+                            @if($participante->user)
+                                <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="font-medium text-slate-900 hover:text-emerald-700">{{ $participante->membro?->nomeExibicao() ?: $participante->user->name }}</a>
+                            @else
+                                {{ $participante->nomeExibicao() }}
+                            @endif
+                            - {{ $participante->tipo }}
+                        </p>
                     @empty
                         <p class="py-2 text-sm text-slate-500">Nenhum jogador na fila de espera.</p>
                     @endforelse

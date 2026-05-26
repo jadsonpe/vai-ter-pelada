@@ -28,6 +28,7 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'phone' => ['nullable', 'string', 'max:20'],
+            'data_nascimento' => ['nullable', 'date', 'before:today'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'remover_avatar' => ['nullable', 'boolean'],
             'cidade' => ['nullable', 'string', 'max:80'],
@@ -37,6 +38,20 @@ class ProfileUpdateRequest extends FormRequest
             'complemento' => ['nullable', 'string', 'max:80'],
             'estado' => ['nullable', 'string', 'max:80'],
             'cep' => ['nullable', 'string', 'max:20'],
+            'esporte_perfis' => ['nullable', 'array'],
+            'esporte_perfis.*.esporte_id' => ['required', 'exists:esportes,id'],
+            'esporte_perfis.*.posicao' => ['nullable', 'string', 'max:80'],
+            'player_profile.esporte_principal_id' => ['nullable', 'exists:esportes,id'],
+            'player_profile.posicao_favorita' => ['nullable', 'string', 'max:80'],
+            'player_profile.headline' => ['nullable', 'string', 'max:120'],
+            'player_profile.bio' => ['nullable', 'string', 'max:500'],
+            'player_profile.banner' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:3072'],
+            'player_profile.remover_banner' => ['nullable', 'boolean'],
+            'social_links' => ['nullable', 'array'],
+            'social_links.instagram' => ['nullable', 'url', 'max:255'],
+            'social_links.tiktok' => ['nullable', 'url', 'max:255'],
+            'social_links.youtube' => ['nullable', 'url', 'max:255'],
+            'social_links.whatsapp' => ['nullable', 'string', 'max:30'],
         ];
     }
 }

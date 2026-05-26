@@ -15,6 +15,7 @@ use App\Http\Controllers\Organizador\PeladaController as OrganizadorPeladaContro
 use App\Http\Controllers\Organizador\SolicitacaoController;
 use App\Http\Controllers\Organizador\SorteioController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Public\ArenaController;
 use App\Http\Controllers\Public\PatrocinadorController as PublicPatrocinadorController;
@@ -27,6 +28,11 @@ Route::get('/peladas/{pelada:slug}', [PublicController::class, 'pelada'])->middl
 Route::get('/ranking', [PublicController::class, 'ranking'])->name('ranking');
 Route::get('/arenas', [ArenaController::class, 'index'])->name('arenas.index');
 Route::get('/patrocinadores', [PublicPatrocinadorController::class, 'index'])->name('patrocinadores.index');
+Route::get('/peladeiro/{profile:slug}', [PlayerProfileController::class, 'show'])->name('peladeiros.show');
+Route::get('/peladeiro/{profile:slug}/card.svg', [PlayerProfileController::class, 'card'])->name('peladeiros.card');
+Route::get('/peladeiro/{profile:slug}/seguidores', [PlayerProfileController::class, 'followers'])->name('peladeiros.followers');
+Route::get('/peladeiro/{profile:slug}/seguindo', [PlayerProfileController::class, 'following'])->name('peladeiros.following');
+Route::get('/jogadores/{user}', [PlayerProfileController::class, 'legacy'])->name('jogadores.show');
 Route::get('/termos-de-uso', [PublicController::class, 'termos'])->name('termos');
 Route::get('/politica-de-privacidade', [PublicController::class, 'privacidade'])->name('privacidade');
 Route::view('/conta-bloqueada', 'auth.conta-bloqueada')->name('conta.bloqueada');
@@ -39,10 +45,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
+    Route::post('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'follow'])->name('peladeiros.follow');
+    Route::delete('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'unfollow'])->name('peladeiros.unfollow');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
         Route::get('/avaliacoes', [AvaliacaoController::class, 'index'])->name('avaliacoes.index');
         Route::post('/avaliacoes', [AvaliacaoController::class, 'store'])->name('avaliacoes.store');
+        Route::post('/votos', [AvaliacaoController::class, 'vote'])->name('votos.store');
 
         Route::get('/minhas-peladas', [JogadorPeladaController::class, 'minhas'])->name('peladas.minhas');
         Route::post('/jogos/{jogo}/confirmar', [JogadorPeladaController::class, 'confirmar'])->name('jogos.confirmar');

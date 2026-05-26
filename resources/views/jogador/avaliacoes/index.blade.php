@@ -102,6 +102,47 @@
                                             </details>
                                         @endforeach
                                     </div>
+
+                                    <div class="mt-5 rounded-lg border border-emerald-100 bg-emerald-50/70 p-4">
+                                        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h4 class="font-bold text-slate-950">Votos da rodada</h4>
+                                                <p class="text-sm text-slate-600">Marque destaques como craque, garcom, muralha, fair play ou perna de pau.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 grid gap-3">
+                                            @foreach($item->votaveis as $participante)
+                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <x-user-avatar :user="$participante->user" size="sm" />
+                                                        <div>
+                                                            <p class="font-semibold text-slate-950">{{ $participante->user->name }}</p>
+                                                            <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil publico</a>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3 flex flex-wrap gap-2">
+                                                        @foreach($voteTypes as $type => $voteType)
+                                                            @php($alreadyVoted = in_array($type, $participante->votos_feitos ?? [], true))
+                                                            <form method="POST" action="{{ route('jogador.votos.store') }}">
+                                                                @csrf
+                                                                <input type="hidden" name="pelada_jogo_id" value="{{ $jogo->id }}">
+                                                                <input type="hidden" name="voted_user_id" value="{{ $participante->user_id }}">
+                                                                <input type="hidden" name="type" value="{{ $type }}">
+                                                                <button
+                                                                    @disabled($alreadyVoted)
+                                                                    class="rounded-full border px-3 py-1.5 text-xs font-bold {{ $alreadyVoted ? 'border-slate-200 bg-slate-100 text-slate-400' : 'border-emerald-200 bg-emerald-100 text-emerald-900 hover:bg-emerald-200' }}"
+                                                                >
+                                                                    {{ $alreadyVoted ? 'Votado: ' : '' }}{{ $voteType['label'] }}
+                                                                </button>
+                                                            </form>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </article>
                             @endforeach
                         </div>

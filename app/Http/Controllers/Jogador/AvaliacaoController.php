@@ -7,6 +7,10 @@ use App\Models\AvaliacaoPartida;
 use App\Models\Notificacao;
 use App\Models\PeladaJogo;
 use App\Models\PeladaJogoParticipante;
+use App\Models\PlayerAchievement;
+use App\Models\PlayerProfile;
+use App\Models\PlayerStat;
+use App\Models\PlayerVote;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,27 +21,44 @@ class AvaliacaoController extends Controller
     {
         $user = $request->user();
 
-        $jogos = PeladaJogo::with(['pelada.esporte', 'participantes.user'])
+        $jogos = PeladaJogo::with(['pelada.esporte', 'participantes.user.playerProfile'])
             ->whereBetween('data_hora', [now()->subDays(3), now()])
             ->where('data_hora', '<=', now())
             ->whereHas('participantes', fn ($query) => $query->where('user_id', $user->id)->where('presente_local', true))
             ->get();
 
         $pendingGames = $jogos->map(function (PeladaJogo $jogo) use ($user) {
-            $avaliados = $jogo->participantes
+            $presentes = $jogo->participantes
                 ->filter(fn ($participante) => $participante->user_id && $participante->user_id !== $user->id)
                 ->filter(fn ($participante) => $participante->presente_local)
+                ->values();
+
+            $avaliados = $presentes
                 ->reject(fn ($participante) => AvaliacaoPartida::where('pelada_jogo_id', $jogo->id)
                     ->where('avaliador_id', $user->id)
                     ->where('avaliado_id', $participante->user_id)
                     ->exists())
                 ->values();
 
+            $votaveis = $presentes->map(function ($participante) use ($jogo, $user) {
+                $profile = $participante->user?->publicProfile();
+                $participante->votos_feitos = $profile
+                    ? PlayerVote::where('pelada_jogo_id', $jogo->id)
+                        ->where('voter_id', $user->id)
+                        ->where('player_profile_id', $profile->id)
+                        ->pluck('type')
+                        ->all()
+                    : [];
+
+                return $participante;
+            });
+
             return (object) [
                 'jogo' => $jogo,
                 'avaliados' => $avaliados,
+                'votaveis' => $votaveis,
             ];
-        })->filter(fn ($item) => $item->avaliados->isNotEmpty())->values();
+        })->filter(fn ($item) => $item->avaliados->isNotEmpty() || $item->votaveis->isNotEmpty())->values();
 
         return view('jogador.avaliacoes.index', [
             'pendingGames' => $pendingGames,
@@ -54,6 +75,7 @@ class AvaliacaoController extends Controller
             'mediaRecebida' => $user->rating_average,
             'totalRecebidas' => $user->rating_count,
             'totalFeitas' => $user->avaliacoesFeitas()->count(),
+            'voteTypes' => $this->voteTypes(),
         ]);
     }
 
@@ -70,7 +92,7 @@ class AvaliacaoController extends Controller
         $jogo = PeladaJogo::findOrFail($data['pelada_jogo_id']);
 
         if (! $jogo->data_hora->between(now()->subDays(3), now())) {
-            return back()->with('status', 'Avaliações só podem ser feitas até 3 dias após a partida.');
+            return back()->with('status', 'Avaliacoes so podem ser feitas ate 3 dias apos a partida.');
         }
 
         $participacao = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
@@ -82,16 +104,17 @@ class AvaliacaoController extends Controller
             return back()->with('status', 'Somente jogadores presentes na partida podem avaliar.');
         }
 
-        if ($data['avaliado_id'] === $user->id) {
-            return back()->with('status', 'Você não pode se avaliar.');
+        if ((int) $data['avaliado_id'] === $user->id) {
+            return back()->with('status', 'Voce nao pode se avaliar.');
         }
 
-        $avaliadoParticipacao = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
+        $avaliadoParticipacao = PeladaJogoParticipante::with('user')
+            ->where('pelada_jogo_id', $jogo->id)
             ->where('user_id', $data['avaliado_id'])
             ->where('presente_local', true)
             ->first();
 
-        if (! $avaliadoParticipacao) {
+        if (! $avaliadoParticipacao?->user) {
             return back()->with('status', 'O jogador avaliado precisa estar presente e cadastrado no sistema.');
         }
 
@@ -99,10 +122,10 @@ class AvaliacaoController extends Controller
             ->where('avaliador_id', $user->id)
             ->where('avaliado_id', $data['avaliado_id'])
             ->exists()) {
-            return back()->with('status', 'Você já avaliou este jogador para esta partida.');
+            return back()->with('status', 'Voce ja avaliou este jogador para esta partida.');
         }
 
-        $avaliacao = AvaliacaoPartida::create([
+        AvaliacaoPartida::create([
             'pelada_jogo_id' => $jogo->id,
             'avaliador_id' => $user->id,
             'avaliado_id' => $data['avaliado_id'],
@@ -110,25 +133,155 @@ class AvaliacaoController extends Controller
             'comentario' => $data['comentario'],
         ]);
 
-        $user->addPoints(5, 'avaliou', 'Avaliação emitida para partida ' . $jogo->titulo, 'jogo:' . $jogo->id);
+        $user->addPoints(5, 'avaliou', 'Avaliacao emitida para partida '.$jogo->titulo, 'jogo:'.$jogo->id);
 
         $avaliado = $avaliadoParticipacao->user;
-        if ($avaliado) {
-            if ($data['estrelas'] === 5) {
-                $avaliado->addPoints(10, 'recebeu_5', 'Recebeu avaliação 5 estrelas', 'jogo:' . $jogo->id);
-            }
-
-            $avaliado->refreshBadges();
-                Notificacao::create([
-                'user_id' => $avaliado->id,
-                'titulo' => 'Você recebeu uma nova avaliação',
-                'mensagem' => sprintf('%s avaliou você com %s estrelas.', $user->name, $data['estrelas']),
-                'link' => route('perfil.edit'),
-            ]);
+        if ((int) $data['estrelas'] === 5) {
+            $avaliado->addPoints(10, 'recebeu_5', 'Recebeu avaliacao 5 estrelas', 'jogo:'.$jogo->id);
         }
+
+        $avaliado->refreshBadges();
+        Notificacao::create([
+            'user_id' => $avaliado->id,
+            'titulo' => 'Voce recebeu uma nova avaliacao',
+            'mensagem' => sprintf('%s avaliou voce com %s estrelas.', $user->name, $data['estrelas']),
+            'link' => route('perfil.edit'),
+        ]);
 
         $user->refreshBadges();
 
-        return back()->with('status', 'Avaliação enviada com sucesso.');
+        return back()->with('status', 'Avaliacao enviada com sucesso.');
+    }
+
+    public function vote(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'pelada_jogo_id' => ['required', 'exists:pelada_jogos,id'],
+            'voted_user_id' => ['required', 'exists:users,id'],
+            'type' => ['required', 'in:'.implode(',', array_keys($this->voteTypes()))],
+        ]);
+
+        $user = $request->user();
+        $jogo = PeladaJogo::with('pelada')->findOrFail($data['pelada_jogo_id']);
+
+        if (! $jogo->data_hora->between(now()->subDays(3), now())) {
+            return back()->with('status', 'Votos so podem ser feitos ate 3 dias apos a partida.');
+        }
+
+        if ((int) $data['voted_user_id'] === $user->id) {
+            return back()->with('status', 'Voce nao pode votar em si mesmo.');
+        }
+
+        $votantePresente = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
+            ->where('user_id', $user->id)
+            ->where('presente_local', true)
+            ->exists();
+
+        $votadoParticipacao = PeladaJogoParticipante::with('user')
+            ->where('pelada_jogo_id', $jogo->id)
+            ->where('user_id', $data['voted_user_id'])
+            ->where('presente_local', true)
+            ->first();
+
+        if (! $votantePresente || ! $votadoParticipacao?->user) {
+            return back()->with('status', 'Somente jogadores presentes na rodada podem votar e receber votos.');
+        }
+
+        $profile = PlayerProfile::ensureForUser($votadoParticipacao->user);
+
+        if (PlayerVote::where('pelada_jogo_id', $jogo->id)
+            ->where('voter_id', $user->id)
+            ->where('player_profile_id', $profile->id)
+            ->where('type', $data['type'])
+            ->exists()) {
+            return back()->with('status', 'Voce ja registrou este voto para esse jogador nesta rodada.');
+        }
+
+        PlayerVote::create([
+            'player_profile_id' => $profile->id,
+            'voter_id' => $user->id,
+            'pelada_jogo_id' => $jogo->id,
+            'type' => $data['type'],
+            'metadata' => [
+                'pelada_id' => $jogo->pelada_id,
+                'pelada_nome' => $jogo->pelada?->nome,
+                'jogo_titulo' => $jogo->titulo,
+            ],
+        ]);
+
+        $this->applyVoteImpact($profile, $jogo, $data['type']);
+        $user->addPoints(2, 'votou_destaque', 'Voto de destaque emitido na rodada '.$jogo->titulo, 'jogo:'.$jogo->id);
+
+        Notificacao::create([
+            'user_id' => $votadoParticipacao->user->id,
+            'titulo' => 'Voce recebeu um voto de destaque',
+            'mensagem' => sprintf('%s votou em voce como %s.', $user->name, $this->voteTypes()[$data['type']]['label']),
+            'link' => route('peladeiros.show', $profile),
+        ]);
+
+        return back()->with('status', 'Voto registrado com sucesso.');
+    }
+
+    private function voteTypes(): array
+    {
+        return [
+            'craque' => ['label' => 'Craque da rodada', 'score' => 15],
+            'garcom' => ['label' => 'Garcom', 'score' => 8],
+            'muralha' => ['label' => 'Muralha', 'score' => 8],
+            'fair_play' => ['label' => 'Fair play', 'score' => 8],
+            'perna_de_pau' => ['label' => 'Perna de pau', 'score' => 0],
+        ];
+    }
+
+    private function applyVoteImpact(PlayerProfile $profile, PeladaJogo $jogo, string $type): void
+    {
+        $voteType = $this->voteTypes()[$type];
+        $score = $voteType['score'];
+
+        if ($score > 0) {
+            $profile->increment('reputation_score', $score);
+            $profile->user?->addPoints($score, 'voto_'.$type, 'Recebeu voto: '.$voteType['label'], 'jogo:'.$jogo->id);
+        }
+
+        $stat = PlayerStat::firstOrCreate([
+            'player_profile_id' => $profile->id,
+            'esporte_id' => $jogo->pelada?->esporte_id,
+        ]);
+
+        match ($type) {
+            'craque' => $stat->increment('mvps'),
+            'garcom' => $stat->increment('assistencias'),
+            default => null,
+        };
+
+        $this->refreshVoteAchievements($profile);
+    }
+
+    private function refreshVoteAchievements(PlayerProfile $profile): void
+    {
+        $craques = $profile->votes()->where('type', 'craque')->count();
+        $fairPlay = $profile->votes()->where('type', 'fair_play')->count();
+
+        if ($craques >= 3) {
+            PlayerAchievement::firstOrCreate([
+                'player_profile_id' => $profile->id,
+                'key' => 'craque_3x',
+            ], [
+                'title' => 'Craque 3x',
+                'description' => 'Recebeu pelo menos 3 votos de craque da rodada.',
+                'earned_at' => now(),
+            ]);
+        }
+
+        if ($fairPlay >= 3) {
+            PlayerAchievement::firstOrCreate([
+                'player_profile_id' => $profile->id,
+                'key' => 'resenha_limpa',
+            ], [
+                'title' => 'Resenha limpa',
+                'description' => 'Recebeu pelo menos 3 votos de fair play.',
+                'earned_at' => now(),
+            ]);
+        }
     }
 }

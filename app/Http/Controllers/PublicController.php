@@ -244,7 +244,7 @@ class PublicController extends Controller
             ->withQueryString();
 
         return view('public.pelada', [
-            'pelada' => $pelada->load(['esporte', 'organizador']),
+            'pelada' => $pelada->load(['esporte', 'organizador', 'membros.user']),
             'rodadas' => $rodadas,
             'membro' => $user ? $pelada->membros()->where('user_id', $user->id)->first() : null,
             'isOwner' => $user && $pelada->organizador_id === $user->id,
@@ -278,6 +278,17 @@ class PublicController extends Controller
                 ->orderByDesc('monthly_points')
                 ->take(10)
                 ->get(),
+        ]);
+    }
+
+    public function jogador(User $user): View
+    {
+        $user->load(['esportePerfis.esporte', 'badges']);
+
+        return view('public.jogador', [
+            'jogador' => $user,
+            'presencasConfirmadas' => $user->participacoes()->where('status', 'confirmado')->count(),
+            'peladasAtivas' => $user->memberships()->where('status', 'ativo')->count(),
         ]);
     }
 

@@ -36,7 +36,7 @@
                 <h3 class="mt-5 font-semibold text-slate-900">Dados de perfil</h3>
                 <ul class="mt-2 list-disc space-y-1 pl-5 leading-7 text-slate-700">
                     <li>Apelido, telefone/WhatsApp, cidade, bairro, logradouro, numero, complemento, estado e CEP.</li>
-                    <li>Posicao em campo, nivel, plano, limite de peladas e foto/avatar quando disponivel.</li>
+                    <li>Data de nascimento, idade exibida, posicoes por esporte, esporte principal, bio esportiva, capa do perfil, links sociais, nivel, plano, limite de peladas e foto/avatar quando disponivel.</li>
                     <li>Identificador Google e avatar do Google quando o usuario usa login social.</li>
                 </ul>
 
@@ -63,6 +63,7 @@
                 <ul class="mt-2 list-disc space-y-1 pl-5 leading-7 text-slate-700">
                     <li>Jogadores presentes usados no sorteio, times gerados, ordem nos times e criterio usado.</li>
                     <li>Avaliacoes feitas e recebidas, estrelas/notas, comentarios, media e quantidade de avaliacoes.</li>
+                    <li>Estatisticas esportivas, votos de destaque, rankings sociais, conquistas e reputacao do perfil publico do peladeiro.</li>
                     <li>Pontos, badges, conquistas e presencas usadas no ranking.</li>
                 </ul>
 

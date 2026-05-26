@@ -36,6 +36,63 @@
             </div>
         </div>
 
+        @php
+            $playerProfile = $user->playerProfile ?: new \App\Models\PlayerProfile();
+            $socialLinks = $playerProfile->socialLinks?->pluck('url', 'platform') ?? collect();
+        @endphp
+
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <div>
+                <h3 class="font-semibold text-slate-900">Perfil publico do peladeiro</h3>
+                <p class="mt-1 text-sm text-slate-600">Essas informacoes aparecem na pagina compartilhavel do jogador.</p>
+            </div>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <x-input-label for="esporte_principal_id" value="Esporte principal" />
+                    <select id="esporte_principal_id" name="player_profile[esporte_principal_id]" class="mt-1 block w-full rounded-md border-slate-300">
+                        <option value="">Selecione</option>
+                        @foreach($esportes as $esporte)
+                            <option value="{{ $esporte->id }}" @selected(old('player_profile.esporte_principal_id', $playerProfile->esporte_principal_id) == $esporte->id)>{{ $esporte->nome }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.esporte_principal_id')" />
+                </div>
+
+                <div>
+                    <x-input-label for="posicao_favorita" value="Posicao favorita" />
+                    <x-text-input id="posicao_favorita" name="player_profile[posicao_favorita]" type="text" class="mt-1 block w-full" :value="old('player_profile.posicao_favorita', $playerProfile->posicao_favorita)" placeholder="Ex: Atacante, armador, ponteiro..." />
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.posicao_favorita')" />
+                </div>
+
+                <div class="sm:col-span-2">
+                    <x-input-label for="headline" value="Frase de destaque" />
+                    <x-text-input id="headline" name="player_profile[headline]" type="text" class="mt-1 block w-full" :value="old('player_profile.headline', $playerProfile->headline)" placeholder="Ex: Raca, resenha e gol no fim." />
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.headline')" />
+                </div>
+
+                <div class="sm:col-span-2">
+                    <x-input-label for="bio" value="Bio esportiva" />
+                    <textarea id="bio" name="player_profile[bio]" rows="3" class="mt-1 block w-full rounded-md border-slate-300" placeholder="Conte rapidamente seu estilo de jogo.">{{ old('player_profile.bio', $playerProfile->bio) }}</textarea>
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.bio')" />
+                </div>
+
+                <div class="sm:col-span-2">
+                    <x-input-label for="banner" value="Imagem de capa" />
+                    @if($playerProfile->bannerUrl())
+                        <img src="{{ $playerProfile->bannerUrl() }}" alt="Capa do perfil" class="mt-2 h-32 w-full rounded-lg object-cover">
+                        <label class="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" name="player_profile[remover_banner]" value="1" @checked(old('player_profile.remover_banner'))>
+                            Remover capa enviada
+                        </label>
+                    @endif
+                    <input id="banner" type="file" name="player_profile[banner]" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-800">
+                    <p class="mt-1 text-xs text-slate-500">Opcional. Sem envio, o sistema usa uma capa esportiva baseada no esporte principal.</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('player_profile.banner')" />
+                </div>
+            </div>
+        </div>
+
         <div class="grid gap-6 lg:grid-cols-2">
             <div class="space-y-4">
                 <div>
@@ -60,6 +117,13 @@
                     <x-input-label for="phone" value="Telefone" />
                     <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" />
                     <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                </div>
+
+                <div>
+                    <x-input-label for="data_nascimento" value="Data de nascimento" />
+                    <x-text-input id="data_nascimento" name="data_nascimento" type="date" class="mt-1 block w-full" :value="old('data_nascimento', optional($user->data_nascimento)->format('Y-m-d'))" max="{{ now()->subDay()->toDateString() }}" />
+                    <p class="mt-1 text-xs text-slate-500">Opcional. Se preenchida, outros jogadores poderao ver sua idade no perfil publico.</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('data_nascimento')" />
                 </div>
             </div>
 
@@ -113,6 +177,59 @@
                 <x-input-label for="complemento" value="Complemento" />
                 <x-text-input id="complemento" name="complemento" type="text" class="mt-1 block w-full" :value="old('complemento', $user->complemento)" autocomplete="off" />
                 <x-input-error class="mt-2" :messages="$errors->get('complemento')" />
+            </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div>
+                <h3 class="font-semibold text-slate-900">Posicoes por esporte</h3>
+                <p class="mt-1 text-sm text-slate-600">Opcional. Preencha apenas as modalidades em que voce quer mostrar sua posicao no perfil publico.</p>
+            </div>
+
+            @php($perfisPorEsporte = $user->esportePerfis->keyBy('esporte_id'))
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                @foreach($esportes as $index => $esporte)
+                    @php($perfil = $perfisPorEsporte->get($esporte->id))
+                    <div>
+                        <input type="hidden" name="esporte_perfis[{{ $index }}][esporte_id]" value="{{ $esporte->id }}">
+                        <x-input-label :for="'esporte-posicao-'.$esporte->id" :value="$esporte->nome" />
+                        <x-text-input
+                            :id="'esporte-posicao-'.$esporte->id"
+                            name="esporte_perfis[{{ $index }}][posicao]"
+                            type="text"
+                            class="mt-1 block w-full"
+                            :value="old('esporte_perfis.'.$index.'.posicao', $perfil?->posicao)"
+                            placeholder="Ex: Goleiro, atacante, levantador..."
+                        />
+                        <x-input-error class="mt-2" :messages="$errors->get('esporte_perfis.'.$index.'.posicao')" />
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+            <div>
+                <h3 class="font-semibold text-slate-900">Redes sociais</h3>
+                <p class="mt-1 text-sm text-slate-600">Mostramos apenas os links preenchidos no perfil publico.</p>
+            </div>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <x-input-label for="instagram" value="Instagram" />
+                    <x-text-input id="instagram" name="social_links[instagram]" type="url" class="mt-1 block w-full" :value="old('social_links.instagram', $socialLinks->get('instagram'))" placeholder="https://instagram.com/seuuser" />
+                </div>
+                <div>
+                    <x-input-label for="tiktok" value="TikTok" />
+                    <x-text-input id="tiktok" name="social_links[tiktok]" type="url" class="mt-1 block w-full" :value="old('social_links.tiktok', $socialLinks->get('tiktok'))" placeholder="https://tiktok.com/@seuuser" />
+                </div>
+                <div>
+                    <x-input-label for="youtube" value="YouTube" />
+                    <x-text-input id="youtube" name="social_links[youtube]" type="url" class="mt-1 block w-full" :value="old('social_links.youtube', $socialLinks->get('youtube'))" placeholder="https://youtube.com/@seucanal" />
+                </div>
+                <div>
+                    <x-input-label for="whatsapp" value="WhatsApp" />
+                    <x-text-input id="whatsapp" name="social_links[whatsapp]" type="text" class="mt-1 block w-full" :value="old('social_links.whatsapp', $socialLinks->get('whatsapp'))" placeholder="81999999999" />
+                </div>
             </div>
         </div>
 

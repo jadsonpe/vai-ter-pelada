@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Esporte;
+use App\Models\PlayerProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +20,8 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('perfil.edit', [
-            'user' => $request->user(),
+            'user' => $request->user()->load(['esportePerfis.esporte', 'playerProfile.socialLinks']),
+            'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
         ]);
     }
 
@@ -29,7 +32,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $data = collect($request->validated())
-            ->except(['avatar', 'remover_avatar'])
+            ->except(['avatar', 'remover_avatar', 'esporte_perfis', 'player_profile', 'social_links'])
             ->all();
 
         $user->fill($data);
@@ -52,8 +55,83 @@ class ProfileController extends Controller
         }
 
         $user->save();
+        $this->syncEsportePerfis($request, $user);
+        $this->syncPlayerProfile($request, $user);
 
         return Redirect::route('perfil.edit')->with('status', 'profile-updated');
+    }
+
+    private function syncEsportePerfis(ProfileUpdateRequest $request, $user): void
+    {
+        foreach (($request->validated()['esporte_perfis'] ?? []) as $perfil) {
+            $posicao = trim((string) ($perfil['posicao'] ?? ''));
+
+            if ($posicao === '') {
+                $user->esportePerfis()
+                    ->where('esporte_id', $perfil['esporte_id'])
+                    ->delete();
+
+                continue;
+            }
+
+            $user->esportePerfis()->updateOrCreate(
+                ['esporte_id' => $perfil['esporte_id']],
+                ['posicao' => $posicao]
+            );
+        }
+    }
+
+    private function syncPlayerProfile(ProfileUpdateRequest $request, $user): void
+    {
+        $profile = PlayerProfile::ensureForUser($user);
+        $profileData = $request->validated()['player_profile'] ?? [];
+        $slugBase = $user->apelido ?: $user->name ?: 'peladeiro';
+
+        $profile->fill([
+            'esporte_principal_id' => $profileData['esporte_principal_id'] ?? null,
+            'posicao_favorita' => $profileData['posicao_favorita'] ?? null,
+            'headline' => $profileData['headline'] ?? null,
+            'bio' => $profileData['bio'] ?? null,
+            'slug' => PlayerProfile::uniqueSlug($slugBase, $profile->id),
+        ]);
+
+        if ($request->boolean('player_profile.remover_banner') && $profile->banner_path) {
+            Storage::disk('public')->delete($profile->banner_path);
+            $profile->banner_path = null;
+        }
+
+        if ($request->hasFile('player_profile.banner')) {
+            if ($profile->banner_path) {
+                Storage::disk('public')->delete($profile->banner_path);
+            }
+
+            $profile->banner_path = $request->file('player_profile.banner')->store('player-banners', 'public');
+        }
+
+        $profile->save();
+
+        foreach (($request->validated()['social_links'] ?? []) as $platform => $url) {
+            $value = trim((string) $url);
+
+            if ($value === '') {
+                $profile->socialLinks()->where('platform', $platform)->delete();
+                continue;
+            }
+
+            if ($platform === 'whatsapp') {
+                if (! str_starts_with($value, 'http')) {
+                    $digits = preg_replace('/\D+/', '', $value);
+                    $value = $digits ? 'https://wa.me/'.(str_starts_with($digits, '55') ? $digits : '55'.$digits) : '';
+                }
+            }
+
+            if ($value !== '') {
+                $profile->socialLinks()->updateOrCreate(
+                    ['platform' => $platform],
+                    ['url' => $value]
+                );
+            }
+        }
     }
 
     /**
@@ -71,6 +149,10 @@ class ProfileController extends Controller
 
         if ($user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        if ($user->playerProfile?->banner_path) {
+            Storage::disk('public')->delete($user->playerProfile->banner_path);
         }
 
         $user->delete();
