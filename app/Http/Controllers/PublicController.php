@@ -8,6 +8,7 @@ use App\Models\Pelada;
 use App\Models\PeladaJogo;
 use App\Models\Patrocinador;
 use App\Models\User;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -255,6 +256,7 @@ class PublicController extends Controller
                     ->latest()
                     ->first()
                 : null,
+            'reportReasons' => Report::reasonsFor('pelada'),
         ]);
     }
 

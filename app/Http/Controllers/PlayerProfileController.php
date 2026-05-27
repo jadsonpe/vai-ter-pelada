@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PlayerProfile;
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -75,6 +76,7 @@ class PlayerProfileController extends Controller
                 'fair_play' => 'Fair play',
                 'perna_de_pau' => 'Perna de pau',
             ],
+            'reportReasons' => Report::reasonsFor('jogador'),
             'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode(
                 'Olha meu perfil no Vai Ter Pelada: '.$profile->shareUrl()
             ),

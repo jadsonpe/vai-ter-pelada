@@ -11,6 +11,7 @@
                 'Modalidades' => $esportesCount,
                 'Banners' => $bannersCount,
                 'Patrocinadores' => $patrocinadoresCount,
+                'Denuncias pendentes' => $denunciasPendentesCount,
             ] as $label => $value)
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <p class="text-sm font-medium text-slate-500">{{ $label }}</p>
@@ -19,10 +20,11 @@
             @endforeach
         </div>
 
-        <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-6">
             <a href="{{ route('admin.users.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-emerald-700">Usuários</a>
             <a href="{{ route('admin.esportes.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-emerald-700">Esportes</a>
             <a href="{{ route('admin.peladas.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-emerald-700">Peladas</a>
+            <a href="{{ route('admin.reports.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-red-700">Denuncias</a>
             <a href="{{ route('admin.banners.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-emerald-700">Banners</a>
             <a href="{{ route('admin.patrocinadores.index') }}" class="rounded-lg border border-slate-200 bg-white p-4 font-semibold text-emerald-700">Patrocinadores</a>
         </div>

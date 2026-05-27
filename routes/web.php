@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\EsporteController;
 use App\Http\Controllers\Admin\PatrocinadorController;
 use App\Http\Controllers\Admin\PeladaController as AdminPeladaController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Jogador\DashboardController as JogadorDashboardController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Organizador\SorteioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Public\ArenaController;
 use App\Http\Controllers\Public\PatrocinadorController as PublicPatrocinadorController;
 use App\Http\Controllers\Jogador\AvaliacaoController;
@@ -48,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
     Route::post('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'follow'])->name('peladeiros.follow');
     Route::delete('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'unfollow'])->name('peladeiros.unfollow');
+    Route::post('/denuncias/peladas/{pelada:slug}', [ReportController::class, 'storePelada'])->name('denuncias.peladas.store');
+    Route::post('/denuncias/peladeiros/{profile:slug}', [ReportController::class, 'storePlayer'])->name('denuncias.peladeiros.store');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
         Route::get('/avaliacoes', [AvaliacaoController::class, 'index'])->name('avaliacoes.index');
@@ -95,6 +99,8 @@ Route::middleware('auth')->group(function () {
         Route::redirect('/modalidades', '/admin/esportes')->name('modalidades.index');
         Route::resource('esportes', EsporteController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('peladas', AdminPeladaController::class)->only(['index']);
+        Route::get('denuncias', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::patch('denuncias/{report}', [AdminReportController::class, 'update'])->name('reports.update');
         Route::resource('banners', BannerController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('patrocinadores', PatrocinadorController::class)
             ->only(['index', 'store', 'update', 'destroy'])

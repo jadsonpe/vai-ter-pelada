@@ -7,6 +7,7 @@ use App\Models\Banner;
 use App\Models\Esporte;
 use App\Models\Patrocinador;
 use App\Models\Pelada;
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\View\View;
 
@@ -21,6 +22,7 @@ class AdminController extends Controller
             'esportesCount' => Esporte::count(),
             'bannersCount' => Banner::count(),
             'patrocinadoresCount' => Patrocinador::count(),
+            'denunciasPendentesCount' => Report::where('status', Report::STATUS_PENDING)->count(),
         ]);
     }
 }

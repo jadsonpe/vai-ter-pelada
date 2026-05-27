@@ -290,6 +290,17 @@
                             @endforelse
                         </div>
                     </section>
+
+                    @if(! auth()->check() || auth()->id() !== $jogador->id)
+                        @include('partials.report-panel', [
+                            'title' => 'Denunciar perfil',
+                            'description' => 'Use este canal para informar perfil falso, comportamento abusivo ou conteudo inadequado.',
+                            'action' => route('denuncias.peladeiros.store', $profile),
+                            'reasons' => $reportReasons,
+                            'dark' => true,
+                            'loginRedirect' => $profile->shareUrl(),
+                        ])
+                    @endif
                 </aside>
             </div>
         </main>

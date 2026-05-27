@@ -112,6 +112,15 @@
                     @endif
                 </section>
 
+                @if(! $isOwner)
+                    @include('partials.report-panel', [
+                        'title' => 'Denunciar pelada',
+                        'description' => 'Informe problemas como pelada falsa, dados incorretos, cobranca suspeita ou conduta abusiva.',
+                        'action' => route('denuncias.peladas.store', $pelada),
+                        'reasons' => $reportReasons,
+                    ])
+                @endif
+
                 <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
