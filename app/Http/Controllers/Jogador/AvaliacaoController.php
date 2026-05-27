@@ -229,7 +229,10 @@ class AvaliacaoController extends Controller
             'garcom' => ['label' => 'Garcom', 'score' => 8],
             'muralha' => ['label' => 'Muralha', 'score' => 8],
             'fair_play' => ['label' => 'Fair play', 'score' => 8],
-            'perna_de_pau' => ['label' => 'Perna de pau', 'score' => 0],
+            'carcara' => ['label' => 'Carcara', 'score' => 8],
+            'fominha' => ['label' => 'Fominha', 'score' => 4],
+            'maestro' => ['label' => 'Maestro', 'score' => 10],
+            'xerife' => ['label' => 'Xerife', 'score' => 10],
         ];
     }
 
@@ -250,7 +253,7 @@ class AvaliacaoController extends Controller
 
         match ($type) {
             'craque' => $stat->increment('mvps'),
-            'garcom' => $stat->increment('assistencias'),
+            'garcom', 'maestro' => $stat->increment('assistencias'),
             default => null,
         };
 

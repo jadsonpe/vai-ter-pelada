@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PlayerProfile;
+use App\Models\PlayerVote;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -69,13 +70,7 @@ class PlayerProfileController extends Controller
             'isFollowing' => $isFollowing,
             'socialLinks' => $profile->socialLinks->keyBy('platform'),
             'rankingSocial' => $this->rankingSocial($profile, $user),
-            'voteLabels' => [
-                'craque' => 'Craque da rodada',
-                'garcom' => 'Garcom',
-                'muralha' => 'Muralha',
-                'fair_play' => 'Fair play',
-                'perna_de_pau' => 'Perna de pau',
-            ],
+            'voteLabels' => $this->voteLabels(),
             'reportReasons' => Report::reasonsFor('jogador'),
             'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode(
                 'Olha meu perfil no Vai Ter Pelada: '.$profile->shareUrl()
@@ -197,27 +192,78 @@ class PlayerProfileController extends Controller
             'media' => $profile->user->rating_average,
             'craque_votes' => $profile->votes->where('type', 'craque')->count(),
             'fair_play_votes' => $profile->votes->where('type', 'fair_play')->count(),
-            'destaques' => $profile->votes->whereIn('type', ['craque', 'garcom', 'muralha', 'fair_play'])->count(),
+            'destaques' => $profile->votes->whereIn('type', array_keys($this->voteLabels()))->count(),
         ];
     }
 
     private function rankingSocial(PlayerProfile $profile, User $user): string
     {
-        $votesCount = $profile->votes()->count();
-        $ratingCount = $user->rating_count;
-        $score = $profile->reputation_score + $user->points_total + ($ratingCount * 10);
+        $lastParticipation = $user->participacoes()
+            ->with('jogo')
+            ->where('presente_local', true)
+            ->whereHas('jogo', fn ($query) => $query
+                ->where('data_hora', '<=', now())
+                ->whereIn('status', ['realizado', 'finalizado']))
+            ->get()
+            ->sortByDesc(fn ($participacao) => $participacao->jogo?->data_hora)
+            ->first();
 
-        if ($score <= 0 && $ratingCount === 0 && $votesCount === 0) {
-            return 'Novato';
+        if (! $lastParticipation?->jogo) {
+            return 'Peladeiro';
         }
 
-        return match (true) {
-            $score >= 1000 => 'Dono da Bola',
-            $score >= 600 => 'Rei da Quadra',
-            $score >= 300 => 'Craque do Baba',
-            $score >= 120 => 'Reserva de Luxo',
-            default => 'Perna de Pau',
-        };
+        $participantProfileIds = $lastParticipation->jogo
+            ->participantes()
+            ->where('presente_local', true)
+            ->whereNotNull('user_id')
+            ->with('user.playerProfile')
+            ->get()
+            ->map(fn ($participante) => $participante->user?->playerProfile?->id)
+            ->filter()
+            ->values();
+
+        if ($participantProfileIds->isEmpty()) {
+            return 'Peladeiro';
+        }
+
+        $winner = collect($this->voteLabels())
+            ->map(function (string $label, string $type) use ($lastParticipation, $participantProfileIds, $profile) {
+                $counts = PlayerVote::query()
+                    ->where('pelada_jogo_id', $lastParticipation->jogo->id)
+                    ->where('type', $type)
+                    ->whereIn('player_profile_id', $participantProfileIds)
+                    ->selectRaw('player_profile_id, COUNT(*) as total')
+                    ->groupBy('player_profile_id')
+                    ->pluck('total', 'player_profile_id');
+
+                $max = (int) $counts->max();
+                $playerTotal = (int) ($counts[$profile->id] ?? 0);
+
+                return [
+                    'label' => $label,
+                    'count' => $playerTotal,
+                    'won' => $playerTotal > 0 && $playerTotal === $max,
+                ];
+            })
+            ->filter(fn (array $vote) => $vote['won'])
+            ->sortByDesc('count')
+            ->first();
+
+        return $winner['label'] ?? 'Peladeiro';
+    }
+
+    private function voteLabels(): array
+    {
+        return [
+            'craque' => 'Craque da rodada',
+            'garcom' => 'Garcom',
+            'muralha' => 'Muralha',
+            'fair_play' => 'Fair play',
+            'carcara' => 'Carcara',
+            'fominha' => 'Fominha',
+            'maestro' => 'Maestro',
+            'xerife' => 'Xerife',
+        ];
     }
 
     private function drawText($image, string $text, int $x, int $y, int $size, int $color, ?string $font = null): void

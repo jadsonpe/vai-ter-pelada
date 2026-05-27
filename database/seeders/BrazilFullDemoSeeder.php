@@ -360,7 +360,7 @@ class BrazilFullDemoSeeder extends Seeder
         $gameStatuses = ['aberto', 'fechado', 'finalizado', 'cancelado', 'realizado'];
         $participantStatuses = ['confirmado', 'fila', 'cancelado'];
         $presenceStatuses = ['compareceu', 'faltou', 'justificou'];
-        $voteTypes = ['craque', 'garcom', 'muralha', 'fair_play', 'perna_de_pau'];
+        $voteTypes = ['craque', 'garcom', 'muralha', 'fair_play', 'carcara', 'fominha', 'maestro', 'xerife'];
 
         foreach ($peladas as $peladaIndex => $pelada) {
             $members = $pelada->membros()->with('user.playerProfile')->get()->values();

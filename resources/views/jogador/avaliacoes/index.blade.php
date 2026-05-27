@@ -37,7 +37,7 @@
                 <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-100 px-5 py-4">
                         <h2 class="text-lg font-bold text-slate-950">Avaliacoes pendentes</h2>
-                        <p class="mt-1 text-sm text-slate-600">Aparecem aqui partidas finalizadas em que sua presenca foi marcada no local.</p>
+                        <p class="mt-1 text-sm text-slate-600">Aparecem aqui partidas realizadas em que sua presenca foi marcada no local.</p>
                     </div>
 
                     @if($pendingGames->isEmpty())
@@ -59,67 +59,29 @@
                                         <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">{{ $item->avaliados->count() }} pendente(s)</span>
                                     </div>
 
-                                    <div class="mt-4 grid gap-3">
-                                        @foreach($item->avaliados as $participante)
-                                            <details class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                                                <summary class="flex cursor-pointer items-center justify-between gap-3">
-                                                    <span class="flex min-w-0 items-center gap-3">
-                                                        <x-user-avatar :user="$participante->user" size="sm" />
-                                                        <span>
-                                                            <span class="block font-semibold text-slate-950">{{ $participante->user->name }}</span>
-                                                            <span class="block text-xs text-slate-500">Presente na partida</span>
-                                                        </span>
-                                                    </span>
-                                                    <span class="shrink-0 rounded-md bg-slate-950 px-3 py-2 text-xs font-semibold text-white">Avaliar</span>
-                                                </summary>
-
-                                                <form method="POST" action="{{ route('jogador.avaliacoes.store') }}" class="mt-4 space-y-4 border-t border-slate-200 pt-4">
-                                                    @csrf
-                                                    <input type="hidden" name="pelada_jogo_id" value="{{ $jogo->id }}">
-                                                    <input type="hidden" name="avaliado_id" value="{{ $participante->user->id }}">
-
-                                                    <div>
-                                                        <label class="text-sm font-medium text-slate-700">Nota</label>
-                                                        <div class="mt-2 grid grid-cols-5 gap-2">
-                                                            @foreach(range(1, 5) as $star)
-                                                                <label class="cursor-pointer rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50">
-                                                                    <input type="radio" name="estrelas" value="{{ $star }}" class="sr-only" @checked(old('estrelas') == $star)>
-                                                                    {{ $star }}
-                                                                </label>
-                                                            @endforeach
-                                                        </div>
-                                                        <x-input-error :messages="$errors->get('estrelas')" class="mt-2" />
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="text-sm font-medium text-slate-700">Comentario opcional</label>
-                                                        <textarea name="comentario" rows="3" class="mt-1 w-full rounded-md border-slate-300 text-sm" placeholder="Ex: jogou limpo, ajudou o time, chegou no horario...">{{ old('comentario') }}</textarea>
-                                                        <x-input-error :messages="$errors->get('comentario')" class="mt-2" />
-                                                    </div>
-
-                                                    <button class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Enviar avaliacao</button>
-                                                </form>
-                                            </details>
-                                        @endforeach
-                                    </div>
-
                                     <div class="mt-5 rounded-lg border border-emerald-100 bg-emerald-50/70 p-4">
-                                        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <h4 class="font-bold text-slate-950">Votos da rodada</h4>
-                                                <p class="text-sm text-slate-600">Marque destaques como craque, garcom, muralha, fair play ou perna de pau.</p>
-                                            </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-950">Votos e avaliacoes da rodada</h4>
+                                            <p class="text-sm text-slate-600">Vote nos destaques e avalie os jogadores presentes no mesmo card.</p>
                                         </div>
 
                                         <div class="mt-4 grid gap-3">
                                             @foreach($item->votaveis as $participante)
+                                                @php($needsReview = $item->avaliados->contains('user_id', $participante->user_id))
+
                                                 <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <div class="flex items-center gap-3">
-                                                        <x-user-avatar :user="$participante->user" size="sm" />
-                                                        <div>
-                                                            <p class="font-semibold text-slate-950">{{ $participante->user->name }}</p>
-                                                            <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil público</a>
+                                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                        <div class="flex items-center gap-3">
+                                                            <x-user-avatar :user="$participante->user" size="sm" />
+                                                            <div>
+                                                                <p class="font-semibold text-slate-950">{{ $participante->user->name }}</p>
+                                                                <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil publico</a>
+                                                            </div>
                                                         </div>
+
+                                                        <span class="w-fit rounded-full px-3 py-1 text-xs font-bold {{ $needsReview ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600' }}">
+                                                            {{ $needsReview ? 'Avaliacao pendente' : 'Ja avaliado' }}
+                                                        </span>
                                                     </div>
 
                                                     <div class="mt-3 flex flex-wrap gap-2">
@@ -139,6 +101,44 @@
                                                             </form>
                                                         @endforeach
                                                     </div>
+
+                                                    @if($needsReview)
+                                                        <details class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 marker:hidden">
+                                                                <span class="text-sm font-bold text-slate-900">Nota do jogador</span>
+                                                                <span class="rounded-md bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white">Abrir</span>
+                                                            </summary>
+
+                                                            <form method="POST" action="{{ route('jogador.avaliacoes.store') }}" class="mt-4 space-y-4 border-t border-slate-200 pt-4">
+                                                                @csrf
+                                                                <input type="hidden" name="pelada_jogo_id" value="{{ $jogo->id }}">
+                                                                <input type="hidden" name="avaliado_id" value="{{ $participante->user->id }}">
+
+                                                                <div>
+                                                                    <label class="text-sm font-medium text-slate-700">Nota</label>
+                                                                    <div class="mt-2 grid grid-cols-5 gap-2">
+                                                                        @foreach(range(1, 5) as $star)
+                                                                            <label class="group cursor-pointer">
+                                                                                <input type="radio" name="estrelas" value="{{ $star }}" class="peer sr-only" @checked(old('estrelas') == $star)>
+                                                                                <span class="block rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm font-bold text-slate-700 transition group-hover:border-emerald-300 group-hover:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:bg-emerald-600 peer-checked:text-white peer-focus:ring-2 peer-focus:ring-emerald-300">
+                                                                                    {{ $star }}
+                                                                                </span>
+                                                                            </label>
+                                                                        @endforeach
+                                                                    </div>
+                                                                    <x-input-error :messages="$errors->get('estrelas')" class="mt-2" />
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="text-sm font-medium text-slate-700">Comentario opcional</label>
+                                                                    <textarea name="comentario" rows="3" class="mt-1 w-full rounded-md border-slate-300 text-sm text-slate-900 placeholder:text-slate-400" placeholder="Ex: jogou limpo, ajudou o time, chegou no horario...">{{ old('comentario') }}</textarea>
+                                                                    <x-input-error :messages="$errors->get('comentario')" class="mt-2" />
+                                                                </div>
+
+                                                                <button class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Enviar avaliacao</button>
+                                                            </form>
+                                                        </details>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         </div>

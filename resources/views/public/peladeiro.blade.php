@@ -22,14 +22,18 @@
         $coverStyle = $profile->coverStyle();
         $statCards = [
             ['label' => 'Jogos', 'value' => $stats['jogos']],
-            ['label' => 'Vitorias', 'value' => $stats['vitorias']],
-            ['label' => 'Gols', 'value' => $stats['gols']],
-            ['label' => 'Assist.', 'value' => $stats['assistencias']],
             ['label' => 'MVPs', 'value' => $stats['mvps']],
             ['label' => 'Media', 'value' => number_format($stats['media'], 2)],
             ['label' => 'Aproveit.', 'value' => number_format((float) $stats['aproveitamento'], 0).'%'],
-            ['label' => 'Destaques', 'value' => $stats['destaques']],
         ];
+        $voteCounts = collect($voteLabels)
+            ->map(fn ($label, $type) => [
+                'type' => $type,
+                'label' => $label,
+                'count' => $profile->votes->where('type', $type)->count(),
+            ])
+            ->sortByDesc('count')
+            ->values();
     @endphp
 
     <div class="bg-slate-950 text-white">
@@ -98,25 +102,12 @@
         <main class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             @include('shared.status')
 
-            <section class="grid gap-3 sm:grid-cols-2">
-                <a href="{{ route('peladeiros.followers', $profile) }}" class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20 hover:border-emerald-300/60">
-                    <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Seguidores</p>
-                    <p class="mt-2 text-3xl font-black text-white">{{ $followersCount }}</p>
-                    <p class="mt-1 text-sm font-semibold text-emerald-200">Ver quem segue</p>
-                </a>
-                <a href="{{ route('peladeiros.following', $profile) }}" class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20 hover:border-emerald-300/60">
-                    <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Seguindo</p>
-                    <p class="mt-2 text-3xl font-black text-white">{{ $followingCount }}</p>
-                    <p class="mt-1 text-sm font-semibold text-emerald-200">Ver perfis seguidos</p>
-                </a>
-            </section>
-
             <section class="grid gap-4 lg:grid-cols-2">
                 <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-black">Quem segue</h2>
-                            <p class="mt-1 text-sm text-slate-400">Jogadores que acompanham este perfil.</p>
+                            <p class="mt-1 text-sm text-slate-400">{{ $followersCount }} jogador(es) acompanham este perfil.</p>
                         </div>
                         <a href="{{ route('peladeiros.followers', $profile) }}" class="shrink-0 text-sm font-bold text-emerald-300 hover:text-emerald-200">Ver todos</a>
                     </div>
@@ -143,7 +134,7 @@
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-black">Perfis seguidos</h2>
-                            <p class="mt-1 text-sm text-slate-400">Peladeiros que este jogador acompanha.</p>
+                            <p class="mt-1 text-sm text-slate-400">{{ $followingCount }} perfil(is) acompanhado(s).</p>
                         </div>
                         <a href="{{ route('peladeiros.following', $profile) }}" class="shrink-0 text-sm font-bold text-emerald-300 hover:text-emerald-200">Ver todos</a>
                     </div>
@@ -182,16 +173,25 @@
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-black">Nível e reputação</h2>
-                                <p class="mt-1 text-sm text-slate-400">Ranking social preparado para votos de craque, perna de pau, destaques e títulos.</p>
+                                <p class="mt-1 text-sm text-slate-400">Reputacao definida pela ultima rodada em que o jogador participou.</p>
                             </div>
                             <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ $rankingSocial }}</span>
                         </div>
-                        <div class="mt-5 grid gap-3 sm:grid-cols-5">
-                            @foreach(['Novato', 'Perna de Pau', 'Reserva de Luxo', 'Craque do Baba', 'Rei da Quadra', 'Dono da Bola'] as $level)
-                                <div class="rounded-md border {{ $level === $rankingSocial ? 'border-emerald-300 bg-emerald-300/15 text-emerald-100' : 'border-white/10 bg-slate-900/50 text-slate-400' }} p-3 text-center text-xs font-black uppercase tracking-wide">
-                                    {{ $level }}
-                                </div>
-                            @endforeach
+                        <div class="mt-5 rounded-lg border border-emerald-300 bg-emerald-300/15 p-5 text-center">
+                            <p class="text-xs font-black uppercase tracking-wide text-emerald-200">Reputacao atual</p>
+                            <p class="mt-2 text-2xl font-black text-white">{{ $rankingSocial }}</p>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-sm font-black uppercase tracking-wide text-slate-300">Votos recebidos</h3>
+                            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                                @foreach($voteCounts as $vote)
+                                    <div class="flex items-center justify-between gap-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                                        <span class="font-bold text-white">{{ $vote['label'] }}</span>
+                                        <span class="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black text-emerald-200">{{ $vote['count'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
@@ -238,18 +238,6 @@
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <h2 class="text-xl font-black">Bio esportiva</h2>
                         <p class="mt-3 text-sm leading-6 text-slate-300">{{ $profile->bio ?: 'Peladeiro em evolução. Em breve mais dados de desempenho, conquistas e estilo de jogo.' }}</p>
-                    </section>
-
-                    <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
-                        <h2 class="text-xl font-black">Votos recebidos</h2>
-                        <div class="mt-4 space-y-2">
-                            @foreach($voteLabels as $type => $label)
-                                <div class="flex items-center justify-between gap-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                                    <span class="font-bold text-white">{{ $label }}</span>
-                                    <span class="text-slate-300">{{ $profile->votes->where('type', $type)->count() }}</span>
-                                </div>
-                            @endforeach
-                        </div>
                     </section>
 
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
