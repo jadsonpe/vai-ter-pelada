@@ -33,7 +33,7 @@ class LargeDemoSeeder extends Seeder
             'email' => 'organizador@vaiterpelada.test',
         ], [
             'name' => 'Organizador Demo',
-            'password' => bcrypt('password'),
+            'password' => bcrypt('asfdvaiterpelada11'),
             'role' => 'organizador',
             'status' => 'ativo',
             'cidade' => 'São Paulo',

@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
         <h1 class="text-lg font-bold text-slate-950">Crie sua conta</h1>
-        <p class="mt-1 text-sm text-slate-700">Depois do cadastro, voce podera participar de peladas, seguir jogadores e confirmar rodadas.</p>
+        <p class="mt-1 text-sm text-slate-700">Depois do cadastro, você poderá participar de peladas, seguir jogadores e confirmar rodadas.</p>
     </div>
 
     <a href="{{ route('auth.google.redirect') }}" class="flex w-full items-center justify-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
@@ -56,10 +56,10 @@
         </div>
 
         <p class="mt-4 text-xs leading-5 text-slate-500">
-            Ao cadastrar, voce concorda com os
+            Ao cadastrar, você concorda com os
             <a href="{{ route('termos') }}" class="font-semibold text-emerald-700 hover:text-emerald-800" target="_blank">Termos de Uso</a>
-            e declara ciencia da
-            <a href="{{ route('privacidade') }}" class="font-semibold text-emerald-700 hover:text-emerald-800" target="_blank">Politica de Privacidade</a>.
+            e declara ciência da
+            <a href="{{ route('privacidade') }}" class="font-semibold text-emerald-700 hover:text-emerald-800" target="_blank">Política de Privacidade</a>.
         </p>
 
         <div class="flex items-center justify-end mt-4">

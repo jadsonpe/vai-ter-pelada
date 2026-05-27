@@ -2,9 +2,9 @@
     @section('title', ($jogador->apelido ?: $jogador->name).' | Peladeiro no Vai Ter Pelada')
 
     @push('meta')
-        <meta name="description" content="Perfil esportivo de {{ $jogador->apelido ?: $jogador->name }} no Vai Ter Pelada. Estatisticas, peladas, ranking e reputacao de jogador.">
+        <meta name="description" content="Perfil esportivo de {{ $jogador->apelido ?: $jogador->name }} no Vai Ter Pelada. Estatísticas, peladas, ranking e reputação de jogador.">
         <meta property="og:title" content="{{ $jogador->apelido ?: $jogador->name }} | Vai Ter Pelada">
-        <meta property="og:description" content="{{ $profile->headline ?: 'Perfil esportivo de peladeiro com estatisticas, peladas e reputacao.' }}">
+        <meta property="og:description" content="{{ $profile->headline ?: 'Perfil esportivo de peladeiro com estatísticas, peladas e reputação.' }}">
         <meta property="og:url" content="{{ $profile->shareUrl() }}">
         <meta property="og:image" content="{{ $profile->shareImageUrl() }}">
         <meta property="og:image:secure_url" content="{{ $profile->shareImageUrl() }}">
@@ -96,6 +96,8 @@
         </section>
 
         <main class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+            @include('shared.status')
+
             <section class="grid gap-3 sm:grid-cols-2">
                 <a href="{{ route('peladeiros.followers', $profile) }}" class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20 hover:border-emerald-300/60">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Seguidores</p>
@@ -132,7 +134,7 @@
                                 </span>
                             </a>
                         @empty
-                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao ha seguidores.</p>
+                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda não há seguidores.</p>
                         @endforelse
                     </div>
                 </div>
@@ -159,7 +161,7 @@
                                 </span>
                             </a>
                         @empty
-                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao segue outros peladeiros.</p>
+                            <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda não segue outros peladeiros.</p>
                         @endforelse
                     </div>
                 </div>
@@ -179,8 +181,8 @@
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 class="text-xl font-black">Nivel e reputacao</h2>
-                                <p class="mt-1 text-sm text-slate-400">Ranking social preparado para votos de craque, perna de pau, destaques e titulos.</p>
+                                <h2 class="text-xl font-black">Nível e reputação</h2>
+                                <p class="mt-1 text-sm text-slate-400">Ranking social preparado para votos de craque, perna de pau, destaques e títulos.</p>
                             </div>
                             <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ $rankingSocial }}</span>
                         </div>
@@ -197,7 +199,7 @@
                         <div class="flex items-end justify-between gap-4">
                             <div>
                                 <h2 class="text-xl font-black">Peladas que participa</h2>
-                                <p class="mt-1 text-sm text-slate-400">Clubes, turmas e campos onde o jogador marca presenca.</p>
+                                <p class="mt-1 text-sm text-slate-400">Clubes, turmas e campos onde o jogador marca presença.</p>
                             </div>
                             <span class="text-sm font-bold text-slate-400">{{ $peladas->count() }} ativa(s)</span>
                         </div>
@@ -226,7 +228,7 @@
                                     </div>
                                 </a>
                             @empty
-                                <p class="rounded-lg border border-white/10 bg-slate-900/70 p-5 text-sm text-slate-400 md:col-span-2">Este peladeiro ainda nao aparece em peladas ativas.</p>
+                                <p class="rounded-lg border border-white/10 bg-slate-900/70 p-5 text-sm text-slate-400 md:col-span-2">Este peladeiro ainda não aparece em peladas ativas.</p>
                             @endforelse
                         </div>
                     </div>
@@ -235,7 +237,7 @@
                 <aside class="space-y-6">
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <h2 class="text-xl font-black">Bio esportiva</h2>
-                        <p class="mt-3 text-sm leading-6 text-slate-300">{{ $profile->bio ?: 'Peladeiro em evolucao. Em breve mais dados de desempenho, conquistas e estilo de jogo.' }}</p>
+                        <p class="mt-3 text-sm leading-6 text-slate-300">{{ $profile->bio ?: 'Peladeiro em evolução. Em breve mais dados de desempenho, conquistas e estilo de jogo.' }}</p>
                     </section>
 
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
@@ -251,7 +253,7 @@
                     </section>
 
                     <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
-                        <h2 class="text-xl font-black">Posicoes</h2>
+                        <h2 class="text-xl font-black">Posições</h2>
                         <div class="mt-4 space-y-2">
                             @forelse($jogador->esportePerfis->filter(fn ($perfil) => filled($perfil->posicao)) as $perfil)
                                 <div class="flex items-center justify-between gap-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm">

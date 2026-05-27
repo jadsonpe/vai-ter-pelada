@@ -220,11 +220,9 @@ class User extends Authenticatable
         $campos = [
             'foto' => $this->avatarUrl(),
             'telefone' => $this->phone,
-            'cep' => $this->cep,
+            'estado' => $this->estado,
             'cidade' => $this->cidade,
             'bairro' => $this->bairro,
-            'logradouro' => $this->logradouro,
-            'numero' => $this->numero,
         ];
 
         return array_keys(array_filter($campos, fn ($value) => blank($value)));

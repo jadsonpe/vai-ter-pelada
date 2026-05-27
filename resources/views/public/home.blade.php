@@ -2,7 +2,7 @@
     @section('title', 'Vai Ter Pelada | Organize, encontre e jogue peladas')
 
     @push('meta')
-        <meta name="description" content="Vai Ter Pelada e a plataforma para encontrar peladas, organizar rodadas, confirmar presenca e criar seu perfil de jogador.">
+        <meta name="description" content="Vai Ter Pelada é a plataforma para encontrar peladas, organizar rodadas, confirmar presença e criar seu perfil de jogador.">
         <meta property="og:title" content="Vai Ter Pelada">
         <meta property="og:description" content="Organize, encontre e jogue peladas.">
         <meta property="og:url" content="{{ url('/') }}">

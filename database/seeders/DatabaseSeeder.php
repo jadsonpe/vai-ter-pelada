@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Esporte;
 use App\Models\User;
+use Database\Seeders\BrazilFullDemoSeeder;
 use Database\Seeders\DemoDataSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,12 +15,24 @@ class DatabaseSeeder extends Seeder
     {
         User::firstOrCreate(
             ['email' => 'admin@vaiterpelada.test'],
-            ['name' => 'Administrador', 'password' => Hash::make('password'), 'role' => 'admin']
+            ['name' => 'Administrador', 'password' => Hash::make('asfdvaiterpelada11'), 'role' => 'admin']
+        );
+
+        User::updateOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Administrador',
+                'password' => Hash::make('asfdvaiterpelada11'),
+                'role' => 'admin',
+                'status' => 'ativo',
+                'active' => true,
+                'email_verified_at' => now(),
+            ]
         );
 
         User::firstOrCreate(
             ['email' => 'organizador@vaiterpelada.test'],
-            ['name' => 'Organizador Demo', 'password' => Hash::make('password'), 'role' => 'organizador']
+            ['name' => 'Organizador Demo', 'password' => Hash::make('asfdvaiterpelada11'), 'role' => 'organizador']
         );
 
         foreach (['Futebol', 'Futsal', 'Society', 'Volei', 'Basquete'] as $nome) {
@@ -30,5 +43,6 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(DemoDataSeeder::class);
+        $this->call(BrazilFullDemoSeeder::class);
     }
 }

@@ -4,9 +4,9 @@
 
     <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
         <h1 class="text-lg font-bold text-slate-950">Acesse sua conta</h1>
-        <p class="mt-1 text-sm text-slate-700">Para participar, seguir jogadores ou confirmar presenca, entre ou crie sua conta gratis.</p>
+        <p class="mt-1 text-sm text-slate-700">Para participar, seguir jogadores ou confirmar presença, entre ou crie sua conta grátis.</p>
         <a href="{{ route('register', $intendedUrl ? ['redirect' => $intendedUrl] : []) }}" class="mt-3 inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
-            Criar conta gratis
+            Criar conta grátis
         </a>
     </div>
 

@@ -38,6 +38,12 @@ class ProfileController extends Controller
             ->all();
 
         $user->fill($data);
+        $user->forceFill([
+            'cep' => null,
+            'logradouro' => null,
+            'numero' => null,
+            'complemento' => null,
+        ]);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

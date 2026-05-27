@@ -60,7 +60,7 @@ class DemoDataSeeder extends Seeder
                 'email' => $player['email'],
             ], [
                 'name' => $player['name'],
-                'password' => Hash::make('password'),
+                'password' => Hash::make('asfdvaiterpelada11'),
                 'role' => 'jogador',
                 'status' => 'ativo',
                 'cidade' => 'São Paulo',

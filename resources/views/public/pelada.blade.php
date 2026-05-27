@@ -56,8 +56,8 @@
                             <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->categoriaLabel() }}</p>
                         </div>
                         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fundacao</span>
-                            <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->data_fundacao ? $pelada->data_fundacao->format('d/m/Y') : 'Nao informada' }}</p>
+                            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fundação</span>
+                            <p class="mt-1 text-xl font-bold text-slate-950">{{ $pelada->data_fundacao ? $pelada->data_fundacao->format('d/m/Y') : 'Não informada' }}</p>
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
         <div class="mt-8">
             <main class="space-y-8">
                 <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-xl font-bold text-slate-950">Informacoes da pelada</h2>
+                    <h2 class="text-xl font-bold text-slate-950">Informações da pelada</h2>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div>
                             <p class="text-sm font-semibold text-slate-500">Local</p>
@@ -79,15 +79,15 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-slate-500">Cidade</p>
-                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->cidade ?: 'Nao informada' }}</p>
+                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->cidade ?: 'Não informada' }}</p>
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-slate-500">Bairro</p>
-                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->bairro ?: 'Nao informado' }}</p>
+                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->bairro ?: 'Não informado' }}</p>
                         </div>
                         <div class="sm:col-span-2">
-                            <p class="text-sm font-semibold text-slate-500">Endereco</p>
-                            <p class="mt-1 font-medium text-slate-900">{{ $enderecoCompleto ?: 'Nao informado' }}</p>
+                            <p class="text-sm font-semibold text-slate-500">Endereço</p>
+                            <p class="mt-1 font-medium text-slate-900">{{ $enderecoCompleto ?: 'Não informado' }}</p>
                             @if($pelada->mapsUrl())
                                 <a href="{{ $pelada->mapsUrl() }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex text-sm font-semibold text-emerald-700 hover:text-emerald-800">
                                     Abrir no Google Maps
@@ -96,11 +96,11 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-slate-500">Aceita diarista</p>
-                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->aceita_diarista ? 'Sim' : 'Nao' }}</p>
+                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->aceita_diarista ? 'Sim' : 'Não' }}</p>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-slate-500">Aprovacao obrigatoria</p>
-                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->requer_aprovacao ? 'Sim' : 'Nao' }}</p>
+                            <p class="text-sm font-semibold text-slate-500">Aprovação obrigatória</p>
+                            <p class="mt-1 font-medium text-slate-900">{{ $pelada->requer_aprovacao ? 'Sim' : 'Não' }}</p>
                         </div>
                     </div>
 
@@ -115,9 +115,10 @@
                 @if(! $isOwner)
                     @include('partials.report-panel', [
                         'title' => 'Denunciar pelada',
-                        'description' => 'Informe problemas como pelada falsa, dados incorretos, cobranca suspeita ou conduta abusiva.',
+                        'description' => 'Informe problemas como pelada falsa, dados incorretos, cobrança suspeita ou conduta abusiva.',
                         'action' => route('denuncias.peladas.store', $pelada),
                         'reasons' => $reportReasons,
+                        'loginRedirect' => route('peladas.show', $pelada),
                     ])
                 @endif
 
@@ -125,7 +126,7 @@
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 class="text-xl font-bold text-slate-950">Jogadores da pelada</h2>
-                            <p class="mt-1 text-sm text-slate-600">Clique em um jogador para ver informacoes basicas do perfil.</p>
+                            <p class="mt-1 text-sm text-slate-600">Clique em um jogador para ver informações básicas do perfil.</p>
                         </div>
                         <span class="text-sm font-medium text-slate-500">{{ $pelada->membros->where('status', 'ativo')->count() }} ativo(s)</span>
                     </div>
@@ -150,7 +151,7 @@
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <h2 class="text-xl font-bold text-slate-950">Quero participar</h2>
-                                <p class="mt-2 text-sm text-slate-600">Crie sua conta ou entre para pedir participacao e confirmar presenca nas rodadas.</p>
+                                <p class="mt-2 text-sm text-slate-600">Crie sua conta ou entre para pedir participação e confirmar presença nas rodadas.</p>
                             </div>
                             <div class="flex flex-col gap-2 sm:flex-row">
                                 <a href="{{ route('register', ['redirect' => url()->current()]) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
@@ -165,8 +166,8 @@
                         @if($isOwner)
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                 <div>
-                                    <h2 class="text-xl font-bold text-slate-950">Voce organiza esta pelada</h2>
-                                    <p class="mt-2 text-sm text-slate-600">Como criador da pelada, voce ja entra como membro mensalista ativo.</p>
+                                    <h2 class="text-xl font-bold text-slate-950">Você organiza esta pelada</h2>
+                                    <p class="mt-2 text-sm text-slate-600">Como criador da pelada, você já entra como membro mensalista ativo.</p>
                                 </div>
                                 <a href="{{ route('organizador.peladas.jogos.index', $pelada) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
                                     Gerenciar rodadas
@@ -175,13 +176,13 @@
                         @elseif($membro)
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
-                                    <h2 class="text-xl font-bold text-slate-950">Voce ja participa</h2>
+                                    <h2 class="text-xl font-bold text-slate-950">Você já participa</h2>
                                     <p class="mt-2 text-sm text-slate-600">Seu status nesta pelada:</p>
                                     <div class="mt-3 inline-flex rounded-md bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
                                         {{ ucfirst($membro->tipo) }} - {{ ucfirst($membro->status) }}
                                     </div>
                                     @if($solicitacaoPendente)
-                                        <p class="mt-4 rounded-md bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">Voce ja tem uma solicitacao pendente.</p>
+                                        <p class="mt-4 rounded-md bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">Você já tem uma solicitação pendente.</p>
                                     @endif
                                 </div>
 
@@ -195,7 +196,7 @@
                             </div>
                         @elseif($solicitacaoPendente)
                             <h2 class="text-xl font-bold text-slate-950">Solicitacao em analise</h2>
-                            <p class="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">Seu pedido ja foi enviado ao organizador.</p>
+                            <p class="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">Seu pedido já foi enviado ao organizador.</p>
                         @else
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
@@ -227,8 +228,8 @@
                 <section>
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h2 class="text-xl font-bold text-slate-950">Proximas rodadas</h2>
-                            <p class="mt-1 text-sm text-slate-600">Confira as rodadas abertas e confirme sua presenca se voce ja participa da pelada.</p>
+                            <h2 class="text-xl font-bold text-slate-950">Próximas rodadas</h2>
+                            <p class="mt-1 text-sm text-slate-600">Confira as rodadas abertas e confirme sua presença se você já participa da pelada.</p>
                         </div>
                         <span class="text-sm font-medium text-slate-500">{{ $rodadas->total() }} rodada(s)</span>
                     </div>
@@ -260,23 +261,23 @@
                                         @if($participacao && in_array($participacao->status, ['confirmado', 'fila'], true))
                                             <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                                                 <span class="rounded-md px-4 py-2 text-sm font-semibold {{ $participacao->status === 'confirmado' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800' }}">
-                                                    {{ $participacao->status === 'confirmado' ? 'Presenca confirmada' : 'Fila #'.$participacao->posicao_fila }}
+                                                    {{ $participacao->status === 'confirmado' ? 'Presença confirmada' : 'Fila #'.$participacao->posicao_fila }}
                                                 </span>
                                                 <form method="POST" action="{{ route('jogador.jogos.cancelar', $jogo) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto">Cancelar presenca</button>
+                                                    <button class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto">Cancelar presença</button>
                                                 </form>
                                             </div>
                                         @else
                                             <form method="POST" action="{{ route('jogador.jogos.confirmar', $jogo) }}">
                                                 @csrf
-                                                <button class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 sm:w-auto">Confirmar presenca</button>
+                                                <button class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 sm:w-auto">Confirmar presença</button>
                                             </form>
                                         @endif
                                     @else
                                         <span class="rounded-md bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600">
-                                            Solicite participacao para confirmar
+                                            Solicite participação para confirmar
                                         </span>
                                     @endif
                                 @else

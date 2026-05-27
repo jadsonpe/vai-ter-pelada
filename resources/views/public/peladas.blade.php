@@ -108,7 +108,7 @@
 
                     <div class="grid gap-4 sm:grid-cols-3">
                         <div>
-                            <label for="price_type" class="text-sm font-medium text-slate-700">Tipo de preco</label>
+                            <label for="price_type" class="text-sm font-medium text-slate-700">Tipo de preço</label>
                             <select id="price_type" name="price_type" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
                                 <option value="both" @selected(($filtros['price_type'] ?? 'both') === 'both')>Ambos</option>
                                 <option value="mensalista" @selected(($filtros['price_type'] ?? '') === 'mensalista')>Mensalista</option>
@@ -127,20 +127,20 @@
                         <div>
                             <label for="sort" class="text-sm font-medium text-slate-700">Ordenar</label>
                             <select id="sort" name="sort" class="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
-                                <option value="">Padrao</option>
-                                <option value="price_asc" @selected(($filtros['sort'] ?? '') === 'price_asc')>Preco: menor primeiro</option>
-                                <option value="price_desc" @selected(($filtros['sort'] ?? '') === 'price_desc')>Preco: maior primeiro</option>
+                                <option value="">Padrão</option>
+                                <option value="price_asc" @selected(($filtros['sort'] ?? '') === 'price_asc')>Preço: menor primeiro</option>
+                                <option value="price_desc" @selected(($filtros['sort'] ?? '') === 'price_desc')>Preço: maior primeiro</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="price_min" class="text-sm font-medium text-slate-700">Preco minimo</label>
+                            <label for="price_min" class="text-sm font-medium text-slate-700">Preço mínimo</label>
                             <input id="price_min" name="price_min" type="number" step="0.01" value="{{ $filtros['price_min'] ?? '' }}" class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900" />
                         </div>
                         <div>
-                            <label for="price_max" class="text-sm font-medium text-slate-700">Preco maximo</label>
+                            <label for="price_max" class="text-sm font-medium text-slate-700">Preço máximo</label>
                             <input id="price_max" name="price_max" type="number" step="0.01" value="{{ $filtros['price_max'] ?? '' }}" class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900" />
                         </div>
                     </div>
@@ -161,9 +161,9 @@
                         'esporte_id' => ['Esporte' => optional(App\Models\Esporte::find($value))->nome ?: 'Selecionado'],
                         'categoria' => ['Categoria' => $categorias[$value] ?? ucfirst($value)],
                         'price_type' => ['Tipo' => $value === 'both' ? 'Ambos' : ucfirst($value)],
-                        'price_min' => ['Preco minimo' => "R$ {$value}"],
-                        'price_max' => ['Preco maximo' => "R$ {$value}"],
-                        'sort' => ['Ordenacao' => $value === 'price_asc' ? 'Menor preco' : 'Maior preco'],
+                        'price_min' => ['Preço mínimo' => "R$ {$value}"],
+                        'price_max' => ['Preço máximo' => "R$ {$value}"],
+                        'sort' => ['Ordenação' => $value === 'price_asc' ? 'Menor preço' : 'Maior preço'],
                         default => [$key => $value],
                     };
                 });
@@ -193,7 +193,7 @@
             <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900">Peladas agendadas para os proximos 7 dias</h2>
-                    <p class="mt-1 text-sm text-slate-500">Ache uma perto de voce e solicite participacao.</p>
+                    <p class="mt-1 text-sm text-slate-500">Ache uma perto de você e solicite participação.</p>
                 </div>
                 <span class="text-sm font-semibold text-slate-500">{{ $rodadas->total() }} encontradas</span>
             </div>
@@ -240,7 +240,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os proximos 7 dias com esses filtros.</p>
+                    <p class="p-5 text-sm text-slate-600">Nenhuma rodada cadastrada para os próximos 7 dias com estes filtros.</p>
                 @endforelse
             </div>
 
@@ -251,7 +251,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900">Todas as peladas ativas</h2>
-                    <p class="mt-1 text-sm text-slate-500">Clique nas peladas e solicite participacao ao organizador.</p>
+                    <p class="mt-1 text-sm text-slate-500">Clique nas peladas e solicite participação ao organizador.</p>
                 </div>
                 <span class="text-sm font-semibold text-slate-500">{{ $peladas->total() }} encontradas</span>
             </div>

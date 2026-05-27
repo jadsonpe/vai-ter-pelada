@@ -1,11 +1,11 @@
 ﻿<section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            Informacoes do jogador
+            Informações do jogador
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            Atualize seus dados de contato e endereco. Esses dados sao importantes para organizar as peladas corretamente.
+            Atualize seus dados de contato, localização geral e informações esportivas. Esses dados ajudam nas peladas sem expor seu endereço completo.
         </p>
     </header>
 
@@ -23,7 +23,7 @@
                 <div class="flex-1">
                     <x-input-label for="avatar" value="Foto do jogador" />
                     <input id="avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
-                    <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Maximo 2 MB. Essa foto aparecera nas listas de membros, avaliacoes e sorteios.</p>
+                    <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Maximo 2 MB. Essa foto aparecerá nas listas de membros, avaliações e sorteios.</p>
                     <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
 
                     @if($user->avatar_path)
@@ -44,7 +44,7 @@
         <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
             <div>
                 <h3 class="font-semibold text-slate-900">Perfil público do peladeiro</h3>
-                <p class="mt-1 text-sm text-slate-600">Essas informacoes aparecem na pagina compartilhavel do jogador.</p>
+                <p class="mt-1 text-sm text-slate-600">Essas informações aparecem na página compartilhável do jogador.</p>
             </div>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -187,18 +187,6 @@
 
             <div class="space-y-4">
                 <div>
-                    <x-input-label for="cep" value="CEP" />
-                    <div class="mt-1 flex gap-2">
-                        <x-text-input id="cep" name="cep" type="text" class="block w-full" :value="old('cep', $user->cep)" required autocomplete="postal-code" inputmode="numeric" placeholder="00000-000" />
-                        <button type="button" id="buscar-cep" class="shrink-0 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                            Buscar
-                        </button>
-                    </div>
-                    <p id="cep-status" class="mt-2 text-xs text-slate-500"></p>
-                    <x-input-error class="mt-2" :messages="$errors->get('cep')" />
-                </div>
-
-                <div>
                     <x-input-label for="estado" value="Estado" />
                     <x-text-input id="estado" name="estado" type="text" class="mt-1 block w-full" :value="old('estado', $user->estado)" required autocomplete="address-level1" />
                     <x-input-error class="mt-2" :messages="$errors->get('estado')" />
@@ -215,26 +203,6 @@
                     <x-text-input id="bairro" name="bairro" type="text" class="mt-1 block w-full" :value="old('bairro', $user->bairro)" required autocomplete="address-level3" />
                     <x-input-error class="mt-2" :messages="$errors->get('bairro')" />
                 </div>
-            </div>
-        </div>
-
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div>
-                <x-input-label for="logradouro" value="Logradouro" />
-                <x-text-input id="logradouro" name="logradouro" type="text" class="mt-1 block w-full" :value="old('logradouro', $user->logradouro)" required autocomplete="street-address" />
-                <x-input-error class="mt-2" :messages="$errors->get('logradouro')" />
-            </div>
-
-            <div>
-                <x-input-label for="numero" value="Numero" />
-                <x-text-input id="numero" name="numero" type="text" class="mt-1 block w-full" :value="old('numero', $user->numero)" required autocomplete="off" />
-                <x-input-error class="mt-2" :messages="$errors->get('numero')" />
-            </div>
-
-            <div>
-                <x-input-label for="complemento" value="Complemento" />
-                <x-text-input id="complemento" name="complemento" type="text" class="mt-1 block w-full" :value="old('complemento', $user->complemento)" autocomplete="off" />
-                <x-input-error class="mt-2" :messages="$errors->get('complemento')" />
             </div>
         </div>
 
@@ -325,90 +293,6 @@
     </form>
 
     <script>
-        (() => {
-            const cep = document.getElementById('cep');
-            const buscar = document.getElementById('buscar-cep');
-            const status = document.getElementById('cep-status');
-            const fields = {
-                logradouro: document.getElementById('logradouro'),
-                bairro: document.getElementById('bairro'),
-                cidade: document.getElementById('cidade'),
-                estado: document.getElementById('estado'),
-                numero: document.getElementById('numero'),
-            };
-
-            function onlyDigits(value) {
-                return String(value || '').replace(/\D/g, '').slice(0, 8);
-            }
-
-            function formatCep(value) {
-                const digits = onlyDigits(value);
-                return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
-            }
-
-            function setStatus(message, type = 'info') {
-                if (!status) return;
-                status.textContent = message;
-                status.className = 'mt-2 text-xs ' + {
-                    info: 'text-slate-500',
-                    success: 'text-emerald-700',
-                    error: 'text-red-600',
-                }[type];
-            }
-
-            async function buscarCep() {
-                const digits = onlyDigits(cep?.value);
-
-                if (digits.length !== 8) {
-                    setStatus('Informe um CEP com 8 numeros.', 'error');
-                    return;
-                }
-
-                buscar.disabled = true;
-                buscar.textContent = 'Buscando...';
-                setStatus('Consultando endereco pelo CEP...');
-
-                try {
-                    const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-                    const data = await response.json();
-
-                    if (!response.ok || data.erro) {
-                        setStatus('CEP nao encontrado. Confira o numero informado.', 'error');
-                        return;
-                    }
-
-                    fields.logradouro.value = data.logradouro || fields.logradouro.value;
-                    fields.bairro.value = data.bairro || fields.bairro.value;
-                    fields.cidade.value = data.localidade || fields.cidade.value;
-                    fields.estado.value = data.uf || fields.estado.value;
-                    cep.value = formatCep(digits);
-
-                    setStatus('Endereco preenchido automaticamente.', 'success');
-
-                    if (fields.numero && !fields.numero.value) {
-                        fields.numero.focus();
-                    }
-                } catch (error) {
-                    setStatus('Nao foi possivel consultar o CEP agora. Tente novamente.', 'error');
-                } finally {
-                    buscar.disabled = false;
-                    buscar.textContent = 'Buscar';
-                }
-            }
-
-            cep?.addEventListener('input', () => {
-                cep.value = formatCep(cep.value);
-            });
-
-            cep?.addEventListener('blur', () => {
-                if (onlyDigits(cep.value).length === 8) {
-                    buscarCep();
-                }
-            });
-
-            buscar?.addEventListener('click', buscarCep);
-        })();
-
         (() => {
             const birthDate = document.getElementById('data_nascimento');
 
