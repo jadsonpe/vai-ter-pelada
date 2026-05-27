@@ -39,6 +39,41 @@
         @php
             $playerProfile = $user->playerProfile ?: new \App\Models\PlayerProfile();
             $socialLinks = $playerProfile->socialLinks?->pluck('url', 'platform') ?? collect();
+            $estadosBrasil = [
+                'AC' => 'Acre',
+                'AL' => 'Alagoas',
+                'AP' => 'Amapa',
+                'AM' => 'Amazonas',
+                'BA' => 'Bahia',
+                'CE' => 'Ceara',
+                'DF' => 'Distrito Federal',
+                'ES' => 'Espirito Santo',
+                'GO' => 'Goias',
+                'MA' => 'Maranhao',
+                'MT' => 'Mato Grosso',
+                'MS' => 'Mato Grosso do Sul',
+                'MG' => 'Minas Gerais',
+                'PA' => 'Para',
+                'PB' => 'Paraiba',
+                'PR' => 'Parana',
+                'PE' => 'Pernambuco',
+                'PI' => 'Piaui',
+                'RJ' => 'Rio de Janeiro',
+                'RN' => 'Rio Grande do Norte',
+                'RS' => 'Rio Grande do Sul',
+                'RO' => 'Rondonia',
+                'RR' => 'Roraima',
+                'SC' => 'Santa Catarina',
+                'SP' => 'Sao Paulo',
+                'SE' => 'Sergipe',
+                'TO' => 'Tocantins',
+            ];
+            $estadoAtual = old('estado', $user->estado);
+            $estadoSelecionado = strtoupper((string) $estadoAtual);
+            $estadoSelecionado = array_key_exists($estadoSelecionado, $estadosBrasil)
+                ? $estadoSelecionado
+                : (array_search($estadoAtual, $estadosBrasil, true) ?: '');
+            $cidadeSelecionada = old('cidade', $user->cidade);
         @endphp
 
         <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
@@ -188,13 +223,24 @@
             <div class="space-y-4">
                 <div>
                     <x-input-label for="estado" value="Estado" />
-                    <x-text-input id="estado" name="estado" type="text" class="mt-1 block w-full" :value="old('estado', $user->estado)" required autocomplete="address-level1" />
+                    <select id="estado" name="estado" class="mt-1 block w-full rounded-md border-slate-300" required autocomplete="address-level1">
+                        <option value="">Selecione o estado</option>
+                        @foreach($estadosBrasil as $uf => $nome)
+                            <option value="{{ $uf }}" @selected($estadoSelecionado === $uf)>{{ $uf }} - {{ $nome }}</option>
+                        @endforeach
+                    </select>
                     <x-input-error class="mt-2" :messages="$errors->get('estado')" />
                 </div>
 
                 <div>
                     <x-input-label for="cidade" value="Cidade" />
-                    <x-text-input id="cidade" name="cidade" type="text" class="mt-1 block w-full" :value="old('cidade', $user->cidade)" required autocomplete="address-level2" />
+                    <select id="cidade" name="cidade" class="mt-1 block w-full rounded-md border-slate-300" required autocomplete="address-level2" data-current-city="{{ $cidadeSelecionada }}">
+                        <option value="">{{ $estadoSelecionado ? 'Carregando cidades...' : 'Selecione primeiro o estado' }}</option>
+                        @if($cidadeSelecionada)
+                            <option value="{{ $cidadeSelecionada }}" selected>{{ $cidadeSelecionada }}</option>
+                        @endif
+                    </select>
+                    <p id="cidade-status" class="mt-1 text-xs text-slate-500"></p>
                     <x-input-error class="mt-2" :messages="$errors->get('cidade')" />
                 </div>
 
@@ -293,6 +339,85 @@
     </form>
 
     <script>
+        (() => {
+            const estado = document.getElementById('estado');
+            const cidade = document.getElementById('cidade');
+            const status = document.getElementById('cidade-status');
+            const cidadeAtual = cidade?.dataset.currentCity || '';
+
+            function appendOption(value, label, selected = false, disabled = false) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = label;
+                option.selected = selected;
+                option.disabled = disabled;
+                cidade.appendChild(option);
+            }
+
+            function fillCities(cities, selectedCity = '') {
+                cidade.innerHTML = '';
+                appendOption('', 'Selecione a cidade');
+
+                cities.forEach((city) => {
+                    appendOption(city, city, city === selectedCity);
+                });
+            }
+
+            async function loadCities(uf, selectedCity = '') {
+                if (!cidade) {
+                    return;
+                }
+
+                cidade.innerHTML = '';
+
+                if (!uf) {
+                    appendOption('', 'Selecione primeiro o estado');
+                    cidade.disabled = true;
+                    if (status) status.textContent = '';
+                    return;
+                }
+
+                appendOption('', 'Carregando cidades...');
+                cidade.disabled = true;
+                if (status) status.textContent = '';
+
+                try {
+                    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`);
+
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar cidades.');
+                    }
+
+                    const data = await response.json();
+                    const cities = data.map((city) => city.nome);
+                    fillCities(cities, selectedCity);
+                } catch (error) {
+                    cidade.innerHTML = '';
+                    appendOption('', 'Nao foi possivel carregar as cidades', false, true);
+
+                    if (selectedCity) {
+                        appendOption(selectedCity, selectedCity, true);
+                    }
+
+                    if (status) {
+                        status.textContent = 'Nao foi possivel carregar as cidades agora. Tente trocar o estado novamente.';
+                    }
+                } finally {
+                    cidade.disabled = false;
+                }
+            }
+
+            estado?.addEventListener('change', () => {
+                loadCities(estado.value);
+            });
+
+            if (estado?.value) {
+                loadCities(estado.value, cidadeAtual);
+            } else if (cidade) {
+                cidade.disabled = true;
+            }
+        })();
+
         (() => {
             const birthDate = document.getElementById('data_nascimento');
 
