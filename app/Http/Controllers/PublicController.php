@@ -12,6 +12,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -26,9 +27,9 @@ class PublicController extends Controller
         }
 
         return view('public.home', [
-            'banners' => Banner::where('ativo', true)->latest()->get(),
-            'peladas' => Pelada::with(['esporte', 'organizador'])->where('ativa', true)->latest()->take(6)->get(),
-            'patrocinadores' => Patrocinador::where('ativo', true)->get(),
+            'banners' => Cache::remember('public.home.banners', now()->addMinutes(10), fn () => Banner::where('ativo', true)->latest()->get()),
+            'peladas' => Cache::remember('public.home.peladas', now()->addMinutes(5), fn () => Pelada::with(['esporte', 'organizador'])->where('ativa', true)->latest()->take(6)->get()),
+            'patrocinadores' => Cache::remember('public.home.patrocinadores', now()->addMinutes(30), fn () => Patrocinador::where('ativo', true)->get()),
         ]);
     }
 
@@ -188,9 +189,9 @@ class PublicController extends Controller
         return view('public.peladas', [
             'peladas' => $peladasQuery->latest()->paginate(12)->withQueryString(),
             'rodadas' => $rodadasQuery->orderBy('data_hora')->paginate(6)->withQueryString(),
-            'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
-            'cidades' => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade'),
-            'bairros' => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro'),
+            'esportes' => Cache::remember('public.filters.esportes', now()->addHour(), fn () => Esporte::where('ativo', true)->orderBy('nome')->get()),
+            'cidades' => Cache::remember('public.filters.cidades', now()->addHour(), fn () => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade')),
+            'bairros' => Cache::remember('public.filters.bairros', now()->addHour(), fn () => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro')),
             'categorias' => Pelada::CATEGORIAS,
             'filtros' => $request->only(['cidade', 'bairro', 'esporte_id', 'categoria', 'q', 'price_type', 'price_min', 'price_max', 'sort']),
         ]);
@@ -198,39 +199,41 @@ class PublicController extends Controller
 
     private function supportsFullText(): bool
     {
-        $driver = DB::getDriverName();
+        return Cache::remember('database.peladas.supports_fulltext', now()->addDay(), function () {
+            $driver = DB::getDriverName();
 
-        if (!in_array($driver, ['mysql', 'mariadb'], true)) {
-            return false;
-        }
+            if (!in_array($driver, ['mysql', 'mariadb'], true)) {
+                return false;
+            }
 
-        try {
-            $dbName = DB::connection()->getDatabaseName();
-            $columnPlaceholders = implode(', ', array_fill(0, count(self::SEARCH_COLUMNS), '?'));
+            try {
+                $dbName = DB::connection()->getDatabaseName();
+                $columnPlaceholders = implode(', ', array_fill(0, count(self::SEARCH_COLUMNS), '?'));
 
-            $result = DB::selectOne(
-                "SELECT 1 AS supported
-                 FROM information_schema.STATISTICS
-                 WHERE table_schema = ?
-                    AND table_name = ?
-                    AND index_type = 'FULLTEXT'
-                 GROUP BY index_name
-                 HAVING COUNT(*) = ?
-                    AND SUM(column_name IN ({$columnPlaceholders})) = ?
-                 LIMIT 1",
-                [
-                    $dbName,
-                    'peladas',
-                    count(self::SEARCH_COLUMNS),
-                    ...self::SEARCH_COLUMNS,
-                    count(self::SEARCH_COLUMNS),
-                ]
-            );
+                $result = DB::selectOne(
+                    "SELECT 1 AS supported
+                     FROM information_schema.STATISTICS
+                     WHERE table_schema = ?
+                        AND table_name = ?
+                        AND index_type = 'FULLTEXT'
+                     GROUP BY index_name
+                     HAVING COUNT(*) = ?
+                        AND SUM(column_name IN ({$columnPlaceholders})) = ?
+                     LIMIT 1",
+                    [
+                        $dbName,
+                        'peladas',
+                        count(self::SEARCH_COLUMNS),
+                        ...self::SEARCH_COLUMNS,
+                        count(self::SEARCH_COLUMNS),
+                    ]
+                );
 
-            return (bool) $result;
-        } catch (\Throwable $e) {
-            return false;
-        }
+                return (bool) $result;
+            } catch (\Throwable $e) {
+                return false;
+            }
+        });
     }
 
     public function pelada(Pelada $pelada): View
@@ -244,9 +247,20 @@ class PublicController extends Controller
             ->paginate(6, ['*'], 'rodadas_page')
             ->withQueryString();
 
+        $pelada->load(['esporte', 'organizador']);
+        $membrosAtivosCount = $pelada->membros()->where('status', 'ativo')->count();
+        $membrosPreview = $pelada->membros()
+            ->with('user.playerProfile')
+            ->where('status', 'ativo')
+            ->orderBy('prioridade')
+            ->take(12)
+            ->get();
+
         return view('public.pelada', [
-            'pelada' => $pelada->load(['esporte', 'organizador', 'membros.user']),
+            'pelada' => $pelada,
             'rodadas' => $rodadas,
+            'membrosAtivosCount' => $membrosAtivosCount,
+            'membrosPreview' => $membrosPreview,
             'membro' => $user ? $pelada->membros()->where('user_id', $user->id)->first() : null,
             'isOwner' => $user && $pelada->organizador_id === $user->id,
             'solicitacaoPendente' => $user

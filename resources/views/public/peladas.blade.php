@@ -158,7 +158,7 @@
                         'q' => ['Busca' => $value],
                         'cidade' => ['Cidade' => $value],
                         'bairro' => ['Bairro' => $value],
-                        'esporte_id' => ['Esporte' => optional(App\Models\Esporte::find($value))->nome ?: 'Selecionado'],
+                        'esporte_id' => ['Esporte' => ($esportes ?? collect())->firstWhere('id', (int) $value)?->nome ?: 'Selecionado'],
                         'categoria' => ['Categoria' => $categorias[$value] ?? ucfirst($value)],
                         'price_type' => ['Tipo' => $value === 'both' ? 'Ambos' : ucfirst($value)],
                         'price_min' => ['Preço mínimo' => "R$ {$value}"],
@@ -313,4 +313,3 @@
         </section>
     </div>
 </x-app-layout>
-

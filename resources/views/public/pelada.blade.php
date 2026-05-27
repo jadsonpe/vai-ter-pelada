@@ -128,11 +128,11 @@
                             <h2 class="text-xl font-bold text-slate-950">Jogadores da pelada</h2>
                             <p class="mt-1 text-sm text-slate-600">Clique em um jogador para ver informações básicas do perfil.</p>
                         </div>
-                        <span class="text-sm font-medium text-slate-500">{{ $pelada->membros->where('status', 'ativo')->count() }} ativo(s)</span>
+                        <span class="text-sm font-medium text-slate-500">{{ $membrosAtivosCount }} ativo(s)</span>
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        @forelse($pelada->membros->where('status', 'ativo')->take(12) as $membroPelada)
+                        @forelse($membrosPreview as $membroPelada)
                             <a href="{{ route('peladeiros.show', $membroPelada->user->publicProfile()) }}" class="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-emerald-300 hover:bg-emerald-50/40">
                                 <x-user-avatar :user="$membroPelada->user" size="sm" />
                                 <span class="min-w-0">

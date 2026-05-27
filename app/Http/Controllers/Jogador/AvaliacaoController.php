@@ -27,27 +27,42 @@ class AvaliacaoController extends Controller
             ->whereHas('participantes', fn ($query) => $query->where('user_id', $user->id)->where('presente_local', true))
             ->get();
 
-        $pendingGames = $jogos->map(function (PeladaJogo $jogo) use ($user) {
+        $jogoIds = $jogos->pluck('id');
+        $avaliacoesFeitas = AvaliacaoPartida::query()
+            ->whereIn('pelada_jogo_id', $jogoIds)
+            ->where('avaliador_id', $user->id)
+            ->get(['pelada_jogo_id', 'avaliado_id'])
+            ->mapWithKeys(fn ($avaliacao) => [$avaliacao->pelada_jogo_id.':'.$avaliacao->avaliado_id => true]);
+
+        $profileIdsByUserId = $jogos
+            ->flatMap(fn (PeladaJogo $jogo) => $jogo->participantes)
+            ->mapWithKeys(fn ($participante) => [
+                $participante->user_id => $participante->user?->playerProfile?->id,
+            ])
+            ->filter();
+
+        $votosFeitos = PlayerVote::query()
+            ->whereIn('pelada_jogo_id', $jogoIds)
+            ->where('voter_id', $user->id)
+            ->whereIn('player_profile_id', $profileIdsByUserId->values())
+            ->get(['pelada_jogo_id', 'player_profile_id', 'type'])
+            ->groupBy(fn ($vote) => $vote->pelada_jogo_id.':'.$vote->player_profile_id)
+            ->map(fn ($votes) => $votes->pluck('type')->all());
+
+        $pendingGames = $jogos->map(function (PeladaJogo $jogo) use ($user, $avaliacoesFeitas, $profileIdsByUserId, $votosFeitos) {
             $presentes = $jogo->participantes
                 ->filter(fn ($participante) => $participante->user_id && $participante->user_id !== $user->id)
                 ->filter(fn ($participante) => $participante->presente_local)
                 ->values();
 
             $avaliados = $presentes
-                ->reject(fn ($participante) => AvaliacaoPartida::where('pelada_jogo_id', $jogo->id)
-                    ->where('avaliador_id', $user->id)
-                    ->where('avaliado_id', $participante->user_id)
-                    ->exists())
+                ->reject(fn ($participante) => $avaliacoesFeitas->has($jogo->id.':'.$participante->user_id))
                 ->values();
 
-            $votaveis = $presentes->map(function ($participante) use ($jogo, $user) {
-                $profile = $participante->user?->publicProfile();
-                $participante->votos_feitos = $profile
-                    ? PlayerVote::where('pelada_jogo_id', $jogo->id)
-                        ->where('voter_id', $user->id)
-                        ->where('player_profile_id', $profile->id)
-                        ->pluck('type')
-                        ->all()
+            $votaveis = $presentes->map(function ($participante) use ($jogo, $profileIdsByUserId, $votosFeitos) {
+                $profileId = $profileIdsByUserId->get($participante->user_id);
+                $participante->votos_feitos = $profileId
+                    ? ($votosFeitos->get($jogo->id.':'.$profileId) ?? [])
                     : [];
 
                 return $participante;

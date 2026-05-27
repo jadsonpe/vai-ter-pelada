@@ -11,9 +11,6 @@
                     {{-- <x-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-nav-link> --}}
                     {{-- <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link> --}}
                     @auth
-                        @php
-                            $notificacoesNaoLidas = auth()->user()->notificacoes()->whereNull('lida_em')->count();
-                        @endphp
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                         <x-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.*')">Jogador</x-nav-link>
                         <x-nav-link :href="route('organizador.peladas.index')" :active="request()->routeIs('organizador.*')">Organizar</x-nav-link>
@@ -54,15 +51,12 @@
 
             <div class="flex items-center gap-2 lg:hidden">
                 @auth
-                    @php
-                        $notificacoesMobile = auth()->user()->notificacoes()->whereNull('lida_em')->count();
-                    @endphp
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="relative inline-flex items-center rounded-full border border-slate-200 bg-slate-50 p-1.5">
                                 <x-user-avatar :user="Auth::user()" size="xs" />
-                                @if($notificacoesMobile)
-                                    <span class="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
+                                @if($notificacoesNaoLidas)
+                                    <span class="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesNaoLidas }}</span>
                                 @endif
                             </button>
                         </x-slot>
@@ -133,8 +127,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
                 </svg>
                 <span>{{ auth()->user()->isAdmin() ? 'Admin' : 'Perfil' }}</span>
-                @if(($notificacoesMobile ?? 0) && !auth()->user()->isAdmin())
-                    <span class="absolute right-4 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
+                @if(($notificacoesNaoLidas ?? 0) && !auth()->user()->isAdmin())
+                    <span class="absolute right-4 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesNaoLidas }}</span>
                 @endif
             </a>
 

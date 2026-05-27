@@ -30,7 +30,7 @@
             ->map(fn ($label, $type) => [
                 'type' => $type,
                 'label' => $label,
-                'count' => $profile->votes->where('type', $type)->count(),
+                'count' => (int) ($voteCounts[$type] ?? 0),
             ])
             ->sortByDesc('count')
             ->values();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PlayerProfile;
 use App\Models\PlayerVote;
+use App\Models\PeladaJogo;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -25,12 +26,17 @@ class PlayerProfileController extends Controller
             'esportePrincipal',
             'socialLinks',
             'stats.esporte',
-            'votes',
             'achievements',
             'rankings',
         ]);
 
         $user = $profile->user;
+        $voteCounts = PlayerVote::query()
+            ->where('player_profile_id', $profile->id)
+            ->selectRaw('type, COUNT(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
         $peladas = $user->memberships()
             ->with('pelada.esporte')
             ->where('status', 'ativo')
@@ -39,7 +45,7 @@ class PlayerProfileController extends Controller
             ->get();
 
         $jogosConfirmados = $user->participacoes()->where('status', 'confirmado')->count();
-        $stats = $this->stats($profile, $jogosConfirmados);
+        $stats = $this->stats($profile, $jogosConfirmados, $voteCounts);
         $followersCount = $user->followers()->count();
         $followingCount = $user->following()->count();
         $followersPreview = $user->followers()
@@ -71,6 +77,7 @@ class PlayerProfileController extends Controller
             'socialLinks' => $profile->socialLinks->keyBy('platform'),
             'rankingSocial' => $this->rankingSocial($profile, $user),
             'voteLabels' => $this->voteLabels(),
+            'voteCounts' => $voteCounts,
             'reportReasons' => Report::reasonsFor('jogador'),
             'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode(
                 'Olha meu perfil no Vai Ter Pelada: '.$profile->shareUrl()
@@ -176,7 +183,7 @@ class PlayerProfileController extends Controller
         ]);
     }
 
-    private function stats(PlayerProfile $profile, int $jogosConfirmados): array
+    private function stats(PlayerProfile $profile, int $jogosConfirmados, $voteCounts): array
     {
         $stat = $profile->stats->firstWhere('esporte_id', $profile->esporte_principal_id)
             ?: $profile->stats->first();
@@ -186,34 +193,32 @@ class PlayerProfileController extends Controller
             'vitorias' => $stat?->vitorias ?: 0,
             'gols' => $stat?->gols ?: 0,
             'assistencias' => $stat?->assistencias ?: 0,
-            'mvps' => $stat?->mvps ?: $profile->votes->where('type', 'craque')->count(),
+            'mvps' => $stat?->mvps ?: (int) ($voteCounts['craque'] ?? 0),
             'aproveitamento' => $stat?->aproveitamento ?: 0,
             'sequencia_vitorias' => $stat?->sequencia_vitorias ?: 0,
             'media' => $profile->user->rating_average,
-            'craque_votes' => $profile->votes->where('type', 'craque')->count(),
-            'fair_play_votes' => $profile->votes->where('type', 'fair_play')->count(),
-            'destaques' => $profile->votes->whereIn('type', array_keys($this->voteLabels()))->count(),
+            'craque_votes' => (int) ($voteCounts['craque'] ?? 0),
+            'fair_play_votes' => (int) ($voteCounts['fair_play'] ?? 0),
+            'destaques' => collect($this->voteLabels())->keys()->sum(fn ($type) => (int) ($voteCounts[$type] ?? 0)),
         ];
     }
 
     private function rankingSocial(PlayerProfile $profile, User $user): string
     {
-        $lastParticipation = $user->participacoes()
-            ->with('jogo')
-            ->where('presente_local', true)
-            ->whereHas('jogo', fn ($query) => $query
-                ->where('data_hora', '<=', now())
-                ->whereIn('status', ['realizado', 'finalizado']))
-            ->get()
-            ->sortByDesc(fn ($participacao) => $participacao->jogo?->data_hora)
+        $lastJogo = PeladaJogo::query()
+            ->where('data_hora', '<=', now())
+            ->whereIn('status', ['realizado', 'finalizado'])
+            ->whereHas('participantes', fn ($query) => $query
+                ->where('user_id', $user->id)
+                ->where('presente_local', true))
+            ->orderByDesc('data_hora')
             ->first();
 
-        if (! $lastParticipation?->jogo) {
+        if (! $lastJogo) {
             return 'Peladeiro';
         }
 
-        $participantProfileIds = $lastParticipation->jogo
-            ->participantes()
+        $participantProfileIds = $lastJogo->participantes()
             ->where('presente_local', true)
             ->whereNotNull('user_id')
             ->with('user.playerProfile')
@@ -226,14 +231,17 @@ class PlayerProfileController extends Controller
             return 'Peladeiro';
         }
 
+        $votesByType = PlayerVote::query()
+            ->where('pelada_jogo_id', $lastJogo->id)
+            ->whereIn('player_profile_id', $participantProfileIds)
+            ->selectRaw('type, player_profile_id, COUNT(*) as total')
+            ->groupBy('type', 'player_profile_id')
+            ->get()
+            ->groupBy('type');
+
         $winner = collect($this->voteLabels())
-            ->map(function (string $label, string $type) use ($lastParticipation, $participantProfileIds, $profile) {
-                $counts = PlayerVote::query()
-                    ->where('pelada_jogo_id', $lastParticipation->jogo->id)
-                    ->where('type', $type)
-                    ->whereIn('player_profile_id', $participantProfileIds)
-                    ->selectRaw('player_profile_id, COUNT(*) as total')
-                    ->groupBy('player_profile_id')
+            ->map(function (string $label, string $type) use ($votesByType, $profile) {
+                $counts = $votesByType->get($type, collect())
                     ->pluck('total', 'player_profile_id');
 
                 $max = (int) $counts->max();
