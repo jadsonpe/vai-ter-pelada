@@ -57,12 +57,25 @@
                     @php
                         $notificacoesMobile = auth()->user()->notificacoes()->whereNull('lida_em')->count();
                     @endphp
-                    <a href="{{ route('dashboard') }}" class="relative inline-flex items-center rounded-full border border-slate-200 bg-slate-50 p-1.5">
-                        <x-user-avatar :user="Auth::user()" size="xs" />
-                        @if($notificacoesMobile)
-                            <span class="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
-                        @endif
-                    </a>
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="relative inline-flex items-center rounded-full border border-slate-200 bg-slate-50 p-1.5">
+                                <x-user-avatar :user="Auth::user()" size="xs" />
+                                @if($notificacoesMobile)
+                                    <span class="absolute -right-1 -top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
+                                @endif
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard')">Dashboard</x-dropdown-link>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Sair</x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
                 @else
                     <a href="{{ route('login') }}" class="rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Entrar</a>
                 @endauth
@@ -124,6 +137,7 @@
                     <span class="absolute right-4 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesMobile }}</span>
                 @endif
             </a>
+
         @else
             <a href="{{ route('login') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('login')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
