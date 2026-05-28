@@ -72,16 +72,18 @@ class PlayerProfile extends Model
 
     public static function ensureForUser(User $user): self
     {
-        if ($user->playerProfile) {
+        if ($user->relationLoaded('playerProfile') && $user->playerProfile) {
             return $user->playerProfile;
         }
 
-        return self::create([
-            'user_id' => $user->id,
-            'slug' => self::uniqueSlug($user->apelido ?: $user->name ?: 'peladeiro'),
-            'nivel_label' => 'Perna de Pau',
-            'publico' => true,
-        ]);
+        return self::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'slug' => self::uniqueSlug($user->apelido ?: $user->name ?: 'peladeiro'),
+                'nivel_label' => 'Novato',
+                'publico' => true,
+            ]
+        );
     }
 
     public static function uniqueSlug(string $name, ?int $ignoreId = null): string

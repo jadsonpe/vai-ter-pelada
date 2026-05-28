@@ -13,6 +13,10 @@ class ThirtyPeladasSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Pelada::where('slug', 'like', 'pelada-extra-%')->count() >= 30) {
+            return;
+        }
+
         $esportes = Esporte::where('ativo', true)->orderBy('id')->get();
 
         if ($esportes->isEmpty()) {

@@ -13,6 +13,13 @@ class FiveCompletedPeladasSeeder extends Seeder
 {
     public function run(): void
     {
+        if (
+            PeladaJogo::where('titulo', 'Rodada efetuada demo')->count() >= 5
+            && AvaliacaoPartida::count() >= 1000
+        ) {
+            return;
+        }
+
         Pelada::query()
             ->with(['membros.user'])
             ->whereHas('membros')

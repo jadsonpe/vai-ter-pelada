@@ -11,6 +11,14 @@ class ThirtyMembersPerPeladaSeeder extends Seeder
 {
     public function run(): void
     {
+        $needsMembers = Pelada::withCount('membros')
+            ->get()
+            ->contains(fn (Pelada $pelada) => $pelada->membros_count < 30);
+
+        if (! $needsMembers) {
+            return;
+        }
+
         $users = User::query()
             ->where('status', '!=', 'bloqueado')
             ->orderBy('id')

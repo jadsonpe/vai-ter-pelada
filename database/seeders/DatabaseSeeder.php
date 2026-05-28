@@ -5,7 +5,11 @@ namespace Database\Seeders;
 use App\Models\Esporte;
 use App\Models\User;
 use Database\Seeders\BrazilFullDemoSeeder;
+use Database\Seeders\CompleteDemoCoverageSeeder;
 use Database\Seeders\DemoDataSeeder;
+use Database\Seeders\FiveCompletedPeladasSeeder;
+use Database\Seeders\ThirtyMembersPerPeladaSeeder;
+use Database\Seeders\ThirtyPeladasSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -44,5 +48,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DemoDataSeeder::class);
         $this->call(BrazilFullDemoSeeder::class);
+        $this->call(ThirtyPeladasSeeder::class);
+        $this->call(ThirtyMembersPerPeladaSeeder::class);
+        $this->call(FiveCompletedPeladasSeeder::class);
+        $this->call(CompleteDemoCoverageSeeder::class);
     }
 }

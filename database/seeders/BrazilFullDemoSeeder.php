@@ -72,6 +72,15 @@ class BrazilFullDemoSeeder extends Seeder
 
     public function run(): void
     {
+        if (
+            User::count() >= 120
+            && Pelada::count() >= 50
+            && PlayerVote::count() >= 500
+            && Report::count() >= 10
+        ) {
+            return;
+        }
+
         $this->seedEsportes();
         $users = $this->seedUsers();
         $this->seedPlayerProfiles($users);
@@ -159,7 +168,14 @@ class BrazilFullDemoSeeder extends Seeder
         $allUsers = $users['organizers']->merge($users['players']);
 
         foreach ($allUsers->values() as $index => $user) {
-            $profile = PlayerProfile::ensureForUser($user);
+            $profile = PlayerProfile::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'slug' => PlayerProfile::uniqueSlug($user->apelido ?: $user->name ?: 'peladeiro'),
+                    'nivel_label' => 'Novato',
+                    'publico' => true,
+                ]
+            );
             $sport = $esportes[$index % $esportes->count()];
             $score = $user->status === 'bloqueado' ? 0 : 20 + ($index * 7) % 900;
 
@@ -338,7 +354,7 @@ class BrazilFullDemoSeeder extends Seeder
                     PeladaSolicitacao::updateOrCreate(
                         ['pelada_id' => $pelada->id, 'user_id' => $player->id, 'tipo_solicitacao' => $type],
                         [
-                            'tipo' => str_contains($type, 'mensalista') ? 'mensalista' : 'entrada',
+                            'tipo' => 'mensalista',
                             'status' => $solicitationStatuses[$typeIndex % count($solicitationStatuses)],
                             'mensagem' => 'Solicitacao demo: '.$type,
                             'respondido_por' => $typeIndex === 0 ? null : $organizer->id,
@@ -445,7 +461,16 @@ class BrazilFullDemoSeeder extends Seeder
                         ['estrelas' => 3 + ($idx % 3), 'comentario' => 'Avaliacao demo da rodada '.$jogo->titulo.'.']
                     );
 
-                    $profile = $target->user?->playerProfile ?: ($target->user ? PlayerProfile::ensureForUser($target->user) : null);
+                    $profile = $target->user
+                        ? PlayerProfile::firstOrCreate(
+                            ['user_id' => $target->user->id],
+                            [
+                                'slug' => PlayerProfile::uniqueSlug($target->user->apelido ?: $target->user->name ?: 'peladeiro'),
+                                'nivel_label' => 'Novato',
+                                'publico' => true,
+                            ]
+                        )
+                        : null;
                     if ($profile) {
                         $type = $voteTypes[($peladaIndex + $r + $idx) % count($voteTypes)];
                         PlayerVote::firstOrCreate(
@@ -562,7 +587,14 @@ class BrazilFullDemoSeeder extends Seeder
             $idx = array_search($reason, array_keys(Report::reasonsFor('jogador')), true);
             $target = $players[($idx + 12) % $players->count()];
             $reporter = $players[($idx + 2) % $players->count()];
-            $profile = PlayerProfile::ensureForUser($target);
+            $profile = PlayerProfile::firstOrCreate(
+                ['user_id' => $target->id],
+                [
+                    'slug' => PlayerProfile::uniqueSlug($target->apelido ?: $target->name ?: 'peladeiro'),
+                    'nivel_label' => 'Novato',
+                    'publico' => true,
+                ]
+            );
             $status = $statuses[($idx + 1) % count($statuses)];
 
             Report::updateOrCreate(

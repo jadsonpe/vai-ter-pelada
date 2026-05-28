@@ -25,6 +25,10 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        if (User::count() >= 100 && Pelada::count() >= 50 && PeladaJogo::count() >= 100) {
+            return;
+        }
+
         $this->seedUsers();
         $this->seedPeladas();
         $this->seedBanners();
