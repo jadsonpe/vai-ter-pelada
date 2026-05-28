@@ -35,7 +35,7 @@ class MembroController extends Controller
         $user = User::where('email', $data['email'])->firstOrFail();
 
         if ($pelada->membros()->where('user_id', $user->id)->where('status', 'ativo')->exists()) {
-            return back()->with('status', 'Este jogador ja e membro ativo desta pelada.');
+            return back()->with('status', 'Este jogador já é membro ativo desta pelada.');
         }
 
         $tipoSolicitacao = 'convite_'.$data['tipo'];
@@ -46,7 +46,7 @@ class MembroController extends Controller
             ->exists();
 
         if ($convitePendente) {
-            return back()->with('status', 'Este jogador ja possui um convite pendente para esta pelada.');
+            return back()->with('status', 'Este jogador já possui um convite pendente para esta pelada.');
         }
 
         PeladaSolicitacao::create([
@@ -61,7 +61,7 @@ class MembroController extends Controller
         Notificacao::create([
             'user_id' => $user->id,
             'titulo' => 'Convite para pelada',
-            'mensagem' => auth()->user()->name.' convidou voce para participar da pelada '.$pelada->nome.' como '.$data['tipo'].'.',
+            'mensagem' => auth()->user()->name.' convidou você para participar da pelada '.$pelada->nome.' como '.$data['tipo'].'.',
             'link' => route('jogador.peladas.minhas'),
         ]);
 
@@ -78,7 +78,7 @@ class MembroController extends Controller
 
         $membro->delete();
 
-        return back()->with('status', 'Membro removido.');
+        return back()->with('status', 'Membro removido da pelada.');
     }
 
     public function updateMany(Request $request, Pelada $pelada): RedirectResponse

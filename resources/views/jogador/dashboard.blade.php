@@ -138,7 +138,13 @@
                             @endif
                         </h2>
                         @if($mensagensNaoLidas > 0)
-                            <span class="text-xs text-emerald-600 animate-pulse">● Nova</span>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                                </span>
+                                Nova
+                            </span>
                         @endif
                     </div>
                     
@@ -146,24 +152,27 @@
                         @forelse($notificacoes as $notificacao)
                             <a href="{{ $notificacao->link ?: '#' }}" 
                             class="block py-3 transition-all duration-200 
-                                    {{ !$notificacao->lida_em ? 'bg-gradient-to-r from-blue-50/50 to-transparent -mx-2 px-2 rounded-lg shadow-sm border-l-4 border-blue-500' : 'hover:bg-slate-50' }}">
+                                    {{ !$notificacao->lida_em ? 'animate-pulse bg-gradient-to-r from-emerald-50 via-white to-transparent -mx-2 rounded-lg border-l-4 border-emerald-500 px-2 shadow-sm ring-1 ring-emerald-100' : 'hover:bg-slate-50' }}">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex-1">
-                                        <p class="text-sm font-semibold {{ !$notificacao->lida_em ? 'text-blue-900' : 'text-slate-900' }}">
+                                        <p class="text-sm font-semibold {{ !$notificacao->lida_em ? 'text-emerald-950' : 'text-slate-900' }}">
                                             {{ $notificacao->titulo }}
                                             @if(!$notificacao->lida_em)
-                                                <span class="ml-2 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 uppercase tracking-wide">
+                                                <span class="ml-2 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
                                                     Nova
                                                 </span>
                                             @endif
                                         </p>
-                                        <p class="mt-1 text-xs {{ !$notificacao->lida_em ? 'text-blue-700 font-medium' : 'text-slate-500' }}">
+                                        <p class="mt-1 text-xs {{ !$notificacao->lida_em ? 'font-medium text-emerald-700' : 'text-slate-500' }}">
                                             {{ $notificacao->mensagem }}
                                         </p>
                                     </div>
                                     @if(!$notificacao->lida_em)
                                         <div class="flex-shrink-0">
-                                            <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                            <div class="relative flex h-3 w-3">
+                                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+                                            </div>
                                         </div>
                                     @endif
                                 </div>
@@ -176,7 +185,7 @@
                     @if($mensagensNaoLidas > 0)
                         <div class="mt-4 pt-3 border-t border-slate-100">
                             <p class="text-center text-[11px] text-slate-400">
-                                💡 Você tem {{ $mensagensNaoLidas }} mensagem(ns) não lida(s)
+                                Você tem {{ $mensagensNaoLidas }} mensagem(ns) não lida(s)
                             </p>
                         </div>
                     @endif
