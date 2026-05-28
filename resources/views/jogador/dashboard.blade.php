@@ -124,26 +124,63 @@
 
             <aside class="space-y-6">
                 <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-lg font-semibold text-slate-900">Mensagens</h2>
+                    @php 
+                        $mensagensNaoLidas = $notificacoes->whereNull('lida_em')->count(); 
+                    @endphp
+                    
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h2 class="text-lg font-semibold text-slate-900">
+                            Mensagens
+                            @if($mensagensNaoLidas > 0)
+                                <span class="ml-2 inline-flex items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                                    {{ $mensagensNaoLidas }}
+                                </span>
+                            @endif
+                        </h2>
+                        @if($mensagensNaoLidas > 0)
+                            <span class="text-xs text-emerald-600 animate-pulse">● Nova</span>
+                        @endif
+                    </div>
+                    
                     <div class="mt-4 divide-y divide-slate-100">
                         @forelse($notificacoes as $notificacao)
-                            <a href="{{ $notificacao->link ?: '#' }}" class="block py-3">
+                            <a href="{{ $notificacao->link ?: '#' }}" 
+                            class="block py-3 transition-all duration-200 
+                                    {{ !$notificacao->lida_em ? 'bg-gradient-to-r from-blue-50/50 to-transparent -mx-2 px-2 rounded-lg shadow-sm border-l-4 border-blue-500' : 'hover:bg-slate-50' }}">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">{{ $notificacao->titulo }}</p>
-                                        <p class="mt-1 text-xs text-slate-500">{{ $notificacao->mensagem }}</p>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold {{ !$notificacao->lida_em ? 'text-blue-900' : 'text-slate-900' }}">
+                                            {{ $notificacao->titulo }}
+                                            @if(!$notificacao->lida_em)
+                                                <span class="ml-2 inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 uppercase tracking-wide">
+                                                    Nova
+                                                </span>
+                                            @endif
+                                        </p>
+                                        <p class="mt-1 text-xs {{ !$notificacao->lida_em ? 'text-blue-700 font-medium' : 'text-slate-500' }}">
+                                            {{ $notificacao->mensagem }}
+                                        </p>
                                     </div>
                                     @if(!$notificacao->lida_em)
-                                        <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Nova</span>
+                                        <div class="flex-shrink-0">
+                                            <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                        </div>
                                     @endif
                                 </div>
                             </a>
                         @empty
-                            <p class="text-sm text-slate-500">Nenhuma mensagem nova.</p>
+                            <p class="py-4 text-center text-sm text-slate-500">Nenhuma mensagem nova.</p>
                         @endforelse
                     </div>
+                    
+                    @if($mensagensNaoLidas > 0)
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <p class="text-center text-[11px] text-slate-400">
+                                💡 Você tem {{ $mensagensNaoLidas }} mensagem(ns) não lida(s)
+                            </p>
+                        </div>
+                    @endif
                 </section>
-
                 <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 class="text-lg font-semibold text-slate-900">Minhas peladas</h2>
                     <div class="mt-4 space-y-3">
