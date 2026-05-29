@@ -67,12 +67,19 @@
                         <div class="flex flex-wrap gap-3 text-sm font-semibold">
                             <a class="text-emerald-700" href="{{ route('organizador.jogos.participantes', $jogo) }}">Participantes</a>
                             <a class="text-emerald-700" href="{{ route('organizador.jogos.sorteios.show', $jogo) }}">Sortear</a>
-                            <a class="text-emerald-700" href="#editar-rodada-{{ $jogo->id }}" onclick="document.getElementById('editar-rodada-{{ $jogo->id }}').open = true;">Editar</a>
+                            <button
+                                type="button"
+                                class="text-emerald-700"
+                                data-edit-toggle="editar-rodada-{{ $jogo->id }}"
+                                aria-controls="editar-rodada-{{ $jogo->id }}"
+                                aria-expanded="{{ (string) $editingJogoId === (string) $jogo->id ? 'true' : 'false' }}"
+                            >
+                                Editar
+                            </button>
                         </div>
                     </div>
 
-                    <details id="editar-rodada-{{ $jogo->id }}" class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4" @if((string) $editingJogoId === (string) $jogo->id) open @endif>
-                        <summary class="cursor-pointer text-sm font-semibold text-slate-700">Editar rodada</summary>
+                    <div id="editar-rodada-{{ $jogo->id }}" class="{{ (string) $editingJogoId === (string) $jogo->id ? '' : 'hidden' }} mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                         <form method="POST" action="{{ route('organizador.jogos.update', $jogo) }}" class="mt-4 grid gap-3 md:grid-cols-4">
                             @csrf
                             @method('PATCH')
@@ -131,11 +138,26 @@
                                 <button class="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white">Salvar alteracoes</button>
                             </div>
                         </form>
-                    </details>
+                    </div>
                 </div>
             @empty
                 <p class="p-5 text-sm text-slate-600">Nenhuma rodada criada ainda.</p>
             @endforelse
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('[data-edit-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const target = document.getElementById(button.dataset.editToggle);
+
+                if (!target) {
+                    return;
+                }
+
+                const isHidden = target.classList.toggle('hidden');
+                button.setAttribute('aria-expanded', String(!isHidden));
+            });
+        });
+    </script>
 </x-app-layout>
