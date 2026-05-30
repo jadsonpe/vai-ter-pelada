@@ -10,6 +10,7 @@ use Database\Seeders\DemoDataSeeder;
 use Database\Seeders\FiveCompletedPeladasSeeder;
 use Database\Seeders\ThirtyMembersPerPeladaSeeder;
 use Database\Seeders\ThirtyPeladasSeeder;
+use Database\Seeders\TorneiosDemoSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -52,5 +53,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ThirtyMembersPerPeladaSeeder::class);
         $this->call(FiveCompletedPeladasSeeder::class);
         $this->call(CompleteDemoCoverageSeeder::class);
+        $this->call(TorneiosDemoSeeder::class);
     }
 }

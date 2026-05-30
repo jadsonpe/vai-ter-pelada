@@ -92,6 +92,11 @@ class Pelada extends Model
         return $this->hasMany(PeladaCaixaMovimentacao::class);
     }
 
+    public function torneios(): HasMany
+    {
+        return $this->hasMany(Torneio::class);
+    }
+
     public function getVagasTotaisAttribute($value): int
     {
         return (int) ($value ?: $this->capacidade ?: 0);

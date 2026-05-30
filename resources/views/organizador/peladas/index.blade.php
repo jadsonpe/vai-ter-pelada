@@ -31,6 +31,9 @@
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.edit', $pelada) }}">Editar</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
+                        @if(in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true))
+                            <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.torneios.index', $pelada) }}">Torneio</a>
+                        @endif
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitações</a>
                     </div>
@@ -63,6 +66,9 @@
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.edit', $pelada) }}">Editar</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
+                                    @if(in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true))
+                                        <a class="text-emerald-700" href="{{ route('organizador.peladas.torneios.index', $pelada) }}">Torneio</a>
+                                    @endif
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.solicitacoes.index', $pelada) }}">Solicitações</a>
                                 </div>
