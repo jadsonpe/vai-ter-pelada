@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('pelada_jogo_participante_estatisticas')) {
+            return;
+        }
+
         Schema::create('pelada_jogo_participante_estatisticas', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelada_jogo_id');
@@ -22,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique('pelada_jogo_participante_id', 'pelada_participante_estatistica_unique');
-            $table->index(['pelada_jogo_id', 'user_id']);
+            $table->index(['pelada_jogo_id', 'user_id'], 'pjpe_jogo_user_idx');
 
             $table->foreign('pelada_jogo_id', 'pjpe_jogo_fk')
                 ->references('id')
