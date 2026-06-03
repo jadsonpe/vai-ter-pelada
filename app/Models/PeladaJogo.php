@@ -57,4 +57,14 @@ class PeladaJogo extends Model
     {
         return $this->hasMany(AvaliacaoPartida::class, 'pelada_jogo_id');
     }
+
+    public function prazoEdicaoEncerrado(): bool
+    {
+        return $this->data_hora && $this->data_hora->copy()->addDay()->isPast();
+    }
+
+    public function bloqueadoParaEdicao(): bool
+    {
+        return $this->status === 'finalizado' || $this->prazoEdicaoEncerrado();
+    }
 }

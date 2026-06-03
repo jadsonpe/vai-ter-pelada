@@ -37,6 +37,7 @@ class SorteioController extends Controller
     public function salvarPresencas(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'presentes' => ['nullable', 'array'],
@@ -75,6 +76,7 @@ class SorteioController extends Controller
     public function adicionarAvulso(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'nome' => ['required', 'string', 'max:120'],
@@ -102,6 +104,7 @@ class SorteioController extends Controller
     public function sortear(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'jogadores_por_time' => ['required', 'integer', 'min:1', 'max:30'],
@@ -183,6 +186,7 @@ class SorteioController extends Controller
     public function atualizarTimes(Request $request, PeladaJogo $jogo, Sorteio $sorteio): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeFinalizada($jogo);
         abort_unless($sorteio->pelada_jogo_id === $jogo->id, 404);
 
         $data = $request->validate([
@@ -261,6 +265,19 @@ class SorteioController extends Controller
     private function authorizeOwner(PeladaJogo $jogo): void
     {
         $this->redirectIfNotPeladaOwner($jogo->pelada);
+    }
+
+    private function bloquearSeFinalizada(PeladaJogo $jogo): void
+    {
+        if ($jogo->prazoEdicaoEncerrado() && in_array($jogo->status, ['aberto', 'fechado', 'realizado'], true)) {
+            $jogo->update(['status' => 'finalizado']);
+        }
+
+        $jogo->refresh();
+
+        if ($jogo->bloqueadoParaEdicao()) {
+            abort(403, 'Rodada finalizada. Edicoes nao estao mais disponiveis.');
+        }
     }
 }
 

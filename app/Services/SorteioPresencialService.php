@@ -19,23 +19,44 @@ class SorteioPresencialService
         if ($quantidadeTimes) {
             $letras = range('A', 'Z');
 
-            return [
-                'times' => $presentes
-                    ->shuffle()
-                    ->chunk($jogadoresPorTime)
-                    ->take($quantidadeTimes)
-                    ->values()
-                    ->map(function (Collection $chunk, int $index) use ($letras) {
-                        $letra = $letras[$index] ?? (string) ($index + 1);
+            if ($quantidadeTimes === 1) {
+                return [
+                    'times' => [[
+                        'nome' => 'Time A',
+                        'ordem' => 1,
+                        'participantes' => $presentes->take($jogadoresPorTime)->values(),
+                    ]],
+                ];
+            }
 
-                        return [
-                            'nome' => 'Time '.$letra,
-                            'ordem' => $index + 1,
-                            'participantes' => $chunk->values(),
-                        ];
-                    })
-                    ->all(),
+            $primeiroBloco = $presentes->take($jogadoresPorTime * 2)->shuffle()->values();
+            [$timeA, $timeB] = $this->distribuirEntreDoisTimes($primeiroBloco, $jogadoresPorTime);
+
+            $times = [
+                [
+                    'nome' => 'Time A',
+                    'ordem' => 1,
+                    'participantes' => $timeA,
+                ],
+                [
+                    'nome' => 'Time B',
+                    'ordem' => 2,
+                    'participantes' => $timeB,
+                ],
             ];
+
+            foreach ($presentes->skip($jogadoresPorTime * 2)->chunk($jogadoresPorTime)->take($quantidadeTimes - 2)->values() as $index => $chunk) {
+                $ordem = $index + 3;
+                $letra = $letras[$ordem - 1] ?? (string) $ordem;
+
+                $times[] = [
+                    'nome' => 'Time '.$letra,
+                    'ordem' => $ordem,
+                    'participantes' => $chunk->values(),
+                ];
+            }
+
+            return ['times' => $times];
         }
 
         $vagasIniciais = $jogadoresPorTime * 2;

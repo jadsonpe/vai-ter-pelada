@@ -15,7 +15,6 @@ class PeladaJogoParticipanteEstatistica extends Model
         'cartoes_amarelos',
         'cartoes_vermelhos',
         'cartoes_azuis',
-        'nota',
         'observacao',
     ];
 
@@ -24,7 +23,6 @@ class PeladaJogoParticipanteEstatistica extends Model
         'cartoes_amarelos' => 'integer',
         'cartoes_vermelhos' => 'integer',
         'cartoes_azuis' => 'integer',
-        'nota' => 'decimal:1',
     ];
 
     public function jogo(): BelongsTo

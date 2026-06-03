@@ -188,17 +188,16 @@ class PlayerProfileController extends Controller
     {
         $stat = $profile->stats->firstWhere('esporte_id', $profile->esporte_principal_id)
             ?: $profile->stats->first();
-        $organizerStats = PeladaJogoParticipanteEstatistica::query()
+        $cartaoStats = PeladaJogoParticipanteEstatistica::query()
             ->where('user_id', $profile->user_id);
 
         return [
             'jogos' => $stat?->jogos ?: $jogosConfirmados,
             'vitorias' => $stat?->vitorias ?: 0,
             'gols' => $stat?->gols ?: 0,
-            'cartoes' => (clone $organizerStats)->sum('cartoes_amarelos')
-                + (clone $organizerStats)->sum('cartoes_vermelhos')
-                + (clone $organizerStats)->sum('cartoes_azuis'),
-            'nota_organizador' => (float) ((clone $organizerStats)->whereNotNull('nota')->avg('nota') ?: 0),
+            'cartoes' => (clone $cartaoStats)->sum('cartoes_amarelos')
+                + (clone $cartaoStats)->sum('cartoes_vermelhos')
+                + (clone $cartaoStats)->sum('cartoes_azuis'),
             'assistencias' => $stat?->assistencias ?: 0,
             'mvps' => $stat?->mvps ?: (int) ($voteCounts['craque'] ?? 0),
             'aproveitamento' => $stat?->aproveitamento ?: 0,

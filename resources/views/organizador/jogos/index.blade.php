@@ -49,6 +49,7 @@
 
         <div class="mt-6 divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
             @forelse($pelada->jogos as $jogo)
+                @php($rodadaBloqueada = $jogo->bloqueadoParaEdicao())
                 <div class="p-4">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -57,19 +58,20 @@
                             <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $jogo->status }}</p>
                         </div>
                         <div class="flex flex-wrap gap-2 text-sm font-semibold">
-                            <a class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-emerald-700 hover:bg-emerald-50" href="{{ route('organizador.jogos.show', $jogo) }}" title="Ver rodada" aria-label="Ver rodada">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <a class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-200 text-emerald-700 hover:bg-emerald-50" href="{{ route('organizador.jogos.show', $jogo) }}" title="Ver rodada" aria-label="Ver rodada">
+                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                             </a>
                             <button
                                 type="button"
-                                class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-emerald-700 hover:bg-emerald-50"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-200 text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
                                 data-edit-toggle="editar-rodada-{{ $jogo->id }}"
                                 aria-controls="editar-rodada-{{ $jogo->id }}"
                                 aria-expanded="{{ (string) $editingJogoId === (string) $jogo->id ? 'true' : 'false' }}"
                                 title="Editar rodada"
                                 aria-label="Editar rodada"
+                                @disabled($rodadaBloqueada)
                             >
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </button>
                         </div>
                     </div>

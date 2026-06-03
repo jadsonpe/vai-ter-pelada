@@ -21,7 +21,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('cartoes_amarelos')->default(0);
             $table->unsignedSmallInteger('cartoes_vermelhos')->default(0);
             $table->unsignedSmallInteger('cartoes_azuis')->default(0);
-            $table->decimal('nota', 3, 1)->nullable();
             $table->text('observacao')->nullable();
             $table->timestamps();
 

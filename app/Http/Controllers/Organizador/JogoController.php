@@ -21,6 +21,7 @@ class JogoController extends Controller
     public function index(Pelada $pelada): View
     {
         $this->authorizeOwner($pelada);
+        $this->finalizarRodadasExpiradas($pelada);
 
         return view('organizador.jogos.index', [
             'pelada' => $pelada->load([
@@ -33,6 +34,8 @@ class JogoController extends Controller
     public function show(PeladaJogo $jogo): View
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->finalizarSeExpirada($jogo);
+        $jogo->refresh();
 
         $jogo->load([
             'pelada.membros.user',
@@ -77,7 +80,7 @@ class JogoController extends Controller
         $data['data_jogo'] = date('Y-m-d', strtotime($data['data_hora']));
         $data['horario'] = date('H:i:s', strtotime($data['data_hora']));
         $data['capacidade'] = $data['vagas_totais'] ?: $pelada->vagas_totais;
-        $data['vagas_diaristas'] = null;
+        $data['vagas_diaristas'] = 0;
 
         $pelada->jogos()->create($data + ['status' => 'aberto']);
 
@@ -87,6 +90,7 @@ class JogoController extends Controller
     public function update(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'data_hora' => ['required', 'date'],
@@ -113,6 +117,7 @@ class JogoController extends Controller
     public function confirmarMembro(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'pelada_membro_id' => ['required', 'integer'],
@@ -143,6 +148,7 @@ class JogoController extends Controller
     public function salvarEstatisticas(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
             'participantes' => ['nullable', 'array'],
@@ -150,7 +156,6 @@ class JogoController extends Controller
             'participantes.*.cartoes_amarelos' => ['nullable', 'integer', 'min:0', 'max:9'],
             'participantes.*.cartoes_vermelhos' => ['nullable', 'integer', 'min:0', 'max:9'],
             'participantes.*.cartoes_azuis' => ['nullable', 'integer', 'min:0', 'max:9'],
-            'participantes.*.nota' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'participantes.*.observacao' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -176,13 +181,12 @@ class JogoController extends Controller
                         'cartoes_amarelos' => (int) ($payload['cartoes_amarelos'] ?? 0),
                         'cartoes_vermelhos' => (int) ($payload['cartoes_vermelhos'] ?? 0),
                         'cartoes_azuis' => (int) ($payload['cartoes_azuis'] ?? 0),
-                        'nota' => $payload['nota'] !== null && $payload['nota'] !== '' ? (float) $payload['nota'] : null,
                         'observacao' => $payload['observacao'] ?? null,
                     ]
                 );
             }
 
-            $this->atualizarStatsDosUsuarios($jogo);
+            $this->atualizarGolsDosUsuarios($jogo);
         });
 
         return back()->with('status', 'Estatisticas da rodada salvas.');
@@ -191,6 +195,7 @@ class JogoController extends Controller
     public function removerParticipante(PeladaJogo $jogo, PeladaJogoParticipante $participante): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
         abort_unless($participante->pelada_jogo_id === $jogo->id, 404);
 
         $eraConfirmado = $participante->status === 'confirmado';
@@ -236,7 +241,32 @@ class JogoController extends Controller
         }
     }
 
-    private function atualizarStatsDosUsuarios(PeladaJogo $jogo): void
+    private function finalizarRodadasExpiradas(Pelada $pelada): void
+    {
+        $pelada->jogos()
+            ->where('data_hora', '<=', now()->subDay())
+            ->whereIn('status', ['aberto', 'fechado', 'realizado'])
+            ->update(['status' => 'finalizado']);
+    }
+
+    private function finalizarSeExpirada(PeladaJogo $jogo): void
+    {
+        if ($jogo->prazoEdicaoEncerrado() && in_array($jogo->status, ['aberto', 'fechado', 'realizado'], true)) {
+            $jogo->update(['status' => 'finalizado']);
+        }
+    }
+
+    private function bloquearSeFinalizada(PeladaJogo $jogo): void
+    {
+        $this->finalizarSeExpirada($jogo);
+        $jogo->refresh();
+
+        if ($jogo->bloqueadoParaEdicao()) {
+            abort(403, 'Rodada finalizada. Edicoes nao estao mais disponiveis.');
+        }
+    }
+
+    private function atualizarGolsDosUsuarios(PeladaJogo $jogo): void
     {
         $userIds = $jogo->estatisticas()
             ->whereNotNull('user_id')
