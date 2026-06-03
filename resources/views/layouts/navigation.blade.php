@@ -12,7 +12,8 @@
                     {{-- <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link> --}}
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <x-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.*')">Jogador</x-nav-link>
+                        <x-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.jogos.*')">Jogador</x-nav-link>
+                        <x-nav-link :href="route('jogador.avaliacoes.index')" :active="request()->routeIs('jogador.avaliacoes.*')">Avaliacoes</x-nav-link>
                         <x-nav-link :href="route('organizador.peladas.index')" :active="request()->routeIs('organizador.*')">Organizar</x-nav-link>
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-nav-link>
@@ -36,6 +37,7 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('jogador.avaliacoes.index')">Avaliacoes</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -64,6 +66,7 @@
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Dashboard</x-dropdown-link>
+                            <x-dropdown-link :href="route('jogador.avaliacoes.index')">Avaliacoes</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Sair</x-dropdown-link>

@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
         Route::get('peladas/{pelada}/jogos', [JogoController::class, 'index'])->name('peladas.jogos.index');
         Route::post('peladas/{pelada}/jogos', [JogoController::class, 'store'])->name('peladas.jogos.store');
         Route::patch('jogos/{jogo}', [JogoController::class, 'update'])->name('jogos.update');
+        Route::post('jogos/{jogo}/finalizar', [JogoController::class, 'finalizar'])->name('jogos.finalizar');
+        Route::post('jogos/{jogo}/cancelar', [JogoController::class, 'cancelar'])->name('jogos.cancelar');
         Route::get('jogos/{jogo}', [JogoController::class, 'show'])->name('jogos.show');
         Route::get('jogos/{jogo}/participantes', [JogoController::class, 'participantes'])->name('jogos.participantes');
         Route::post('jogos/{jogo}/participantes/membros', [JogoController::class, 'confirmarMembro'])->name('jogos.participantes.confirmar-membro');

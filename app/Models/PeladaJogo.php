@@ -19,6 +19,8 @@ class PeladaJogo extends Model
         'vagas_totais',
         'vagas_diaristas',
         'status',
+        'finalizada_em',
+        'cancelada_em',
         'observacao',
     ];
 
@@ -26,6 +28,8 @@ class PeladaJogo extends Model
         'data_hora' => 'datetime',
         'data_jogo' => 'date',
         'horario' => 'datetime:H:i',
+        'finalizada_em' => 'datetime',
+        'cancelada_em' => 'datetime',
     ];
 
     public function pelada(): BelongsTo
@@ -65,6 +69,20 @@ class PeladaJogo extends Model
 
     public function bloqueadoParaEdicao(): bool
     {
-        return $this->status === 'finalizado' || $this->prazoEdicaoEncerrado();
+        return in_array($this->status, ['finalizado', 'cancelado'], true) || $this->prazoEdicaoEncerrado();
+    }
+
+    public function avaliacoesAbertas(): bool
+    {
+        return $this->status === 'finalizado'
+            && $this->finalizada_em
+            && $this->finalizada_em->between(now()->subDays(2), now());
+    }
+
+    public function avaliacoesAbertasAte(): ?\Illuminate\Support\Carbon
+    {
+        return $this->status === 'finalizado' && $this->finalizada_em
+            ? $this->finalizada_em->copy()->addDays(2)
+            : null;
     }
 }

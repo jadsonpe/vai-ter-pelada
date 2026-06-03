@@ -29,7 +29,7 @@
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
                     <p class="text-sm font-medium text-emerald-800">Pendentes</p>
                     <p class="mt-2 text-3xl font-bold text-emerald-950">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</p>
-                    <p class="mt-1 text-xs text-emerald-800">abertas por ate 3 dias</p>
+                    <p class="mt-1 text-xs text-emerald-800">abertas por ate 2 dias</p>
                 </div>
             </section>
 
@@ -154,7 +154,7 @@
                         <h2 class="text-lg font-bold text-slate-950">Como funciona</h2>
                         <div class="mt-4 space-y-3 text-sm text-slate-600">
                             <p>1. O organizador marca a presenca no local.</p>
-                            <p>2. A avaliacao fica aberta por 3 dias apos a rodada.</p>
+                            <p>2. A avaliacao fica aberta por 2 dias apos a finalizacao da rodada.</p>
                             <p>3. Voce avalia apenas jogadores presentes e cadastrados.</p>
                             <p>4. Notas recebidas impactam media, pontos, badges e ranking.</p>
                         </div>

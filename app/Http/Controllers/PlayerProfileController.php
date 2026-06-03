@@ -44,6 +44,11 @@ class PlayerProfileController extends Controller
             ->latest()
             ->take(6)
             ->get();
+        $avaliacoesPublicas = $user->avaliacoesRecebidas()
+            ->with(['avaliador.playerProfile', 'jogo.pelada'])
+            ->latest()
+            ->take(6)
+            ->get();
 
         $jogosConfirmados = $user->participacoes()->where('status', 'confirmado')->count();
         $stats = $this->stats($profile, $jogosConfirmados, $voteCounts);
@@ -69,6 +74,7 @@ class PlayerProfileController extends Controller
             'profile' => $profile,
             'jogador' => $user,
             'peladas' => $peladas,
+            'avaliacoesPublicas' => $avaliacoesPublicas,
             'stats' => $stats,
             'followersCount' => $followersCount,
             'followingCount' => $followingCount,

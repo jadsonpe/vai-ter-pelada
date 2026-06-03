@@ -20,11 +20,14 @@ class AvaliacaoController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
+        $this->finalizarRodadasExpiradas();
 
         $jogos = PeladaJogo::with(['pelada.esporte', 'participantes.user.playerProfile'])
-            ->whereBetween('data_hora', [now()->subDays(3), now()])
-            ->where('data_hora', '<=', now())
+            ->where('status', 'finalizado')
+            ->whereNotNull('finalizada_em')
+            ->whereBetween('finalizada_em', [now()->subDays(2), now()])
             ->whereHas('participantes', fn ($query) => $query->where('user_id', $user->id)->where('presente_local', true))
+            ->orderByDesc('finalizada_em')
             ->get();
 
         $jogoIds = $jogos->pluck('id');
@@ -106,8 +109,8 @@ class AvaliacaoController extends Controller
         $user = $request->user();
         $jogo = PeladaJogo::findOrFail($data['pelada_jogo_id']);
 
-        if (! $jogo->data_hora->between(now()->subDays(3), now())) {
-            return back()->with('status', 'Avaliacoes so podem ser feitas ate 3 dias apos a partida.');
+        if (! $jogo->avaliacoesAbertas()) {
+            return back()->with('status', 'Avaliacoes ficam disponiveis por 2 dias apos a finalizacao da rodada.');
         }
 
         $participacao = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
@@ -179,8 +182,8 @@ class AvaliacaoController extends Controller
         $user = $request->user();
         $jogo = PeladaJogo::with('pelada')->findOrFail($data['pelada_jogo_id']);
 
-        if (! $jogo->data_hora->between(now()->subDays(3), now())) {
-            return back()->with('status', 'Votos so podem ser feitos ate 3 dias apos a partida.');
+        if (! $jogo->avaliacoesAbertas()) {
+            return back()->with('status', 'Votos ficam disponiveis por 2 dias apos a finalizacao da rodada.');
         }
 
         if ((int) $data['voted_user_id'] === $user->id) {
@@ -301,5 +304,17 @@ class AvaliacaoController extends Controller
                 'earned_at' => now(),
             ]);
         }
+    }
+
+    private function finalizarRodadasExpiradas(): void
+    {
+        PeladaJogo::query()
+            ->where('data_hora', '<=', now()->subDay())
+            ->whereIn('status', ['aberto', 'fechado', 'realizado'])
+            ->update([
+                'status' => 'finalizado',
+                'finalizada_em' => now(),
+                'cancelada_em' => null,
+            ]);
     }
 }

@@ -198,6 +198,35 @@
                     </div>
 
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 class="text-xl font-black">Avaliacoes recebidas</h2>
+                                <p class="mt-1 text-sm text-slate-400">Notas dadas por jogadores presentes nas rodadas.</p>
+                            </div>
+                            <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ number_format($stats['media'], 2) }}/5</span>
+                        </div>
+
+                        <div class="mt-5 divide-y divide-white/10">
+                            @forelse($avaliacoesPublicas as $avaliacao)
+                                <article class="py-4 first:pt-0 last:pb-0">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <p class="text-lg font-black text-emerald-200">{{ $avaliacao->estrelas }}/5</p>
+                                            <p class="mt-1 text-sm text-slate-400">{{ $avaliacao->jogo?->pelada?->nome ?? 'Pelada' }} - {{ $avaliacao->created_at->format('d/m/Y') }}</p>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-300">por {{ $avaliacao->avaliador?->apelido ?: ($avaliacao->avaliador?->name ?? 'Jogador') }}</p>
+                                    </div>
+                                    @if($avaliacao->comentario)
+                                        <p class="mt-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm leading-6 text-slate-300">{{ $avaliacao->comentario }}</p>
+                                    @endif
+                                </article>
+                            @empty
+                                <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao ha avaliacoes publicas recebidas.</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <div class="flex items-end justify-between gap-4">
                             <div>
                                 <h2 class="text-xl font-black">Peladas que participa</h2>

@@ -104,9 +104,49 @@ class JogoController extends Controller
         $data['horario'] = date('H:i:s', strtotime($data['data_hora']));
         $data['capacidade'] = $data['vagas_totais'] ?: $jogo->pelada->vagas_totais;
 
+        if ($data['status'] === 'finalizado' && strtotime($data['data_hora']) > time()) {
+            return back()
+                ->withInput($request->input() + ['editing_jogo_id' => $jogo->id])
+                ->with('status', 'A rodada so pode ser finalizada depois da data de inicio.');
+        }
+
+        $data = $this->statusTimestamps($jogo, $data);
+
         $jogo->update($data);
 
         return back()->with('status', 'Rodada atualizada.');
+    }
+
+    public function finalizar(PeladaJogo $jogo): RedirectResponse
+    {
+        $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
+
+        if ($jogo->data_hora && $jogo->data_hora->isFuture()) {
+            return back()->with('status', 'A rodada so pode ser finalizada depois da data de inicio.');
+        }
+
+        $jogo->update([
+            'status' => 'finalizado',
+            'finalizada_em' => now(),
+            'cancelada_em' => null,
+        ]);
+
+        return back()->with('status', 'Rodada finalizada. Avaliacoes liberadas para jogadores presentes por 2 dias.');
+    }
+
+    public function cancelar(PeladaJogo $jogo): RedirectResponse
+    {
+        $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeFinalizada($jogo);
+
+        $jogo->update([
+            'status' => 'cancelado',
+            'cancelada_em' => now(),
+            'finalizada_em' => null,
+        ]);
+
+        return back()->with('status', 'Rodada cancelada.');
     }
 
     public function participantes(PeladaJogo $jogo): View
@@ -246,13 +286,21 @@ class JogoController extends Controller
         $pelada->jogos()
             ->where('data_hora', '<=', now()->subDay())
             ->whereIn('status', ['aberto', 'fechado', 'realizado'])
-            ->update(['status' => 'finalizado']);
+            ->update([
+                'status' => 'finalizado',
+                'finalizada_em' => now(),
+                'cancelada_em' => null,
+            ]);
     }
 
     private function finalizarSeExpirada(PeladaJogo $jogo): void
     {
         if ($jogo->prazoEdicaoEncerrado() && in_array($jogo->status, ['aberto', 'fechado', 'realizado'], true)) {
-            $jogo->update(['status' => 'finalizado']);
+            $jogo->update([
+                'status' => 'finalizado',
+                'finalizada_em' => now(),
+                'cancelada_em' => null,
+            ]);
         }
     }
 
@@ -262,7 +310,7 @@ class JogoController extends Controller
         $jogo->refresh();
 
         if ($jogo->bloqueadoParaEdicao()) {
-            abort(403, 'Rodada finalizada. Edicoes nao estao mais disponiveis.');
+            abort(403, 'Rodada finalizada ou cancelada. Edicoes nao estao mais disponiveis.');
         }
     }
 
@@ -304,5 +352,20 @@ class JogoController extends Controller
                 ]
             );
         }
+    }
+
+    private function statusTimestamps(PeladaJogo $jogo, array $data): array
+    {
+        if (($data['status'] ?? null) === 'finalizado' && $jogo->status !== 'finalizado') {
+            $data['finalizada_em'] = now();
+            $data['cancelada_em'] = null;
+        }
+
+        if (($data['status'] ?? null) === 'cancelado' && $jogo->status !== 'cancelado') {
+            $data['cancelada_em'] = now();
+            $data['finalizada_em'] = null;
+        }
+
+        return $data;
     }
 }
