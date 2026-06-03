@@ -9,7 +9,9 @@
                     <h1 class="mt-1 text-3xl font-bold text-slate-950">Avaliacoes</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-600">Avalie quem jogou com voce e acompanhe sua reputacao nas partidas.</p>
                 </div>
-                <a href="{{ route('jogador.peladas.minhas') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Minhas peladas</a>
+                <a href="{{ route('jogador.peladas.minhas') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    Minhas peladas
+                </a>
             </div>
 
             <section class="mt-6 grid gap-4 md:grid-cols-4">
@@ -18,14 +20,17 @@
                     <p class="mt-2 text-3xl font-bold text-slate-950">{{ number_format($mediaRecebida, 2) }}</p>
                     <p class="mt-1 text-xs text-slate-500">de 5 estrelas</p>
                 </div>
+
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <p class="text-sm font-medium text-slate-500">Recebidas</p>
                     <p class="mt-2 text-3xl font-bold text-slate-950">{{ $totalRecebidas }}</p>
                 </div>
+
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <p class="text-sm font-medium text-slate-500">Feitas</p>
                     <p class="mt-2 text-3xl font-bold text-slate-950">{{ $totalFeitas }}</p>
                 </div>
+
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
                     <p class="text-sm font-medium text-emerald-800">Pendentes</p>
                     <p class="mt-2 text-3xl font-bold text-emerald-950">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</p>
@@ -50,7 +55,10 @@
                             @foreach($pendingGames as $item)
                                 @php
                                     $jogo = $item->jogo;
+                                    $pendentes = $item->votaveis->filter(fn ($p) => ! $p->avaliacao_atual);
+                                    $avaliados = $item->votaveis->filter(fn ($p) => $p->avaliacao_atual);
                                 @endphp
+
                                 <article class="p-5">
                                     <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                         <div>
@@ -58,7 +66,10 @@
                                             <h3 class="mt-1 font-bold text-slate-950">{{ $jogo->pelada->nome }}</h3>
                                             <p class="mt-1 text-sm text-slate-500">{{ $jogo->titulo }} - {{ $jogo->data_hora->format('d/m/Y H:i') }}</p>
                                         </div>
-                                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">{{ $item->avaliados->count() }} pendente(s)</span>
+
+                                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                                            {{ $pendentes->count() }} pendente(s)
+                                        </span>
                                     </div>
 
                                     <div class="mt-5 rounded-lg border border-emerald-100 bg-emerald-50/70 p-4">
@@ -68,85 +79,66 @@
                                         </div>
 
                                         <div class="mt-4 grid gap-3">
-                                            @foreach($item->votaveis as $participante)
+                                            @forelse($pendentes as $participante)
                                                 @php
                                                     $currentReview = $participante->avaliacao_atual;
                                                     $needsReview = ! $currentReview;
                                                     $oldForThisPlayer = (int) old('avaliado_id') === (int) $participante->user_id;
                                                     $selectedVote = $oldForThisPlayer ? old('vote_type') : $participante->voto_atual;
-                                                    $selectedStars = $oldForThisPlayer ? old('estrelas') : $currentReview?->estrelas;
-                                                    $commentValue = $oldForThisPlayer ? old('comentario') : $currentReview?->comentario;
+                                                    $selectedStars = $oldForThisPlayer ? old('estrelas') : optional($currentReview)->estrelas;
+                                                    $commentValue = $oldForThisPlayer ? old('comentario') : optional($currentReview)->comentario;
                                                 @endphp
 
-                                                <div class="rounded-lg border border-slate-200 bg-white p-3">
-                                                    <details>
-                                                        <summary class="flex cursor-pointer list-none flex-col gap-3 marker:hidden sm:flex-row sm:items-center sm:justify-between">
-                                                            <span class="flex items-center gap-3">
-                                                                <x-user-avatar :user="$participante->user" size="sm" />
-                                                                <span>
-                                                                    <span class="block font-semibold text-slate-950">{{ $participante->user->name }}</span>
-                                                                    <a href="{{ route('peladeiros.show', $participante->user->publicProfile()) }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800">Ver perfil publico</a>
-                                                                </span>
-                                                            </span>
-                                                            <span class="inline-flex w-fit items-center justify-center rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
-                                                                {{ $needsReview ? 'Avaliar' : 'Editar avaliacao' }}
-                                                            </span>
-                                                        </summary>
-
-                                                        <form method="POST" action="{{ route('jogador.avaliacoes.store') }}" class="mt-4 space-y-5 border-t border-slate-200 pt-4">
-                                                            @csrf
-                                                            <input type="hidden" name="pelada_jogo_id" value="{{ $jogo->id }}">
-                                                            <input type="hidden" name="avaliado_id" value="{{ $participante->user->id }}">
-
-                                                            <div>
-                                                                <p class="text-sm font-semibold text-slate-900">Destaque da rodada</p>
-                                                                <div class="mt-2 flex flex-wrap gap-2">
-                                                                    @foreach($voteTypes as $type => $voteType)
-                                                                        <label class="cursor-pointer">
-                                                                            <input type="radio" name="vote_type" value="{{ $type }}" class="peer sr-only" @checked($selectedVote === $type)>
-                                                                            <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-900 transition hover:bg-emerald-200 peer-checked:border-emerald-300 peer-checked:bg-emerald-600 peer-checked:text-white">
-                                                                                {{ $voteType['label'] }}
-                                                                            </span>
-                                                                        </label>
-                                                                    @endforeach
-                                                                </div>
-                                                                <x-input-error :messages="$oldForThisPlayer ? $errors->get('vote_type') : []" class="mt-2" />
-                                                            </div>
-
-                                                            <div>
-                                                                <label class="text-sm font-medium text-slate-700">Nota</label>
-                                                                <div class="mt-2 grid grid-cols-5 gap-2">
-                                                                    @foreach(range(1, 5) as $star)
-                                                                        <label class="group cursor-pointer">
-                                                                            <input type="radio" name="estrelas" value="{{ $star }}" class="peer sr-only" @checked((string) $selectedStars === (string) $star)>
-                                                                            <span class="block rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm font-bold text-slate-700 transition group-hover:border-emerald-300 group-hover:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:bg-emerald-600 peer-checked:text-white peer-focus:ring-2 peer-focus:ring-emerald-300">
-                                                                                {{ $star }}
-                                                                            </span>
-                                                                        </label>
-                                                                    @endforeach
-                                                                </div>
-                                                                <x-input-error :messages="$oldForThisPlayer ? $errors->get('estrelas') : []" class="mt-2" />
-                                                            </div>
-
-                                                            <div>
-                                                                <label class="text-sm font-medium text-slate-700">Comentario opcional</label>
-                                                                <textarea
-                                                                    name="comentario"
-                                                                    rows="3"
-                                                                    class="mt-1 w-full rounded-md border-slate-300 text-sm text-slate-900 placeholder:text-slate-400"
-                                                                    placeholder="Ex: jogou limpo, ajudou o time, chegou no horario..."
-                                                                >{{ old('comentario', $commentValue) }}</textarea>
-                                                                <x-input-error :messages="$oldForThisPlayer ? $errors->get('comentario') : []" class="mt-2" />
-                                                            </div>
-
-                                                            <button class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                                                                {{ $needsReview ? 'Enviar avaliacao' : 'Salvar alteracoes' }}
-                                                            </button>
-                                                        </form>
-                                                    </details>
+                                                @include('jogador.avaliacoes._card-avaliacao', [
+                                                    'participante' => $participante,
+                                                    'jogo' => $jogo,
+                                                    'voteTypes' => $voteTypes,
+                                                    'currentReview' => $currentReview,
+                                                    'needsReview' => $needsReview,
+                                                    'oldForThisPlayer' => $oldForThisPlayer,
+                                                    'selectedVote' => $selectedVote,
+                                                    'selectedStars' => $selectedStars,
+                                                    'commentValue' => $commentValue,
+                                                ])
+                                            @empty
+                                                <div class="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                                                    Todos os jogadores desta rodada já foram avaliados.
                                                 </div>
-                                            @endforeach
+                                            @endforelse
                                         </div>
+
+                                        @if($avaliados->isNotEmpty())
+                                            <details class="mt-5 rounded-lg border border-slate-300 bg-slate-50 p-4">
+                                                <summary class="cursor-pointer text-sm font-bold text-slate-700">
+                                                    Ver jogadores já avaliados ({{ $avaliados->count() }})
+                                                </summary>
+
+                                                <div class="mt-4 grid gap-3">
+                                                    @foreach($avaliados as $participante)
+                                                        @php
+                                                            $currentReview = $participante->avaliacao_atual;
+                                                            $needsReview = ! $currentReview;
+                                                            $oldForThisPlayer = (int) old('avaliado_id') === (int) $participante->user_id;
+                                                            $selectedVote = $oldForThisPlayer ? old('vote_type') : $participante->voto_atual;
+                                                            $selectedStars = $oldForThisPlayer ? old('estrelas') : optional($currentReview)->estrelas;
+                                                            $commentValue = $oldForThisPlayer ? old('comentario') : optional($currentReview)->comentario;
+                                                        @endphp
+
+                                                        @include('jogador.avaliacoes._card-avaliacao', [
+                                                            'participante' => $participante,
+                                                            'jogo' => $jogo,
+                                                            'voteTypes' => $voteTypes,
+                                                            'currentReview' => $currentReview,
+                                                            'needsReview' => $needsReview,
+                                                            'oldForThisPlayer' => $oldForThisPlayer,
+                                                            'selectedVote' => $selectedVote,
+                                                            'selectedStars' => $selectedStars,
+                                                            'commentValue' => $commentValue,
+                                                        ])
+                                                    @endforeach
+                                                </div>
+                                            </details>
+                                        @endif
                                     </div>
                                 </article>
                             @endforeach
