@@ -50,7 +50,7 @@ class AvaliacaoController extends Controller
             ->whereIn('player_profile_id', $profileIdsByUserId->values())
             ->get(['pelada_jogo_id', 'player_profile_id', 'type'])
             ->groupBy(fn ($vote) => $vote->pelada_jogo_id.':'.$vote->player_profile_id)
-            ->map(fn ($votes) => $votes->pluck('type')->all());
+            ->map(fn ($votes) => $votes->last()->type);
 
         $pendingGames = $jogos->map(function (PeladaJogo $jogo) use ($user, $avaliacoesFeitas, $profileIdsByUserId, $votosFeitos) {
             $presentes = $jogo->participantes
@@ -64,9 +64,9 @@ class AvaliacaoController extends Controller
 
             $votaveis = $presentes->map(function ($participante) use ($jogo, $profileIdsByUserId, $votosFeitos) {
                 $profileId = $profileIdsByUserId->get($participante->user_id);
-                $participante->votos_feitos = $profileId
-                    ? ($votosFeitos->get($jogo->id.':'.$profileId) ?? [])
-                    : [];
+                $participante->voto_atual = $profileId
+                    ? $votosFeitos->get($jogo->id.':'.$profileId)
+                    : null;
 
                 return $participante;
             });
@@ -207,12 +207,32 @@ class AvaliacaoController extends Controller
 
         $profile = PlayerProfile::ensureForUser($votadoParticipacao->user);
 
-        if (PlayerVote::where('pelada_jogo_id', $jogo->id)
+        $vote = PlayerVote::where('pelada_jogo_id', $jogo->id)
             ->where('voter_id', $user->id)
             ->where('player_profile_id', $profile->id)
-            ->where('type', $data['type'])
-            ->exists()) {
-            return back()->with('status', 'Voce ja registrou este voto para esse jogador nesta rodada.');
+            ->first();
+
+        if ($vote && $vote->type === $data['type']) {
+            return back()->with('status', 'Esse voto ja esta registrado para este jogador.');
+        }
+
+        $metadata = [
+            'pelada_id' => $jogo->pelada_id,
+            'pelada_nome' => $jogo->pelada?->nome,
+            'jogo_titulo' => $jogo->titulo,
+        ];
+
+        if ($vote) {
+            $this->removeVoteImpact($profile, $jogo, $vote->type);
+
+            $vote->update([
+                'type' => $data['type'],
+                'metadata' => $metadata,
+            ]);
+
+            $this->applyVoteImpact($profile, $jogo, $data['type'], false);
+
+            return back()->with('status', 'Voto atualizado com sucesso.');
         }
 
         PlayerVote::create([
@@ -220,11 +240,7 @@ class AvaliacaoController extends Controller
             'voter_id' => $user->id,
             'pelada_jogo_id' => $jogo->id,
             'type' => $data['type'],
-            'metadata' => [
-                'pelada_id' => $jogo->pelada_id,
-                'pelada_nome' => $jogo->pelada?->nome,
-                'jogo_titulo' => $jogo->titulo,
-            ],
+            'metadata' => $metadata,
         ]);
 
         $this->applyVoteImpact($profile, $jogo, $data['type']);
@@ -254,14 +270,16 @@ class AvaliacaoController extends Controller
         ];
     }
 
-    private function applyVoteImpact(PlayerProfile $profile, PeladaJogo $jogo, string $type): void
+    private function applyVoteImpact(PlayerProfile $profile, PeladaJogo $jogo, string $type, bool $awardPoints = true): void
     {
         $voteType = $this->voteTypes()[$type];
         $score = $voteType['score'];
 
         if ($score > 0) {
             $profile->increment('reputation_score', $score);
-            $profile->user?->addPoints($score, 'voto_'.$type, 'Recebeu voto: '.$voteType['label'], 'jogo:'.$jogo->id);
+            if ($awardPoints) {
+                $profile->user?->addPoints($score, 'voto_'.$type, 'Recebeu voto: '.$voteType['label'], 'jogo:'.$jogo->id);
+            }
         }
 
         $stat = PlayerStat::firstOrCreate([
@@ -276,6 +294,27 @@ class AvaliacaoController extends Controller
         };
 
         $this->refreshVoteAchievements($profile);
+    }
+
+    private function removeVoteImpact(PlayerProfile $profile, PeladaJogo $jogo, string $type): void
+    {
+        $voteType = $this->voteTypes()[$type];
+        $score = $voteType['score'];
+
+        if ($score > 0) {
+            $profile->decrement('reputation_score', min((int) $profile->reputation_score, $score));
+        }
+
+        $stat = PlayerStat::firstOrCreate([
+            'player_profile_id' => $profile->id,
+            'esporte_id' => $jogo->pelada?->esporte_id,
+        ]);
+
+        match ($type) {
+            'craque' => $stat->decrement('mvps', min((int) $stat->mvps, 1)),
+            'garcom', 'maestro' => $stat->decrement('assistencias', min((int) $stat->assistencias, 1)),
+            default => null,
+        };
     }
 
     private function refreshVoteAchievements(PlayerProfile $profile): void

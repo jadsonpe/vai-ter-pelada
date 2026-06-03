@@ -86,17 +86,16 @@
 
                                                     <div class="mt-3 flex flex-wrap gap-2">
                                                         @foreach($voteTypes as $type => $voteType)
-                                                            @php($alreadyVoted = in_array($type, $participante->votos_feitos ?? [], true))
+                                                            @php($alreadyVoted = ($participante->voto_atual ?? null) === $type)
                                                             <form method="POST" action="{{ route('jogador.votos.store') }}">
                                                                 @csrf
                                                                 <input type="hidden" name="pelada_jogo_id" value="{{ $jogo->id }}">
                                                                 <input type="hidden" name="voted_user_id" value="{{ $participante->user_id }}">
                                                                 <input type="hidden" name="type" value="{{ $type }}">
                                                                 <button
-                                                                    @disabled($alreadyVoted)
-                                                                    class="rounded-full border px-3 py-1.5 text-xs font-bold {{ $alreadyVoted ? 'border-slate-200 bg-slate-100 text-slate-400' : 'border-emerald-200 bg-emerald-100 text-emerald-900 hover:bg-emerald-200' }}"
+                                                                    class="rounded-full border px-3 py-1.5 text-xs font-bold {{ $alreadyVoted ? 'border-emerald-300 bg-emerald-600 text-white' : 'border-emerald-200 bg-emerald-100 text-emerald-900 hover:bg-emerald-200' }}"
                                                                 >
-                                                                    {{ $alreadyVoted ? 'Votado: ' : '' }}{{ $voteType['label'] }}
+                                                                    {{ $alreadyVoted ? 'Selecionado: ' : (($participante->voto_atual ?? null) ? 'Trocar para: ' : '') }}{{ $voteType['label'] }}
                                                                 </button>
                                                             </form>
                                                         @endforeach
