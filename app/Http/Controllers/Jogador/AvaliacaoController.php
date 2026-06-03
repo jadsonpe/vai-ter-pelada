@@ -34,8 +34,8 @@ class AvaliacaoController extends Controller
         $avaliacoesFeitas = AvaliacaoPartida::query()
             ->whereIn('pelada_jogo_id', $jogoIds)
             ->where('avaliador_id', $user->id)
-            ->get(['pelada_jogo_id', 'avaliado_id'])
-            ->mapWithKeys(fn ($avaliacao) => [$avaliacao->pelada_jogo_id.':'.$avaliacao->avaliado_id => true]);
+            ->get()
+            ->mapWithKeys(fn ($avaliacao) => [$avaliacao->pelada_jogo_id.':'.$avaliacao->avaliado_id => $avaliacao]);
 
         $profileIdsByUserId = $jogos
             ->flatMap(fn (PeladaJogo $jogo) => $jogo->participantes)
@@ -62,11 +62,12 @@ class AvaliacaoController extends Controller
                 ->reject(fn ($participante) => $avaliacoesFeitas->has($jogo->id.':'.$participante->user_id))
                 ->values();
 
-            $votaveis = $presentes->map(function ($participante) use ($jogo, $profileIdsByUserId, $votosFeitos) {
+            $votaveis = $presentes->map(function ($participante) use ($jogo, $profileIdsByUserId, $votosFeitos, $avaliacoesFeitas) {
                 $profileId = $profileIdsByUserId->get($participante->user_id);
                 $participante->voto_atual = $profileId
                     ? $votosFeitos->get($jogo->id.':'.$profileId)
                     : null;
+                $participante->avaliacao_atual = $avaliacoesFeitas->get($jogo->id.':'.$participante->user_id);
 
                 return $participante;
             });
@@ -103,6 +104,7 @@ class AvaliacaoController extends Controller
             'pelada_jogo_id' => ['required', 'exists:pelada_jogos,id'],
             'avaliado_id' => ['required', 'exists:users,id'],
             'estrelas' => ['required', 'integer', 'between:1,5'],
+            'vote_type' => ['nullable', 'in:'.implode(',', array_keys($this->voteTypes()))],
             'comentario' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -136,39 +138,51 @@ class AvaliacaoController extends Controller
             return back()->with('status', 'O jogador avaliado precisa estar presente e cadastrado no sistema.');
         }
 
-        if (AvaliacaoPartida::where('pelada_jogo_id', $jogo->id)
+        $avaliacao = AvaliacaoPartida::where('pelada_jogo_id', $jogo->id)
             ->where('avaliador_id', $user->id)
             ->where('avaliado_id', $data['avaliado_id'])
-            ->exists()) {
-            return back()->with('status', 'Voce ja avaliou este jogador para esta partida.');
+            ->first();
+
+        $isNew = ! $avaliacao;
+
+        $avaliacao = AvaliacaoPartida::updateOrCreate(
+            [
+                'pelada_jogo_id' => $jogo->id,
+                'avaliador_id' => $user->id,
+                'avaliado_id' => $data['avaliado_id'],
+            ],
+            [
+                'estrelas' => $data['estrelas'],
+                'comentario' => $data['comentario'],
+            ]
+        );
+
+        if ($isNew) {
+            $user->addPoints(5, 'avaliou', 'Avaliacao emitida para partida '.$jogo->titulo, 'jogo:'.$jogo->id);
         }
 
-        AvaliacaoPartida::create([
-            'pelada_jogo_id' => $jogo->id,
-            'avaliador_id' => $user->id,
-            'avaliado_id' => $data['avaliado_id'],
-            'estrelas' => $data['estrelas'],
-            'comentario' => $data['comentario'],
-        ]);
-
-        $user->addPoints(5, 'avaliou', 'Avaliacao emitida para partida '.$jogo->titulo, 'jogo:'.$jogo->id);
+        if (filled($data['vote_type'] ?? null)) {
+            $this->syncVote($user, $jogo, $avaliadoParticipacao->user, $data['vote_type']);
+        }
 
         $avaliado = $avaliadoParticipacao->user;
-        if ((int) $data['estrelas'] === 5) {
+        if ($isNew && (int) $data['estrelas'] === 5) {
             $avaliado->addPoints(10, 'recebeu_5', 'Recebeu avaliacao 5 estrelas', 'jogo:'.$jogo->id);
         }
 
         $avaliado->refreshBadges();
-        Notificacao::create([
-            'user_id' => $avaliado->id,
-            'titulo' => 'Voce recebeu uma nova avaliacao',
-            'mensagem' => sprintf('%s avaliou voce com %s estrelas.', $user->name, $data['estrelas']),
-            'link' => route('perfil.edit'),
-        ]);
+        if ($isNew) {
+            Notificacao::create([
+                'user_id' => $avaliado->id,
+                'titulo' => 'Voce recebeu uma nova avaliacao',
+                'mensagem' => sprintf('%s avaliou voce com %s estrelas.', $user->name, $data['estrelas']),
+                'link' => route('perfil.edit'),
+            ]);
+        }
 
         $user->refreshBadges();
 
-        return back()->with('status', 'Avaliacao enviada com sucesso.');
+        return back()->with('status', $isNew ? 'Avaliacao enviada com sucesso.' : 'Avaliacao atualizada com sucesso.');
     }
 
     public function vote(Request $request): RedirectResponse
@@ -205,15 +219,22 @@ class AvaliacaoController extends Controller
             return back()->with('status', 'Somente jogadores presentes na rodada podem votar e receber votos.');
         }
 
-        $profile = PlayerProfile::ensureForUser($votadoParticipacao->user);
+        $this->syncVote($user, $jogo, $votadoParticipacao->user, $data['type']);
+
+        return back()->with('status', 'Voto registrado com sucesso.');
+    }
+
+    private function syncVote($user, PeladaJogo $jogo, $votedUser, string $type): void
+    {
+        $profile = PlayerProfile::ensureForUser($votedUser);
 
         $vote = PlayerVote::where('pelada_jogo_id', $jogo->id)
             ->where('voter_id', $user->id)
             ->where('player_profile_id', $profile->id)
             ->first();
 
-        if ($vote && $vote->type === $data['type']) {
-            return back()->with('status', 'Esse voto ja esta registrado para este jogador.');
+        if ($vote && $vote->type === $type) {
+            return;
         }
 
         $metadata = [
@@ -226,34 +247,32 @@ class AvaliacaoController extends Controller
             $this->removeVoteImpact($profile, $jogo, $vote->type);
 
             $vote->update([
-                'type' => $data['type'],
+                'type' => $type,
                 'metadata' => $metadata,
             ]);
 
-            $this->applyVoteImpact($profile, $jogo, $data['type'], false);
+            $this->applyVoteImpact($profile, $jogo, $type, false);
 
-            return back()->with('status', 'Voto atualizado com sucesso.');
+            return;
         }
 
         PlayerVote::create([
             'player_profile_id' => $profile->id,
             'voter_id' => $user->id,
             'pelada_jogo_id' => $jogo->id,
-            'type' => $data['type'],
+            'type' => $type,
             'metadata' => $metadata,
         ]);
 
-        $this->applyVoteImpact($profile, $jogo, $data['type']);
+        $this->applyVoteImpact($profile, $jogo, $type);
         $user->addPoints(2, 'votou_destaque', 'Voto de destaque emitido na rodada '.$jogo->titulo, 'jogo:'.$jogo->id);
 
         Notificacao::create([
-            'user_id' => $votadoParticipacao->user->id,
+            'user_id' => $votedUser->id,
             'titulo' => 'Voce recebeu um voto de destaque',
-            'mensagem' => sprintf('%s votou em voce como %s.', $user->name, $this->voteTypes()[$data['type']]['label']),
+            'mensagem' => sprintf('%s votou em voce como %s.', $user->name, $this->voteTypes()[$type]['label']),
             'link' => route('peladeiros.show', $profile),
         ]);
-
-        return back()->with('status', 'Voto registrado com sucesso.');
     }
 
     private function voteTypes(): array
