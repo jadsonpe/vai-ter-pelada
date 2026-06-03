@@ -270,13 +270,17 @@ class SorteioController extends Controller
     private function bloquearSeFinalizada(PeladaJogo $jogo): void
     {
         if ($jogo->prazoEdicaoEncerrado() && in_array($jogo->status, ['aberto', 'fechado', 'realizado'], true)) {
-            $jogo->update(['status' => 'finalizado']);
+            $jogo->update([
+                'status' => 'finalizado',
+                'finalizada_em' => now(),
+                'cancelada_em' => null,
+            ]);
         }
 
         $jogo->refresh();
 
         if ($jogo->bloqueadoParaEdicao()) {
-            abort(403, 'Rodada finalizada. Edicoes nao estao mais disponiveis.');
+            abort(403, 'Rodada finalizada ou cancelada. Edicoes nao estao mais disponiveis.');
         }
     }
 }

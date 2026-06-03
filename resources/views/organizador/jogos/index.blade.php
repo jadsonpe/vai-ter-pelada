@@ -73,6 +73,20 @@
                             >
                                 <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </button>
+                            @if(! $rodadaBloqueada)
+                                <form method="POST" action="{{ route('organizador.jogos.finalizar', $jogo) }}">
+                                    @csrf
+                                    <button class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-emerald-200 text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40" title="Finalizar rodada" aria-label="Finalizar rodada" @disabled($jogo->data_hora->isFuture())>
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('organizador.jogos.cancelar', $jogo) }}" onsubmit="return confirm('Cancelar esta rodada?');">
+                                    @csrf
+                                    <button class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-red-200 text-red-700 hover:bg-red-50" title="Cancelar rodada" aria-label="Cancelar rodada">
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m18 6-12 12"/><path d="m6 6 12 12"/></svg>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
 
