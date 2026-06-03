@@ -48,7 +48,9 @@
                     @else
                         <div class="divide-y divide-slate-100">
                             @foreach($pendingGames as $item)
-                                @php $jogo = $item->jogo @endphp
+                                @php
+                                    $jogo = $item->jogo;
+                                @endphp
                                 <article class="p-5">
                                     <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                         <div>
