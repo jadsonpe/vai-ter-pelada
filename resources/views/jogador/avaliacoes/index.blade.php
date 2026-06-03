@@ -128,7 +128,12 @@
 
                                                             <div>
                                                                 <label class="text-sm font-medium text-slate-700">Comentario opcional</label>
-                                                                <textarea name="comentario" rows="3" class="mt-1 w-full rounded-md border-slate-300 text-sm text-slate-900 placeholder:text-slate-400" placeholder="Ex: jogou limpo, ajudou o time, chegou no horario...">{{ $commentValue }}</textarea>
+                                                                <textarea
+                                                                    name="comentario"
+                                                                    rows="3"
+                                                                    class="mt-1 w-full rounded-md border-slate-300 text-sm text-slate-900 placeholder:text-slate-400"
+                                                                    placeholder="Ex: jogou limpo, ajudou o time, chegou no horario..."
+                                                                >{{ old('comentario', $commentValue) }}</textarea>
                                                                 <x-input-error :messages="$oldForThisPlayer ? $errors->get('comentario') : []" class="mt-2" />
                                                             </div>
 
