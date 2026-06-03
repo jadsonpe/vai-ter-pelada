@@ -22,8 +22,11 @@
         $coverStyle = $profile->coverStyle();
         $statCards = [
             ['label' => 'Jogos', 'value' => $stats['jogos']],
+            ['label' => 'Gols', 'value' => $stats['gols']],
             ['label' => 'MVPs', 'value' => $stats['mvps']],
             ['label' => 'Media', 'value' => number_format($stats['media'], 2)],
+            ['label' => 'Nota org.', 'value' => number_format((float) $stats['nota_organizador'], 1)],
+            ['label' => 'Cartoes', 'value' => $stats['cartoes']],
             ['label' => 'Aproveit.', 'value' => number_format((float) $stats['aproveitamento'], 0).'%'],
         ];
         $voteCounts = collect($voteLabels)

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PeladaJogoParticipante extends Model
 {
@@ -58,5 +59,10 @@ class PeladaJogoParticipante extends Model
     public function membro(): BelongsTo
     {
         return $this->belongsTo(PeladaMembro::class, 'pelada_membro_id');
+    }
+
+    public function estatistica(): HasOne
+    {
+        return $this->hasOne(PeladaJogoParticipanteEstatistica::class, 'pelada_jogo_participante_id');
     }
 }

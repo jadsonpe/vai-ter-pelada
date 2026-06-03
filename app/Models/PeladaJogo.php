@@ -43,6 +43,11 @@ class PeladaJogo extends Model
         return $this->hasMany(Sorteio::class);
     }
 
+    public function estatisticas(): HasMany
+    {
+        return $this->hasMany(PeladaJogoParticipanteEstatistica::class);
+    }
+
     public function presencas(): HasMany
     {
         return $this->hasMany(Presenca::class);

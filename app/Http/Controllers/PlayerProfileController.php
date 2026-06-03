@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PlayerProfile;
 use App\Models\PlayerVote;
 use App\Models\PeladaJogo;
+use App\Models\PeladaJogoParticipanteEstatistica;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -187,11 +188,17 @@ class PlayerProfileController extends Controller
     {
         $stat = $profile->stats->firstWhere('esporte_id', $profile->esporte_principal_id)
             ?: $profile->stats->first();
+        $organizerStats = PeladaJogoParticipanteEstatistica::query()
+            ->where('user_id', $profile->user_id);
 
         return [
             'jogos' => $stat?->jogos ?: $jogosConfirmados,
             'vitorias' => $stat?->vitorias ?: 0,
             'gols' => $stat?->gols ?: 0,
+            'cartoes' => (clone $organizerStats)->sum('cartoes_amarelos')
+                + (clone $organizerStats)->sum('cartoes_vermelhos')
+                + (clone $organizerStats)->sum('cartoes_azuis'),
+            'nota_organizador' => (float) ((clone $organizerStats)->whereNotNull('nota')->avg('nota') ?: 0),
             'assistencias' => $stat?->assistencias ?: 0,
             'mvps' => $stat?->mvps ?: (int) ($voteCounts['craque'] ?? 0),
             'aproveitamento' => $stat?->aproveitamento ?: 0,

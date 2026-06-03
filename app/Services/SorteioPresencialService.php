@@ -11,9 +11,33 @@ class SorteioPresencialService
      * @param  Collection<int, PeladaJogoParticipante>  $presentes
      * @return array{times: array<int, array{nome: string, ordem: int, participantes: Collection<int, PeladaJogoParticipante>}>}
      */
-    public function montarTimes(Collection $presentes, int $jogadoresPorTime): array
+    public function montarTimes(Collection $presentes, int $jogadoresPorTime, ?int $quantidadeTimes = null): array
     {
         $jogadoresPorTime = max(1, $jogadoresPorTime);
+        $quantidadeTimes = $quantidadeTimes ? max(1, $quantidadeTimes) : null;
+
+        if ($quantidadeTimes) {
+            $letras = range('A', 'Z');
+
+            return [
+                'times' => $presentes
+                    ->shuffle()
+                    ->chunk($jogadoresPorTime)
+                    ->take($quantidadeTimes)
+                    ->values()
+                    ->map(function (Collection $chunk, int $index) use ($letras) {
+                        $letra = $letras[$index] ?? (string) ($index + 1);
+
+                        return [
+                            'nome' => 'Time '.$letra,
+                            'ordem' => $index + 1,
+                            'participantes' => $chunk->values(),
+                        ];
+                    })
+                    ->all(),
+            ];
+        }
+
         $vagasIniciais = $jogadoresPorTime * 2;
         $primeiroBloco = $presentes->take($vagasIniciais)->shuffle()->values();
         $restantes = $presentes->skip($vagasIniciais)->values();

@@ -105,6 +105,7 @@ class SorteioController extends Controller
 
         $data = $request->validate([
             'jogadores_por_time' => ['required', 'integer', 'min:1', 'max:30'],
+            'quantidade_times' => ['required', 'integer', 'min:1', 'max:20'],
             'modo_ordenacao' => ['required', 'in:manual,prioridade'],
             'presentes' => ['required', 'array', 'min:1'],
             'presentes.*' => ['integer'],
@@ -115,6 +116,7 @@ class SorteioController extends Controller
         $this->salvarPresencasInterno($jogo, $data['presentes'], $data['ordem'] ?? []);
 
         $jogadoresPorTime = (int) $data['jogadores_por_time'];
+        $quantidadeTimes = (int) $data['quantidade_times'];
         $usarOrdemManual = $request->input('modo_ordenacao') === 'manual';
 
         $confirmados = $this->participantesConfirmados($jogo);
@@ -132,14 +134,17 @@ class SorteioController extends Controller
             ]);
         }
 
-        $resultado = $this->sorteioService->montarTimes($presentesOrdenados, $jogadoresPorTime);
+        $limiteJogadores = $jogadoresPorTime * $quantidadeTimes;
+        $selecionados = $presentesOrdenados->take($limiteJogadores)->values();
+        $sobras = $presentesOrdenados->skip($limiteJogadores)->values();
+        $resultado = $this->sorteioService->montarTimes($selecionados, $jogadoresPorTime, $quantidadeTimes);
 
-        DB::transaction(function () use ($request, $jogo, $jogadoresPorTime, $usarOrdemManual, $resultado, $presentesOrdenados) {
+        DB::transaction(function () use ($request, $jogo, $jogadoresPorTime, $quantidadeTimes, $usarOrdemManual, $resultado, $sobras) {
             $sorteio = Sorteio::create([
                 'pelada_jogo_id' => $jogo->id,
                 'criado_por' => $request->user()->id,
                 'tipo_sorteio' => 'presencial_quadra',
-                'quantidade_times' => count($resultado['times']),
+                'quantidade_times' => min($quantidadeTimes, count($resultado['times'])),
                 'jogadores_por_time' => $jogadoresPorTime,
                 'usar_ordem_manual' => $usarOrdemManual,
                 'status' => 'publicado',
@@ -161,15 +166,65 @@ class SorteioController extends Controller
                     ]);
                 }
             }
+
+            foreach ($sobras as $ordem => $participante) {
+                $sorteio->sobras()->create([
+                    'user_id' => $participante->user_id,
+                    'ordem' => $ordem + 1,
+                ]);
+            }
         });
-
-        $vagasIniciais = $jogadoresPorTime * 2;
-        $timesExtras = max(0, count($resultado['times']) - 2);
-
         return back()->with(
             'status',
-            "Sorteio realizado: {$presentesOrdenados->count()} presentes, {$vagasIniciais} vagas no 1º jogo (A x B)".($timesExtras > 0 ? " e mais {$timesExtras} time(s) na fila." : '.')
+            "Sorteio realizado: {$selecionados->count()} jogador(es) em {$quantidadeTimes} time(s).".($sobras->isNotEmpty() ? " {$sobras->count()} jogador(es) ficaram fora deste sorteio." : '')
         );
+    }
+
+    public function atualizarTimes(Request $request, PeladaJogo $jogo, Sorteio $sorteio): RedirectResponse
+    {
+        $this->authorizeOwner($jogo);
+        abort_unless($sorteio->pelada_jogo_id === $jogo->id, 404);
+
+        $data = $request->validate([
+            'times' => ['nullable', 'array'],
+            'times.*' => ['nullable', 'array'],
+            'times.*.*' => ['integer'],
+        ]);
+
+        $participantesValidos = $this->participantesConfirmados($jogo)->keyBy('id');
+        $participantesUsados = [];
+
+        DB::transaction(function () use ($data, $sorteio, $participantesValidos, &$participantesUsados) {
+            foreach ($sorteio->times()->get() as $time) {
+                $ids = collect($data['times'][$time->id] ?? [])
+                    ->map(fn ($id) => (int) $id)
+                    ->filter(fn ($id) => $participantesValidos->has($id))
+                    ->reject(function ($id) use (&$participantesUsados) {
+                        if (in_array($id, $participantesUsados, true)) {
+                            return true;
+                        }
+
+                        $participantesUsados[] = $id;
+
+                        return false;
+                    })
+                    ->values();
+
+                $time->jogadores()->delete();
+
+                foreach ($ids as $ordem => $participanteId) {
+                    $participante = $participantesValidos->get($participanteId);
+
+                    $time->jogadores()->create([
+                        'pelada_jogo_participante_id' => $participante->id,
+                        'user_id' => $participante->user_id,
+                        'ordem' => $ordem + 1,
+                    ]);
+                }
+            }
+        });
+
+        return back()->with('status', 'Times atualizados.');
     }
 
     /** @return Collection<int, PeladaJogoParticipante> */
@@ -208,3 +263,4 @@ class SorteioController extends Controller
         $this->redirectIfNotPeladaOwner($jogo->pelada);
     }
 }
+

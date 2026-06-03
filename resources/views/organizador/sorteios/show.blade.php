@@ -87,6 +87,19 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <label class="text-sm font-medium text-slate-700">
+                    Numero de times
+                    <input
+                        type="number"
+                        name="quantidade_times"
+                        id="quantidade_times"
+                        min="1"
+                        max="20"
+                        value="{{ old('quantidade_times', 2) }}"
+                        required
+                        class="mt-1 w-full rounded-md border-slate-300"
+                    >
+                </label>
+                <label class="text-sm font-medium text-slate-700">
                     Jogadores por time (hoje)
                     <input
                         type="number"
