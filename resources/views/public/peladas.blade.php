@@ -3,8 +3,6 @@
         $sportIcon = fn (string $name): string => match (str($name)->lower()->ascii()->toString()) {
             'futebol', 'futebol society' => 'futebol_flat.png',
             'society' => 'society_flat.png',
-            'basquete', 'basket' => 'basquete_flat.png',
-            'volei', 'volei' => 'volei_flat.png',
             default => 'ui_player.png',
         };
 
@@ -48,7 +46,7 @@
                 @endforeach
 
                 @php
-                    $esportesList = $esportes ?? App\Models\Esporte::where('ativo', true)->orderBy('nome')->get();
+                    $esportesList = $esportes ?? App\Models\Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get();
                 @endphp
                 <select name="esporte_id" onchange="this.form.submit()" class="mt-0 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900">
                     <option value="" @if(!request('esporte_id')) selected @endif>Todos</option>

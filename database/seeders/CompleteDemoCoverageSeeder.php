@@ -44,14 +44,14 @@ class CompleteDemoCoverageSeeder extends Seeder
 
     private function normalizeUsers(): void
     {
-        User::query()->update(['password' => Hash::make('asfdvaiterpelada11')]);
+        User::query()->update(['password' => Hash::make('vaiterpelada11')]);
 
         User::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Administrador',
                 'apelido' => 'Admin',
-                'password' => Hash::make('asfdvaiterpelada11'),
+                'password' => Hash::make('vaiterpelada11'),
                 'role' => 'admin',
                 'status' => 'ativo',
                 'active' => true,

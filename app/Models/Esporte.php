@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Esporte extends Model
 {
+    public const ALLOWED_SLUGS = ['futebol', 'futsal', 'society'];
+
     protected $fillable = ['nome', 'slug', 'icone', 'ativo'];
 
     protected $casts = ['ativo' => 'boolean'];
@@ -14,6 +16,11 @@ class Esporte extends Model
     public function peladas(): HasMany
     {
         return $this->hasMany(Pelada::class);
+    }
+
+    public function scopePermitidos($query)
+    {
+        return $query->whereIn('slug', self::ALLOWED_SLUGS);
     }
 
     public function imagemPadraoPath(): string

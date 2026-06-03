@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PeladaController extends Controller
@@ -36,7 +37,7 @@ class PeladaController extends Controller
 
         return view('organizador.peladas.form', [
             'pelada' => new Pelada(),
-            'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
         ]);
     }
 
@@ -80,7 +81,7 @@ class PeladaController extends Controller
 
         return view('organizador.peladas.form', [
             'pelada' => $pelada,
-            'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
         ]);
     }
 
@@ -109,7 +110,10 @@ class PeladaController extends Controller
     private function validateData(Request $request): array
     {
         return $request->validate([
-            'esporte_id' => ['required', 'exists:esportes,id'],
+            'esporte_id' => [
+                'required',
+                Rule::exists('esportes', 'id')->where(fn ($query) => $query->whereIn('slug', Esporte::ALLOWED_SLUGS)->where('ativo', true)),
+            ],
             'nome' => ['required', 'max:255'],
             'descricao' => ['nullable', 'max:200'],
             'data_fundacao' => ['nullable', 'date', 'before_or_equal:today'],

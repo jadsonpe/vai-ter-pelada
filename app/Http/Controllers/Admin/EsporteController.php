@@ -13,13 +13,14 @@ class EsporteController extends Controller
 {
     public function index(): View
     {
-        return view('admin.esportes.index', ['esportes' => Esporte::orderBy('nome')->get()]);
+        return view('admin.esportes.index', ['esportes' => Esporte::permitidos()->orderBy('nome')->get()]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate(['nome' => ['required', 'max:255'], 'icone' => ['nullable', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
         $data['slug'] = Str::slug($data['nome']);
+        abort_unless(in_array($data['slug'], Esporte::ALLOWED_SLUGS, true), 422);
         $data['ativo'] = $request->boolean('ativo', true);
         Esporte::create($data);
 
@@ -30,6 +31,7 @@ class EsporteController extends Controller
     {
         $data = $request->validate(['nome' => ['required', 'max:255'], 'icone' => ['nullable', 'max:255'], 'ativo' => ['nullable', 'boolean']]);
         $data['slug'] = Str::slug($data['nome']);
+        abort_unless(in_array($data['slug'], Esporte::ALLOWED_SLUGS, true), 422);
         $data['ativo'] = $request->boolean('ativo');
         $esporte->update($data);
 

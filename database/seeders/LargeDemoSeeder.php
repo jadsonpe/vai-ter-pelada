@@ -16,7 +16,7 @@ class LargeDemoSeeder extends Seeder
     public function run(): void
     {
         // Ensure basic esportes exist
-        $names = ['Futebol', 'Futsal', 'Society', 'Volei', 'Basquete'];
+        $names = ['Futebol', 'Futsal', 'Society'];
         foreach ($names as $nome) {
             Esporte::firstOrCreate([
                 'slug' => Str::slug($nome),
@@ -26,14 +26,14 @@ class LargeDemoSeeder extends Seeder
             ]);
         }
 
-        $esportes = Esporte::where('ativo', true)->pluck('id')->toArray();
+        $esportes = Esporte::permitidos()->where('ativo', true)->pluck('id')->toArray();
 
         // Create an organizer if missing
         $organizador = User::firstOrCreate([
             'email' => 'organizador@vaiterpelada.test',
         ], [
             'name' => 'Organizador Demo',
-            'password' => bcrypt('asfdvaiterpelada11'),
+            'password' => bcrypt('vaiterpelada11'),
             'role' => 'organizador',
             'status' => 'ativo',
             'cidade' => 'São Paulo',

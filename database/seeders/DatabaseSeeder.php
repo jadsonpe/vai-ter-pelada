@@ -20,14 +20,14 @@ class DatabaseSeeder extends Seeder
     {
         User::firstOrCreate(
             ['email' => 'admin@vaiterpelada.test'],
-            ['name' => 'Administrador', 'password' => Hash::make('asfdvaiterpelada11'), 'role' => 'admin']
+            ['name' => 'Administrador', 'password' => Hash::make('vaiterpelada11'), 'role' => 'admin']
         );
 
         User::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Administrador',
-                'password' => Hash::make('asfdvaiterpelada11'),
+                'password' => Hash::make('vaiterpelada11'),
                 'role' => 'admin',
                 'status' => 'ativo',
                 'active' => true,
@@ -37,10 +37,10 @@ class DatabaseSeeder extends Seeder
 
         User::firstOrCreate(
             ['email' => 'organizador@vaiterpelada.test'],
-            ['name' => 'Organizador Demo', 'password' => Hash::make('asfdvaiterpelada11'), 'role' => 'organizador']
+            ['name' => 'Organizador Demo', 'password' => Hash::make('vaiterpelada11'), 'role' => 'organizador']
         );
 
-        foreach (['Futebol', 'Futsal', 'Society', 'Volei', 'Basquete'] as $nome) {
+        foreach (['Futebol', 'Futsal', 'Society'] as $nome) {
             Esporte::firstOrCreate(
                 ['slug' => str($nome)->slug()->toString()],
                 ['nome' => $nome, 'ativo' => true]

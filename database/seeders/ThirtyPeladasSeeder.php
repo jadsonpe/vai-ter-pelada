@@ -17,10 +17,10 @@ class ThirtyPeladasSeeder extends Seeder
             return;
         }
 
-        $esportes = Esporte::where('ativo', true)->orderBy('id')->get();
+        $esportes = Esporte::permitidos()->where('ativo', true)->orderBy('id')->get();
 
         if ($esportes->isEmpty()) {
-            foreach (['Futebol', 'Futsal', 'Society', 'Volei', 'Basquete'] as $nome) {
+            foreach (['Futebol', 'Futsal', 'Society'] as $nome) {
                 $esportes->push(Esporte::firstOrCreate(
                     ['slug' => Str::slug($nome)],
                     ['nome' => $nome, 'ativo' => true]

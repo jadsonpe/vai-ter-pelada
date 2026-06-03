@@ -92,7 +92,7 @@ class BrazilFullDemoSeeder extends Seeder
 
     private function seedEsportes(): void
     {
-        foreach (['Futebol', 'Futsal', 'Society', 'Volei', 'Basquete'] as $nome) {
+        foreach (['Futebol', 'Futsal', 'Society'] as $nome) {
             Esporte::updateOrCreate(
                 ['slug' => Str::slug($nome)],
                 ['nome' => $nome, 'ativo' => true]
@@ -110,7 +110,7 @@ class BrazilFullDemoSeeder extends Seeder
                 [
                     'name' => 'Organizador '.$state['uf'],
                     'apelido' => 'Org '.$state['uf'],
-                    'password' => Hash::make('asfdvaiterpelada11'),
+                    'password' => Hash::make('vaiterpelada11'),
                     'role' => 'organizador',
                     'status' => 'ativo',
                     'active' => true,
@@ -135,7 +135,7 @@ class BrazilFullDemoSeeder extends Seeder
                     [
                         'name' => $name,
                         'apelido' => explode(' ', $name)[0].' '.$state['uf'],
-                        'password' => Hash::make('asfdvaiterpelada11'),
+                        'password' => Hash::make('vaiterpelada11'),
                         'role' => 'jogador',
                         'status' => $blocked ? 'bloqueado' : 'ativo',
                         'active' => ! $blocked,
@@ -161,7 +161,7 @@ class BrazilFullDemoSeeder extends Seeder
 
     private function seedPlayerProfiles(array $users): void
     {
-        $esportes = Esporte::orderBy('id')->get();
+        $esportes = Esporte::permitidos()->orderBy('id')->get();
         $themes = array_keys(PlayerProfile::gradientCoverOptions());
         $covers = array_keys(PlayerProfile::imageCoverOptions());
 
@@ -282,7 +282,7 @@ class BrazilFullDemoSeeder extends Seeder
 
     private function seedPeladas(array $users): array
     {
-        $esportes = Esporte::orderBy('id')->get();
+        $esportes = Esporte::permitidos()->orderBy('id')->get();
         $peladas = collect();
         $players = $users['players']->values();
         $memberStatuses = ['ativo', 'pendente', 'bloqueado', 'saiu', 'inativo'];

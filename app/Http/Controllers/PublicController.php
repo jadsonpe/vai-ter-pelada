@@ -28,7 +28,7 @@ class PublicController extends Controller
 
         return view('public.home', [
             'banners' => Cache::remember('public.home.banners', now()->addMinutes(10), fn () => Banner::where('ativo', true)->latest()->get()),
-            'peladas' => Cache::remember('public.home.peladas', now()->addMinutes(5), fn () => Pelada::with(['esporte', 'organizador'])->where('ativa', true)->latest()->take(6)->get()),
+            'peladas' => Cache::remember('public.home.peladas.football', now()->addMinutes(5), fn () => Pelada::with(['esporte', 'organizador'])->whereHas('esporte', fn ($query) => $query->permitidos())->where('ativa', true)->latest()->take(6)->get()),
             'patrocinadores' => Cache::remember('public.home.patrocinadores', now()->addMinutes(30), fn () => Patrocinador::where('ativo', true)->get()),
         ]);
     }
@@ -36,6 +36,7 @@ class PublicController extends Controller
     public function peladas(Request $request): View
     {
         $peladasQuery = Pelada::with(['esporte', 'organizador'])
+            ->whereHas('esporte', fn ($query) => $query->permitidos())
             ->where('ativa', true)
             ->where('status', 'ativa');
 
@@ -135,6 +136,7 @@ class PublicController extends Controller
             ->whereBetween('data_hora', [now()->startOfDay(), now()->addDays(7)->endOfDay()])
             ->whereHas('pelada', function ($query) use ($request) {
                 $query->where('ativa', true)->where('status', 'ativa');
+                $query->whereHas('esporte', fn ($esporteQuery) => $esporteQuery->permitidos());
 
                 if ($request->filled('cidade')) {
                     $query->where('cidade', $request->cidade);
@@ -189,9 +191,9 @@ class PublicController extends Controller
         return view('public.peladas', [
             'peladas' => $peladasQuery->latest()->paginate(12)->withQueryString(),
             'rodadas' => $rodadasQuery->orderBy('data_hora')->paginate(6)->withQueryString(),
-            'esportes' => Cache::remember('public.filters.esportes', now()->addHour(), fn () => Esporte::where('ativo', true)->orderBy('nome')->get()),
-            'cidades' => Cache::remember('public.filters.cidades', now()->addHour(), fn () => Pelada::where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade')),
-            'bairros' => Cache::remember('public.filters.bairros', now()->addHour(), fn () => Pelada::where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro')),
+            'esportes' => Cache::remember('public.filters.esportes.football', now()->addHour(), fn () => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get()),
+            'cidades' => Cache::remember('public.filters.cidades.football', now()->addHour(), fn () => Pelada::whereHas('esporte', fn ($query) => $query->permitidos())->where('ativa', true)->whereNotNull('cidade')->distinct()->orderBy('cidade')->pluck('cidade')),
+            'bairros' => Cache::remember('public.filters.bairros.football', now()->addHour(), fn () => Pelada::whereHas('esporte', fn ($query) => $query->permitidos())->where('ativa', true)->whereNotNull('bairro')->distinct()->orderBy('bairro')->pluck('bairro')),
             'categorias' => Pelada::CATEGORIAS,
             'filtros' => $request->only(['cidade', 'bairro', 'esporte_id', 'categoria', 'q', 'price_type', 'price_min', 'price_max', 'sort']),
         ]);

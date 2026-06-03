@@ -127,11 +127,6 @@ class PlayerProfile extends Model
             's1.png' => 'Society 1',
             's2.png' => 'Society 2',
             'society3.png' => 'Society 3',
-            'basquete1.png' => 'Basquete 1',
-            'basquete2.png' => 'Basquete 2',
-            'basquete3.png' => 'Basquete 3',
-            'volei1.png' => 'Volei 1',
-            'volei2.png' => 'Volei 2',
         ];
     }
 
@@ -175,8 +170,6 @@ class PlayerProfile extends Model
         $sport = Str::lower($this->esportePrincipal?->slug ?: $this->esportePrincipal?->nome ?: '');
 
         return match (true) {
-            str_contains($sport, 'basquete') => 'fogo',
-            str_contains($sport, 'volei') => 'quadra',
             str_contains($sport, 'futsal') => 'noturno',
             str_contains($sport, 'society') => 'ouro',
             default => 'verde_campo',
@@ -198,8 +191,6 @@ class PlayerProfile extends Model
     public function coverClass(): string
     {
         return match ($this->esportePrincipal?->slug) {
-            'basquete' => 'from-orange-500 via-slate-950 to-slate-900',
-            'volei' => 'from-sky-500 via-slate-950 to-slate-900',
             'society' => 'from-lime-500 via-slate-950 to-slate-900',
             default => 'from-emerald-500 via-slate-950 to-slate-900',
         };

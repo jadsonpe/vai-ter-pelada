@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Esporte;
 use App\Models\PlayerProfile;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
@@ -52,9 +53,15 @@ class ProfileUpdateRequest extends FormRequest
             'bairro' => ['nullable', 'string', 'max:80'],
             'estado' => ['nullable', 'string', 'max:80'],
             'esporte_perfis' => ['nullable', 'array'],
-            'esporte_perfis.*.esporte_id' => ['required', 'exists:esportes,id'],
+            'esporte_perfis.*.esporte_id' => [
+                'required',
+                Rule::exists('esportes', 'id')->where(fn ($query) => $query->whereIn('slug', Esporte::ALLOWED_SLUGS)->where('ativo', true)),
+            ],
             'esporte_perfis.*.posicao' => ['nullable', 'string', 'max:80'],
-            'player_profile.esporte_principal_id' => ['nullable', 'exists:esportes,id'],
+            'player_profile.esporte_principal_id' => [
+                'nullable',
+                Rule::exists('esportes', 'id')->where(fn ($query) => $query->whereIn('slug', Esporte::ALLOWED_SLUGS)->where('ativo', true)),
+            ],
             'player_profile.posicao_favorita' => ['nullable', 'string', 'max:80'],
             'player_profile.headline' => ['nullable', 'string', 'max:120'],
             'player_profile.bio' => ['nullable', 'string', 'max:500'],

@@ -21,7 +21,7 @@ class ProfileController extends Controller
     {
         return view('perfil.edit', [
             'user' => $request->user()->load(['esportePerfis.esporte', 'playerProfile.socialLinks']),
-            'esportes' => Esporte::where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
             'imageCoverOptions' => PlayerProfile::imageCoverOptions(),
             'gradientCoverOptions' => PlayerProfile::gradientCoverOptions(),
         ]);
