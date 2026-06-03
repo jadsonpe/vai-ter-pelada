@@ -16,7 +16,9 @@ use App\Models\TorneioTimeJogador;
 use App\Services\TorneioService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -68,6 +70,7 @@ class TorneioController extends Controller
         $this->authorizeSupportedSport($pelada);
 
         $data = $this->validatedTorneio($request);
+        $this->validatedTorneioImages($request);
         $baseSlug = Str::slug($data['nome'].' '.$pelada->slug) ?: 'torneio';
         $slug = $baseSlug;
         $count = 2;
@@ -77,6 +80,7 @@ class TorneioController extends Controller
         }
 
         $torneio = $pelada->torneios()->create($data + ['slug' => $slug, 'status' => 'rascunho']);
+        $this->syncTorneioImages($request, $torneio);
 
         return redirect()
             ->route('organizador.torneios.show', $torneio)
@@ -97,7 +101,9 @@ class TorneioController extends Controller
     {
         $this->authorizeOwner($torneio->pelada);
 
+        $this->validatedTorneioImages($request);
         $torneio->update($this->validatedTorneio($request));
+        $this->syncTorneioImages($request, $torneio);
 
         return redirect()->route('organizador.torneios.show', $torneio)->with('status', 'Torneio atualizado.');
     }
@@ -116,12 +122,16 @@ class TorneioController extends Controller
             'classificacao' => $this->service->classificacao($torneio),
             'artilharia' => $this->service->artilharia($torneio),
             'disciplina' => $this->service->disciplina($torneio),
+            'torneioEncerrado' => $torneio->finalRealizada(),
         ]);
     }
 
     public function addParticipantes(Request $request, Torneio $torneio): RedirectResponse
     {
         $this->authorizeOwner($torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($torneio)) {
+            return $response;
+        }
 
         $data = $request->validate([
             'membros' => ['nullable', 'array'],
@@ -163,6 +173,9 @@ class TorneioController extends Controller
     public function updateParticipante(Request $request, TorneioParticipante $participante): RedirectResponse
     {
         $this->authorizeOwner($participante->torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($participante->torneio)) {
+            return $response;
+        }
 
         $participante->update($request->validate([
             'goleiro' => ['nullable', 'boolean'],
@@ -176,6 +189,9 @@ class TorneioController extends Controller
     public function updateParticipantesMany(Request $request, Torneio $torneio): RedirectResponse
     {
         $this->authorizeOwner($torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($torneio)) {
+            return $response;
+        }
 
         $data = $request->validate([
             'participantes' => ['nullable', 'array'],
@@ -203,6 +219,9 @@ class TorneioController extends Controller
     public function removeParticipante(TorneioParticipante $participante): RedirectResponse
     {
         $this->authorizeOwner($participante->torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($participante->torneio)) {
+            return $response;
+        }
         $participante->delete();
 
         return back()->with('status', 'Participante removido.');
@@ -211,6 +230,9 @@ class TorneioController extends Controller
     public function sortearTimes(Torneio $torneio): RedirectResponse
     {
         $this->authorizeOwner($torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($torneio)) {
+            return $response;
+        }
 
         if ($torneio->times()->exists()) {
             return back()->with('status', 'Os times ja foram sorteados. Agora voce pode apenas adicionar jogadores restantes aos times.');
@@ -262,6 +284,9 @@ class TorneioController extends Controller
     public function addJogadorTime(Request $request, TorneioTime $time): RedirectResponse
     {
         $this->authorizeOwner($time->torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($time->torneio)) {
+            return $response;
+        }
 
         $data = $request->validate([
             'torneio_participante_id' => ['nullable', 'integer', 'exists:torneio_participantes,id'],
@@ -301,6 +326,9 @@ class TorneioController extends Controller
     public function updateTime(Request $request, TorneioTime $time): RedirectResponse
     {
         $this->authorizeOwner($time->torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($time->torneio)) {
+            return $response;
+        }
 
         $time->update($request->validate(['nome' => ['required', 'string', 'max:80']]));
 
@@ -310,6 +338,9 @@ class TorneioController extends Controller
     public function gerarJogos(Torneio $torneio): RedirectResponse
     {
         $this->authorizeOwner($torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($torneio)) {
+            return $response;
+        }
 
         $torneio->load('times');
         if ($torneio->times->count() < 2) {
@@ -333,6 +364,9 @@ class TorneioController extends Controller
     public function resultado(Request $request, TorneioJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->torneio->pelada);
+        if ($response = $this->redirectIfTorneioEncerrado($jogo->torneio)) {
+            return $response;
+        }
         $this->normalizarNumerosDaSumula($request);
 
         $data = $request->validate([
@@ -427,7 +461,77 @@ class TorneioController extends Controller
         $this->preencherClassificadosDosGrupos($jogo->torneio);
         $this->avancarVencedor($jogo);
 
+        if ($jogo->fase === 'final' && $jogo->status === 'finalizado') {
+            $jogo->torneio->update(['status' => 'finalizado']);
+        }
+
         return back()->with('status', 'Resultado salvo.');
+    }
+
+    private function redirectIfTorneioEncerrado(Torneio $torneio): ?RedirectResponse
+    {
+        if (! $torneio->finalRealizada()) {
+            return null;
+        }
+
+        return back()->with('status', 'A final ja foi realizada. Times, jogadores e sumulas deste torneio estao bloqueados.');
+    }
+
+    private function validatedTorneioImages(Request $request): void
+    {
+        $request->validate([
+            'imagem' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'mural_fotos' => ['nullable', 'array', 'max:4'],
+            'mural_fotos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remover_imagem' => ['nullable', 'boolean'],
+            'remover_mural_fotos' => ['nullable', 'array'],
+            'remover_mural_fotos.*' => ['string'],
+        ]);
+    }
+
+    private function syncTorneioImages(Request $request, Torneio $torneio): void
+    {
+        if ($request->boolean('remover_imagem') && $torneio->imagem) {
+            Storage::disk('public')->delete($torneio->imagem);
+            $torneio->forceFill(['imagem' => null])->save();
+        }
+
+        if ($request->hasFile('imagem')) {
+            if ($torneio->imagem) {
+                Storage::disk('public')->delete($torneio->imagem);
+            }
+
+            $torneio->forceFill([
+                'imagem' => $this->storeTorneioImage($request->file('imagem')),
+            ])->save();
+        }
+
+        $mural = collect($torneio->mural_fotos ?: [])->filter()->values();
+        $removidas = collect($request->input('remover_mural_fotos', []))->filter()->values();
+
+        if ($removidas->isNotEmpty()) {
+            $removidas
+                ->filter(fn ($path) => $mural->contains($path))
+                ->each(fn ($path) => Storage::disk('public')->delete($path));
+
+            $mural = $mural->reject(fn ($path) => $removidas->contains($path))->values();
+        }
+
+        $uploads = collect($request->file('mural_fotos', []))->filter();
+        $availableSlots = max(0, 4 - $mural->count());
+
+        $uploads->take($availableSlots)->each(function (UploadedFile $file) use (&$mural) {
+            $mural->push($this->storeTorneioImage($file));
+        });
+
+        if ($request->hasFile('mural_fotos') || $removidas->isNotEmpty()) {
+            $torneio->forceFill(['mural_fotos' => $mural->take(4)->values()->all()])->save();
+        }
+    }
+
+    private function storeTorneioImage(UploadedFile $file): string
+    {
+        return $file->store('torneios', 'public');
     }
 
     private function normalizarNumerosDaSumula(Request $request): void

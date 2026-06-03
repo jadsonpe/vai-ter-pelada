@@ -8,13 +8,17 @@ return [
     'date' => 'O campo :attribute deve ser uma data valida.',
     'email' => 'O campo :attribute deve ser um endereco de e-mail valido.',
     'exists' => 'O valor selecionado em :attribute e invalido.',
+    'image' => 'O campo :attribute deve ser uma imagem.',
     'in' => 'O valor selecionado em :attribute e invalido.',
     'integer' => 'O campo :attribute deve ser um numero inteiro.',
     'max' => [
+        'array' => 'O campo :attribute nao pode ter mais que :max itens.',
+        'file' => 'O arquivo :attribute nao pode ter mais que :max kilobytes.',
         'integer' => 'O campo :attribute nao pode ser maior que :max.',
         'numeric' => 'O campo :attribute nao pode ser maior que :max.',
         'string' => 'O campo :attribute nao pode ter mais que :max caracteres.',
     ],
+    'mimes' => 'O campo :attribute deve ser um arquivo do tipo: :values.',
     'min' => [
         'integer' => 'O campo :attribute deve ser pelo menos :min.',
         'numeric' => 'O campo :attribute deve ser pelo menos :min.',
@@ -43,5 +47,8 @@ return [
         'cartoes.*.tipo' => 'tipo do cartao',
         'cartoes.*.tipos' => 'tipos de cartao',
         'cartoes.*.quantidade' => 'quantidade de cartoes',
+        'imagem' => 'imagem do torneio',
+        'mural_fotos' => 'mural de fotos',
+        'mural_fotos.*' => 'foto do mural',
     ],
 ];

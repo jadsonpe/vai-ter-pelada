@@ -1,4 +1,13 @@
 <x-app-layout>
+    @php
+        $cardIcon = fn (string $color) => match ($color) {
+            'amarelo' => '<span class="inline-block h-4 w-3 rounded-sm bg-yellow-400 align-middle ring-1 ring-yellow-500/40"></span>',
+            'vermelho' => '<span class="inline-block h-4 w-3 rounded-sm bg-red-600 align-middle ring-1 ring-red-700/40"></span>',
+            'azul' => '<span class="inline-block h-4 w-3 rounded-sm bg-blue-600 align-middle ring-1 ring-blue-700/40"></span>',
+            default => '',
+        };
+    @endphp
+
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         @include('shared.status')
 
@@ -13,6 +22,28 @@
                 <a href="https://wa.me/?text={{ urlencode('Acompanhe o torneio '.$torneio->nome.': '.route('torneios.public.show', $torneio)) }}" target="_blank" rel="noopener noreferrer" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Compartilhar</a>
             </div>
         </div>
+
+        @if($torneioEncerrado)
+            <div class="mt-6 rounded-lg border border-slate-300 bg-slate-100 p-4 text-sm font-semibold text-slate-700">
+                Final realizada. Times, jogadores e sumulas deste torneio estao bloqueados para preservar o historico.
+            </div>
+        @endif
+
+        @if($torneio->imagemUrl() || collect($torneio->mural_fotos ?: [])->isNotEmpty())
+            <section class="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                @if($torneio->imagemUrl())
+                    <img src="{{ $torneio->imagemUrl() }}" alt="Imagem do torneio {{ $torneio->nome }}" class="h-56 w-full object-cover md:h-72">
+                @endif
+
+                @if(collect($torneio->mural_fotos ?: [])->isNotEmpty())
+                    <div class="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach($torneio->muralFotosUrls() as $fotoUrl)
+                            <img src="{{ $fotoUrl }}" alt="Foto do mural do torneio" class="h-36 w-full rounded-lg object-cover">
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+        @endif
 
         <div class="mt-6 grid gap-4 md:grid-cols-4">
             <div class="rounded-lg border border-slate-200 bg-white p-4">
@@ -71,27 +102,31 @@
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <h2 class="text-xl font-bold text-slate-950">Adicionar participantes</h2>
                 <p class="mt-1 text-sm text-slate-600">Selecione membros da pelada ou cole nomes avulsos, um por linha.</p>
-                <form method="POST" action="{{ route('organizador.torneios.participantes.store', $torneio) }}" class="mt-4 space-y-4">
-                    @csrf
-                    <div>
-                        <label for="membros-torneio" class="text-sm font-medium text-slate-700">Membros da pelada</label>
-                        <select id="membros-torneio" name="membros[]" multiple size="10" class="mt-1 w-full rounded-md border-slate-300 text-sm">
-                            @foreach($membrosDisponiveis->groupBy('tipo') as $tipo => $membrosPorTipo)
-                                <optgroup label="{{ ucfirst($tipo) }}">
-                                    @foreach($membrosPorTipo->sortBy(fn ($membro) => $membro->nomeExibicao()) as $membro)
-                                        <option value="{{ $membro->id }}">{{ $membro->nomeExibicao() }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
-                        <p class="mt-1 text-xs text-slate-500">No computador, use Ctrl ou Shift para selecionar varios. No celular, toque nos nomes desejados.</p>
-                    </div>
-                    <div>
-                        <label for="nomes-manuais" class="text-sm font-medium text-slate-700">Participantes manuais</label>
-                        <textarea id="nomes-manuais" name="nomes_manuais" rows="4" class="mt-1 w-full rounded-md border-slate-300" placeholder="Ex: Joao da Silva&#10;Carlos Pereira&#10;Rafael Santos"></textarea>
-                    </div>
-                    <button class="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Adicionar selecionados</button>
-                </form>
+                @if($torneioEncerrado)
+                    <p class="mt-4 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">Participantes bloqueados apos a final.</p>
+                @else
+                    <form method="POST" action="{{ route('organizador.torneios.participantes.store', $torneio) }}" class="mt-4 space-y-4">
+                        @csrf
+                        <div>
+                            <label for="membros-torneio" class="text-sm font-medium text-slate-700">Membros da pelada</label>
+                            <select id="membros-torneio" name="membros[]" multiple size="10" class="mt-1 w-full rounded-md border-slate-300 text-sm">
+                                @foreach($membrosDisponiveis->groupBy('tipo') as $tipo => $membrosPorTipo)
+                                    <optgroup label="{{ ucfirst($tipo) }}">
+                                        @foreach($membrosPorTipo->sortBy(fn ($membro) => $membro->nomeExibicao()) as $membro)
+                                            <option value="{{ $membro->id }}">{{ $membro->nomeExibicao() }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-slate-500">No computador, use Ctrl ou Shift para selecionar varios. No celular, toque nos nomes desejados.</p>
+                        </div>
+                        <div>
+                            <label for="nomes-manuais" class="text-sm font-medium text-slate-700">Participantes manuais</label>
+                            <textarea id="nomes-manuais" name="nomes_manuais" rows="4" class="mt-1 w-full rounded-md border-slate-300" placeholder="Ex: Joao da Silva&#10;Carlos Pereira&#10;Rafael Santos"></textarea>
+                        </div>
+                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Adicionar selecionados</button>
+                    </form>
+                @endif
                 </div>
 
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -151,7 +186,7 @@
 
                                         <label class="text-xs font-semibold text-slate-500 md:text-sm md:font-medium md:text-slate-700">
                                             <span class="md:hidden">Funcao</span>
-                                            <select name="participantes[{{ $participante->id }}][perfil]" class="mt-1 w-full rounded-md border-slate-300 text-sm md:mt-0">
+                                            <select name="participantes[{{ $participante->id }}][perfil]" class="mt-1 w-full rounded-md border-slate-300 text-sm md:mt-0" @disabled($torneioEncerrado)>
                                                 <option value="normal" @selected($perfilSorteio === 'normal')>Normal</option>
                                                 <option value="goleiro" @selected($perfilSorteio === 'goleiro')>Goleiro</option>
                                                 <option value="cabeca" @selected($perfilSorteio === 'cabeca')>Cabeca de chave</option>
@@ -161,13 +196,14 @@
 
                                         <label class="text-xs font-semibold text-slate-500 md:text-sm md:font-medium md:text-slate-700">
                                             <span class="md:hidden">Status</span>
-                                            <select name="participantes[{{ $participante->id }}][status]" class="mt-1 w-full rounded-md border-slate-300 text-sm md:mt-0">
+                                            <select name="participantes[{{ $participante->id }}][status]" class="mt-1 w-full rounded-md border-slate-300 text-sm md:mt-0" @disabled($torneioEncerrado)>
                                                 <option value="ativo" @selected($participante->status === 'ativo')>Ativo</option>
                                                 <option value="removido" @selected($participante->status === 'removido')>Removido</option>
                                             </select>
                                         </label>
 
                                         <div class="flex justify-end">
+                                            @unless($torneioEncerrado)
                                             <button
                                                 type="submit"
                                                 form="remover-participante-{{ $participante->id }}"
@@ -184,6 +220,9 @@
                                                 </svg>
                                                 <span class="sr-only">Remover participante</span>
                                             </button>
+                                            @else
+                                                <span class="rounded-md bg-slate-100 px-3 py-2 text-xs font-bold text-slate-500">Bloqueado</span>
+                                            @endunless
                                         </div>
                                     </div>
                                 @empty
@@ -192,7 +231,7 @@
                             </div>
                         </div>
 
-                        @if($torneio->participantes->isNotEmpty())
+                        @if($torneio->participantes->isNotEmpty() && ! $torneioEncerrado)
                             <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <p class="text-xs text-slate-500">As funcoes ajudam a equilibrar o sorteio antes da primeira montagem dos times.</p>
                                 <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Salvar configuracoes</button>
@@ -254,11 +293,13 @@
                             <p class="mt-1 text-sm text-slate-600">{{ $torneio->jogadores_por_time }} jogadores por time. Restantes ficam fora do sorteio.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            @if($torneio->times->isEmpty())
-                                <form method="POST" action="{{ route('organizador.torneios.times.sortear', $torneio) }}">
+                            @if($torneio->times->isEmpty() && ! $torneioEncerrado)
+                                <form method="POST" action="{{ route('organizador.torneios.times.sortear', $torneio) }}" data-loading-submit data-loading-message="Sorteando times...">
                                     @csrf
                                     <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Sortear times</button>
                                 </form>
+                            @elseif($torneio->times->isEmpty())
+                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Sorteio bloqueado</span>
                             @else
                                 <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Sorteio fechado</span>
                                 <button
@@ -280,30 +321,36 @@
                         <div class="mt-4 grid gap-3 md:grid-cols-2">
                             @foreach($torneio->times->sortBy('ordem') as $time)
                                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                                    <form method="POST" action="{{ route('organizador.torneios.times.update', $time) }}" class="flex gap-2">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input name="nome" value="{{ $time->nome }}" class="min-w-0 flex-1 rounded-md border-slate-300 text-sm">
-                                        <button class="rounded-md bg-white px-3 text-xs font-semibold text-emerald-700 ring-1 ring-slate-200">OK</button>
-                                    </form>
+                                    @if($torneioEncerrado)
+                                        <h3 class="font-bold text-slate-950">{{ $time->nome }}</h3>
+                                    @else
+                                        <form method="POST" action="{{ route('organizador.torneios.times.update', $time) }}" class="flex gap-2">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input name="nome" value="{{ $time->nome }}" class="min-w-0 flex-1 rounded-md border-slate-300 text-sm">
+                                            <button class="rounded-md bg-white px-3 text-xs font-semibold text-emerald-700 ring-1 ring-slate-200">OK</button>
+                                        </form>
+                                    @endif
                                     <ul class="mt-3 space-y-1 text-sm text-slate-700">
                                         @foreach($time->jogadores->sortBy('ordem') as $jogador)
                                             <li>{{ $jogador->participante->nomeExibicao() }}</li>
                                         @endforeach
                                     </ul>
-                                    <form method="POST" action="{{ route('organizador.torneios.times.jogadores.store', $time) }}" class="mt-3 space-y-2 rounded-md border border-dashed border-slate-300 bg-white p-3">
-                                        @csrf
-                                        <select name="torneio_participante_id" class="w-full rounded-md border-slate-300 text-sm">
-                                            <option value="">Adicionar jogador restante</option>
-                                            @foreach($restantes->sortBy(fn ($p) => $p->nomeExibicao()) as $participanteRestante)
-                                                <option value="{{ $participanteRestante->id }}">{{ $participanteRestante->nomeExibicao() }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="flex flex-col gap-2 sm:flex-row">
-                                            <input name="nome_manual" class="min-w-0 flex-1 rounded-md border-slate-300 text-sm" placeholder="Ou digite um nome manual">
-                                            <button class="rounded-md border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Adicionar</button>
-                                        </div>
-                                    </form>
+                                    @unless($torneioEncerrado)
+                                        <form method="POST" action="{{ route('organizador.torneios.times.jogadores.store', $time) }}" class="mt-3 space-y-2 rounded-md border border-dashed border-slate-300 bg-white p-3">
+                                            @csrf
+                                            <select name="torneio_participante_id" class="w-full rounded-md border-slate-300 text-sm">
+                                                <option value="">Adicionar jogador restante</option>
+                                                @foreach($restantes->sortBy(fn ($p) => $p->nomeExibicao()) as $participanteRestante)
+                                                    <option value="{{ $participanteRestante->id }}">{{ $participanteRestante->nomeExibicao() }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="flex flex-col gap-2 sm:flex-row">
+                                                <input name="nome_manual" class="min-w-0 flex-1 rounded-md border-slate-300 text-sm" placeholder="Ou digite um nome manual">
+                                                <button class="rounded-md border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Adicionar</button>
+                                            </div>
+                                        </form>
+                                    @endunless
                                 </div>
                             @endforeach
                         </div>
@@ -316,17 +363,28 @@
                         @endif
                     </div>
 
-                    <form method="POST" action="{{ route('organizador.torneios.jogos.gerar', $torneio) }}" class="mt-4">
-                        @csrf
-                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Gerar jogos do torneio</button>
-                    </form>
+                    @unless($torneioEncerrado)
+                        <form method="POST" action="{{ route('organizador.torneios.jogos.gerar', $torneio) }}" class="mt-4" data-loading-submit data-loading-message="Gerando tabela de jogos...">
+                            @csrf
+                            <button class="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Gerar jogos do torneio</button>
+                        </form>
+                    @else
+                        <p class="mt-4 rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600">Tabela bloqueada apos a final.</p>
+                    @endunless
                 </div>
 
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 class="text-xl font-bold text-slate-950">Classificação</h2>
                     <div class="mt-4 overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-500"><tr><th class="p-2">Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th><th>CA</th><th>CV</th><th>AZ</th></tr></thead>
+                            <thead class="bg-slate-50 text-slate-500">
+                                <tr>
+                                    <th class="p-2">Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
+                                    <th>{!! $cardIcon('amarelo') !!}</th>
+                                    <th>{!! $cardIcon('vermelho') !!}</th>
+                                    <th>{!! $cardIcon('azul') !!}</th>
+                                </tr>
+                            </thead>
                             <tbody class="divide-y divide-slate-100">
                                 @foreach($classificacao as $row)
                                     <tr><td class="p-2 font-semibold">{{ $row['time']->nome }}</td><td>{{ $row['pontos'] }}</td><td>{{ $row['jogos'] }}</td><td>{{ $row['vitorias'] }}</td><td>{{ $row['empates'] }}</td><td>{{ $row['derrotas'] }}</td><td>{{ $row['gols_pro'] }}</td><td>{{ $row['gols_contra'] }}</td><td>{{ $row['saldo'] }}</td><td>{{ $row['amarelos'] }}</td><td>{{ $row['vermelhos'] }}</td><td>{{ $row['azuis'] ?? 0 }}</td></tr>
@@ -383,6 +441,19 @@
                             </div>
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <span class="inline-flex justify-center rounded-full px-3 py-1 text-xs font-semibold {{ $jogoFinalizado ? 'bg-slate-700 text-white' : 'bg-amber-50 text-amber-800' }}">{{ $jogoFinalizado ? 'sumula salva' : $jogo->status }} @if($jogo->wo) - W.O. @endif</span>
+                                @if($torneioEncerrado)
+                                    <button
+                                        type="button"
+                                        class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                        data-toggle-target="sumula-jogo-{{ $jogo->id }}"
+                                        aria-controls="sumula-jogo-{{ $jogo->id }}"
+                                        aria-expanded="false"
+                                        data-label-open="Ver sumula"
+                                        data-label-close="Ocultar sumula"
+                                    >
+                                        Ver sumula
+                                    </button>
+                                @else
                                 <button
                                     type="button"
                                     class="rounded-md border px-3 py-2 text-sm font-semibold {{ $jogoFinalizado ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50' }}"
@@ -394,9 +465,11 @@
                                 >
                                     Lançar súmula
                                 </button>
+                                @endif
                             </div>
                         </div>
 
+                        @unless($torneioEncerrado)
                         <form
                             id="sumula-jogo-{{ $jogo->id }}"
                             method="POST"
@@ -458,6 +531,84 @@
 
                             <button class="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white lg:col-span-6">Salvar súmula</button>
                         </form>
+                        @endunless
+
+                        @if($torneioEncerrado)
+                            <div id="sumula-jogo-{{ $jogo->id }}" class="mt-4 hidden space-y-4 rounded-lg border border-slate-200 bg-white p-4">
+                                <div class="grid gap-3 md:grid-cols-3">
+                                    <div class="rounded-lg bg-slate-50 p-3">
+                                        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Placar</p>
+                                        <p class="mt-1 text-lg font-black text-slate-950">{{ $jogo->gols_a ?? 0 }} x {{ $jogo->gols_b ?? 0 }}</p>
+                                    </div>
+                                    <div class="rounded-lg bg-slate-50 p-3">
+                                        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Vencedor</p>
+                                        <p class="mt-1 font-bold text-slate-950">{{ $jogo->vencedor?->nome ?: 'Nao informado' }}</p>
+                                    </div>
+                                    <div class="rounded-lg bg-slate-50 p-3">
+                                        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Decisao</p>
+                                        <p class="mt-1 font-bold text-slate-950">
+                                            @if($jogo->wo)
+                                                W.O.
+                                            @elseif($jogo->decidido_penaltis)
+                                                Penaltis
+                                            @else
+                                                Tempo normal
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-4 lg:grid-cols-2">
+                                    <div class="rounded-lg border border-slate-200 p-4">
+                                        <h4 class="font-bold text-slate-950">Gols</h4>
+                                        <div class="mt-3 space-y-2 text-sm">
+                                            @forelse($jogo->gols->groupBy('torneio_time_id') as $timeId => $golsDoTime)
+                                                <div class="rounded-md bg-slate-50 p-3">
+                                                    <p class="font-bold text-slate-800">
+                                                        {{ (int) $timeId === (int) $jogo->time_a_id ? ($jogo->timeA?->nome ?: 'Time casa') : ($jogo->timeB?->nome ?: 'Time visitante') }}
+                                                    </p>
+                                                    <ul class="mt-2 space-y-1 text-slate-700">
+                                                        @foreach($golsDoTime as $gol)
+                                                            <li>{{ $gol->participante?->nomeExibicao() ?: 'Jogador' }} - {{ $gol->quantidade }} gol(s)</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @empty
+                                                <p class="rounded-md bg-slate-50 p-3 text-slate-500">Nenhum gol registrado para este jogo.</p>
+                                            @endforelse
+                                        </div>
+                                    </div>
+
+                                    <div class="rounded-lg border border-slate-200 p-4">
+                                        <h4 class="font-bold text-slate-950">Cartoes</h4>
+                                        <div class="mt-3 space-y-2 text-sm">
+                                            @forelse($jogo->cartoes->groupBy('torneio_participante_id') as $cartoesDoJogador)
+                                                @php($primeiroCartao = $cartoesDoJogador->first())
+                                                <div class="rounded-md bg-slate-50 p-3">
+                                                    <p class="font-bold text-slate-800">{{ $primeiroCartao->participante?->nomeExibicao() ?: 'Jogador' }}</p>
+                                                    <p class="mt-1 flex flex-wrap gap-2 text-slate-700">
+                                                        @foreach($cartoesDoJogador as $cartao)
+                                                            <span class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs font-bold ring-1 ring-slate-200">
+                                                                {!! $cardIcon($cartao->tipo) !!} {{ $cartao->quantidade }}
+                                                            </span>
+                                                        @endforeach
+                                                    </p>
+                                                </div>
+                                            @empty
+                                                <p class="rounded-md bg-slate-50 p-3 text-slate-500">Nenhum cartao registrado para este jogo.</p>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if($jogo->observacao)
+                                    <div class="rounded-lg border border-slate-200 p-4">
+                                        <h4 class="font-bold text-slate-950">Observacoes</h4>
+                                        <p class="mt-2 text-sm text-slate-700">{{ $jogo->observacao }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     </article>
                 @empty
                     <p class="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">Nenhum jogo gerado ainda.</p>
@@ -480,7 +631,14 @@
                 <h2 class="text-xl font-bold text-slate-950">Disciplina</h2>
                 <div class="mt-3 divide-y divide-slate-100">
                     @forelse($disciplina as $row)
-                        <div class="flex items-center justify-between py-2 text-sm"><span>{{ $row['participante']->nomeExibicao() }} <span class="text-slate-500">({{ $row['time']->nome }})</span></span><strong>{{ $row['amarelos'] }} CA / {{ $row['vermelhos'] }} CV / {{ $row['azuis'] ?? 0 }} AZ</strong></div>
+                        <div class="flex items-center justify-between gap-3 py-2 text-sm">
+                            <span>{{ $row['participante']->nomeExibicao() }} <span class="text-slate-500">({{ $row['time']->nome }})</span></span>
+                            <strong class="flex items-center gap-3">
+                                <span class="inline-flex items-center gap-1">{!! $cardIcon('amarelo') !!} {{ $row['amarelos'] }}</span>
+                                <span class="inline-flex items-center gap-1">{!! $cardIcon('vermelho') !!} {{ $row['vermelhos'] }}</span>
+                                <span class="inline-flex items-center gap-1">{!! $cardIcon('azul') !!} {{ $row['azuis'] ?? 0 }}</span>
+                            </strong>
+                        </div>
                     @empty
                         <p class="text-sm text-slate-500">Sem cartões registrados.</p>
                     @endforelse
@@ -489,7 +647,53 @@
         </div>
     </div>
 
+    <div id="torneio-loading-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 px-6 backdrop-blur-sm">
+        <div class="w-full max-w-sm rounded-lg border border-emerald-300/30 bg-white p-6 text-center shadow-2xl">
+            <div class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-emerald-50 ring-8 ring-emerald-100">
+                <img src="{{ asset('assets/img/logo/vai-ter-pelada-logo-transparente.png') }}" alt="Vai Ter Pelada" class="h-20 w-20 animate-[vtpSpin_1.4s_ease-in-out_infinite] object-contain">
+            </div>
+            <p id="torneio-loading-message" class="mt-5 text-lg font-black text-slate-950">Processando...</p>
+            <p class="mt-1 text-sm text-slate-600">Aguarde um instante.</p>
+            <div class="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full w-1/2 animate-[vtpLoading_1.2s_ease-in-out_infinite] rounded-full bg-emerald-500"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes vtpSpin {
+            0%, 100% { transform: rotate(-8deg) scale(1); }
+            50% { transform: rotate(8deg) scale(1.08); }
+        }
+
+        @keyframes vtpLoading {
+            0% { transform: translateX(-110%); }
+            100% { transform: translateX(220%); }
+        }
+    </style>
+
     <script>
+        document.querySelectorAll('[data-loading-submit]').forEach((form) => {
+            form.addEventListener('submit', () => {
+                const overlay = document.getElementById('torneio-loading-overlay');
+                const message = document.getElementById('torneio-loading-message');
+
+                if (message) {
+                    message.textContent = form.dataset.loadingMessage || 'Processando...';
+                }
+
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                }
+
+                form.querySelectorAll('button').forEach((button) => {
+                    button.disabled = true;
+                    button.classList.add('opacity-70', 'cursor-wait');
+                });
+            });
+        });
+
         document.querySelectorAll('[data-toggle-target]').forEach((button) => {
             button.addEventListener('click', () => {
                 const target = document.getElementById(button.dataset.toggleTarget);

@@ -18,6 +18,7 @@
         <form
             method="POST"
             action="{{ $torneio->exists ? route('organizador.torneios.update', $torneio) : route('organizador.peladas.torneios.store', $pelada) }}"
+            enctype="multipart/form-data"
             class="mt-6 space-y-5"
             data-tournament-wizard
         >
@@ -65,6 +66,60 @@
             <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-center gap-3">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">2</span>
+                    <div>
+                        <h2 class="font-bold text-slate-950">Imagem e mural</h2>
+                        <p class="text-sm text-slate-600">Use uma imagem principal para o torneio e ate 4 fotos no mural.</p>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
+                    <div>
+                        <label class="text-sm font-medium text-slate-700">
+                            Imagem do torneio
+                            <input type="file" name="imagem" accept="image/png,image/jpeg,image/webp" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+                        </label>
+                        <x-input-error :messages="$errors->get('imagem')" class="mt-2" />
+
+                        @if($torneio->imagemUrl())
+                            <div class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                                <img src="{{ $torneio->imagemUrl() }}" alt="Imagem do torneio" class="h-44 w-full object-cover">
+                                <label class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700">
+                                    <input type="checkbox" name="remover_imagem" value="1">
+                                    Remover imagem atual
+                                </label>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-medium text-slate-700">
+                            Mural de fotos
+                            <input type="file" name="mural_fotos[]" accept="image/png,image/jpeg,image/webp" multiple class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+                        </label>
+                        <p class="mt-1 text-xs text-slate-500">O mural aceita no maximo 4 fotos. Formatos: JPG, PNG ou WEBP.</p>
+                        <x-input-error :messages="$errors->get('mural_fotos')" class="mt-2" />
+                        <x-input-error :messages="$errors->get('mural_fotos.*')" class="mt-2" />
+
+                        @if(collect($torneio->mural_fotos ?: [])->isNotEmpty())
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                @foreach($torneio->mural_fotos ?: [] as $foto)
+                                    <div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                                        <img src="{{ asset('storage/'.$foto) }}" alt="Foto do mural" class="h-32 w-full object-cover">
+                                        <label class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700">
+                                            <input type="checkbox" name="remover_mural_fotos[]" value="{{ $foto }}">
+                                            Remover
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</span>
                     <div>
                         <h2 class="font-bold text-slate-950">Formato principal</h2>
                         <p class="text-sm text-slate-600">As opcoes mudam automaticamente conforme a quantidade de times.</p>
@@ -135,7 +190,7 @@
 
             <section data-section="fase-final" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</span>
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">4</span>
                     <div>
                         <h2 class="font-bold text-slate-950">Mata-mata final</h2>
                         <p data-final-summary class="text-sm text-slate-600">A fase inicial sera calculada conforme os classificados.</p>

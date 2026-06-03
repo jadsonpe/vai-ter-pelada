@@ -23,6 +23,8 @@ class TorneioController extends Controller
             'jogos.timeA',
             'jogos.timeB',
             'jogos.vencedor',
+            'jogos.gols.participante',
+            'jogos.cartoes.participante',
         ]);
 
         return view('public.torneio', [

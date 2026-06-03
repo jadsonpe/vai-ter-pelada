@@ -20,7 +20,7 @@
                         <x-pelada-imagem variant="thumb" :src="$pelada->imagemUrl()" :alt="$pelada->nome" empty="Sem foto" />
                         <div class="min-w-0 flex-1">
                             <h2 class="truncate font-semibold text-slate-900">{{ $pelada->nome }}</h2>
-                            <p class="mt-1 text-sm text-slate-600">{{ $pelada->esporte->nome }}</p>
+                            <p class="mt-1 text-sm text-slate-600">{{ $pelada->esporte?->nome ?: 'Esporte nao informado' }}</p>
                             <p class="mt-1 text-sm text-slate-500">{{ $pelada->capacidade }} vagas - {{ $pelada->categoriaLabel() }}</p>
                             @if($pelada->data_fundacao)
                                 <p class="mt-1 text-xs text-slate-500">Desde {{ $pelada->data_fundacao->format('d/m/Y') }}</p>
@@ -31,7 +31,7 @@
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.edit', $pelada) }}">Editar</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
-                        @if(in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true))
+                        @if($pelada->esporte && in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true) && \Illuminate\Support\Facades\Route::has('organizador.peladas.torneios.index'))
                             <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.torneios.index', $pelada) }}">Torneio</a>
                         @endif
                         <a class="inline-flex items-center justify-center rounded-md border border-slate-200 px-3 py-2 text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>
@@ -57,7 +57,7 @@
                                     <span class="font-medium">{{ $pelada->nome }}</span>
                                 </div>
                             </td>
-                            <td class="p-3">{{ $pelada->esporte->nome }}</td>
+                            <td class="p-3">{{ $pelada->esporte?->nome ?: 'Esporte nao informado' }}</td>
                             <td class="p-3">{{ $pelada->categoriaLabel() }}</td>
                             <td class="p-3">{{ $pelada->data_fundacao ? $pelada->data_fundacao->format('d/m/Y') : '-' }}</td>
                             <td class="p-3">{{ $pelada->capacidade }}</td>
@@ -66,7 +66,7 @@
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.edit', $pelada) }}">Editar</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.membros.index', $pelada) }}">Membros</a>
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.jogos.index', $pelada) }}">Rodadas</a>
-                                    @if(in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true))
+                                    @if($pelada->esporte && in_array($pelada->esporte->slug, ['futebol', 'society', 'futsal'], true) && \Illuminate\Support\Facades\Route::has('organizador.peladas.torneios.index'))
                                         <a class="text-emerald-700" href="{{ route('organizador.peladas.torneios.index', $pelada) }}">Torneio</a>
                                     @endif
                                     <a class="text-emerald-700" href="{{ route('organizador.peladas.caixa.index', $pelada) }}">Caixa</a>

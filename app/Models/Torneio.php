@@ -34,6 +34,8 @@ class Torneio extends Model
         'wo_conta_saldo',
         'status',
         'regras',
+        'imagem',
+        'mural_fotos',
     ];
 
     protected $casts = [
@@ -47,6 +49,7 @@ class Torneio extends Model
         'classificados_por_grupo' => 'integer',
         'wo_gols_vencedor' => 'integer',
         'wo_gols_perdedor' => 'integer',
+        'mural_fotos' => 'array',
     ];
 
     public function getRouteKeyName(): string
@@ -82,5 +85,29 @@ class Torneio extends Model
     public function formatoLabel(): string
     {
         return self::FORMATOS[$this->formato] ?? ucfirst(str_replace('_', ' ', $this->formato));
+    }
+
+    public function finalRealizada(): bool
+    {
+        if ($this->relationLoaded('jogos')) {
+            return $this->jogos->contains(fn ($jogo) => $jogo->fase === 'final' && $jogo->status === 'finalizado');
+        }
+
+        return $this->jogos()
+            ->where('fase', 'final')
+            ->where('status', 'finalizado')
+            ->exists();
+    }
+
+    public function imagemUrl(): ?string
+    {
+        return $this->imagem ? asset('storage/'.$this->imagem) : null;
+    }
+
+    public function muralFotosUrls(): array
+    {
+        return collect($this->mural_fotos ?: [])
+            ->map(fn ($path) => asset('storage/'.$path))
+            ->all();
     }
 }
