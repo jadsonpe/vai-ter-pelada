@@ -388,9 +388,9 @@
                     x-data="{ show: true }"
                     x-show="show"
                     x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >Salvo.</p>
+                    x-init="setTimeout(() => show = false, 4000)"
+                    class="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
+                >Perfil salvo com sucesso.</p>
             @endif
         </div>
     </form>

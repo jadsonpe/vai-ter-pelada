@@ -7,6 +7,12 @@
                 eyebrow="Minha conta"
             />
 
+            @if(session('status') === 'profile-updated')
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 shadow-sm">
+                    Perfil salvo com sucesso.
+                </div>
+            @endif
+
             <div class="rounded-lg border border-emerald-200 bg-white p-5 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
