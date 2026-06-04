@@ -22,6 +22,7 @@
         <form method="post" action="{{ route('password.update') }}" class="space-y-6">
             @csrf
             @method('put')
+            <input type="hidden" name="username" value="{{ auth()->user()->email }}" autocomplete="username">
 
             @if(auth()->user()->google_id)
                 <div class="mb-2 text-sm text-gray-700 bg-amber-50 p-3 rounded border border-amber-200">

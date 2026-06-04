@@ -18,6 +18,7 @@
         <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
             @csrf
             @method('delete')
+            <input type="hidden" name="username" value="{{ auth()->user()->email }}" autocomplete="username">
 
             <h2 class="text-lg font-medium text-gray-900">
                 Tem certeza que deseja excluir sua conta?
@@ -35,6 +36,7 @@
                     name="password"
                     type="password"
                     class="mt-1 block w-3/4"
+                    autocomplete="current-password"
                     placeholder="Senha"
                 />
 
