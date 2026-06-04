@@ -180,10 +180,11 @@
             </section>
 
             <section class="grid gap-4 lg:grid-cols-2">
+                {{-- Card: Desempenho nas Peladas --}}
                 <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <h2 class="text-xl font-black">Desempenho nas peladas</h2>
+                            <h2 class="text-xl font-black text-white">Desempenho nas peladas</h2>
                             <p class="mt-1 text-sm text-slate-400">Rodadas, gols e cartões registrados nas peladas.</p>
                         </div>
                     </div>
@@ -191,80 +192,106 @@
                     <div class="mt-5 grid gap-3 sm:grid-cols-3">
                         <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                             <p class="text-xs font-bold uppercase text-slate-400">Rodadas</p>
-                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['jogos'] }}</p>
+                            <p class="mt-1 text-2xl font-black text-white">{{ $peladaPerformance['jogos'] }}</p>
                         </div>
                         <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                             <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
-                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['gols'] }}</p>
+                            <p class="mt-1 text-2xl font-black text-white">{{ $peladaPerformance['gols'] }}</p>
                         </div>
                         <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                             <p class="text-xs font-bold uppercase text-slate-400">Cartões</p>
-                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['cartoes'] }}</p>
+                            <p class="mt-1 text-2xl font-black text-white">{{ $peladaPerformance['cartoes'] }}</p>
                         </div>
                     </div>
 
+                    {{-- Grid dos Cartões Corrigidos e Profissionais --}}
                     <div class="mt-4 grid gap-2 sm:grid-cols-3">
-                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                            <span class="h-7 w-5 rounded-sm bg-yellow-300 shadow-sm" aria-label="Cartões amarelos"></span>
+                        {{-- Cartão Amarelo --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #facc15;" aria-label="Cartões amarelos"></div>
+                                <span class="text-xs font-medium text-slate-400">Amarelos</span>
+                            </div>
                             <strong class="text-white">{{ $peladaPerformance['cartoes_amarelos'] }}</strong>
                         </div>
-                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                            <span class="h-7 w-5 rounded-sm bg-red-500 shadow-sm" aria-label="Cartões vermelhos"></span>
+                        {{-- Cartão Vermelho --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #ef4444;" aria-label="Cartões vermelhos"></div>
+                                <span class="text-xs font-medium text-slate-400">Vermelhos</span>
+                            </div>
                             <strong class="text-white">{{ $peladaPerformance['cartoes_vermelhos'] }}</strong>
                         </div>
-                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                            <span class="h-7 w-5 rounded-sm bg-sky-400 shadow-sm" aria-label="Cartões azuis"></span>
+                        {{-- Cartão Azul --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #38bdf8;" aria-label="Cartões azuis"></div>
+                                <span class="text-xs font-medium text-slate-400">Azuis</span>
+                            </div>
                             <strong class="text-white">{{ $peladaPerformance['cartoes_azuis'] }}</strong>
                         </div>
                     </div>
                 </div>
 
+                {{-- Card: Desempenho em Torneios --}}
                 <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                     <div>
-                        <h2 class="text-xl font-black">Desempenho em torneios</h2>
+                        <h2 class="text-xl font-black text-white">Desempenho em torneios</h2>
                         <p class="mt-1 text-sm text-slate-400">Números registrados em súmulas de torneios.</p>
                     </div>
 
                     @if($torneioPerformance['tem_dados'])
                         <div class="mt-5 grid gap-3 sm:grid-cols-4">
-                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Torneios</p>
-                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['torneios'] }}</p>
+                                <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['torneios'] }}</p>
                             </div>
-                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Jogos</p>
-                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['jogos'] }}</p>
+                                <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['jogos'] }}</p>
                             </div>
-                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
-                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['gols'] }}</p>
+                                <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['gols'] }}</p>
                             </div>
-                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Cartões</p>
-                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['cartoes'] }}</p>
+                                <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['cartoes'] }}</p>
                             </div>
                         </div>
 
+                        {{-- Grid dos Cartões Corrigidos e Profissionais (Torneio) --}}
                         <div class="mt-4 grid gap-2 sm:grid-cols-3">
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                                <span class="h-7 w-5 rounded-sm bg-yellow-300 shadow-sm" aria-label="Cartões amarelos"></span>
+                            {{-- Cartão Amarelo --}}
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #facc15;" aria-label="Cartões amarelos"></div>
+                                    <span class="text-xs font-medium text-slate-400">Amarelos</span>
+                                </div>
                                 <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong>
                             </div>
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                                <span class="h-7 w-5 rounded-sm bg-red-500 shadow-sm" aria-label="Cartões vermelhos"></span>
+                            {{-- Cartão Vermelho --}}
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #ef4444;" aria-label="Cartões vermelhos"></div>
+                                    <span class="text-xs font-medium text-slate-400">Vermelhos</span>
+                                </div>
                                 <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong>
                             </div>
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
-                                <span class="h-7 w-5 rounded-sm bg-sky-400 shadow-sm" aria-label="Cartões azuis"></span>
+                            {{-- Cartão Azul --}}
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #38bdf8;" aria-label="Cartões azuis"></div>
+                                    <span class="text-xs font-medium text-slate-400">Azuis</span>
+                                </div>
                                 <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong>
                             </div>
                         </div>
                     @else
-                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400">Ainda não há desempenho em torneios registrado.</p>
+                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400 border border-white/5">Ainda não há desempenho em torneios registrado.</p>
                     @endif
                 </div>
             </section>
-
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
                 <section class="space-y-6">
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
@@ -396,9 +423,10 @@
                         <h2 class="text-xl font-black">Conquistas</h2>
                         <div class="mt-4 flex flex-wrap gap-2">
                             @php
-                                $achievements = $profile->achievements
-                                    ->map(fn ($achievement) => $achievement->title)
-                                    ->merge($jogador->badges->map(fn ($badge) => $badge->nome));
+                                $achievements = collect($profile->achievements->pluck('title')->all())
+                                    ->merge($jogador->badges->pluck('nome')->all())
+                                    ->filter()
+                                    ->values();
                             @endphp
                             @forelse($achievements as $achievement)
                                 <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-100">{{ $achievement }}</span>
