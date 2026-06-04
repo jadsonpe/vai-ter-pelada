@@ -21,12 +21,10 @@
             ?: 'Posição livre';
         $coverStyle = $profile->coverStyle();
         $statCards = [
-            ['label' => 'Jogos', 'value' => $stats['jogos']],
-            ['label' => 'Gols', 'value' => $stats['gols']],
-            ['label' => 'MVPs', 'value' => $stats['mvps']],
-            ['label' => 'Media', 'value' => number_format($stats['media'], 2)],
-            ['label' => 'Cartoes', 'value' => $stats['cartoes']],
-            ['label' => 'Aproveit.', 'value' => number_format((float) $stats['aproveitamento'], 0).'%'],
+            ['label' => 'Jogos', 'value' => $stats['jogos'], 'hint' => 'Rodadas + torneios'],
+            ['label' => 'Gols', 'value' => $stats['gols'], 'hint' => 'Peladas + torneios'],
+            ['label' => 'Cartões', 'value' => $stats['cartoes'], 'hint' => 'Total recebido'],
+            ['label' => 'Avaliação', 'value' => number_format($reputation['avaliacoes_media'], 2).'/5', 'hint' => 'Últimas 5 rodadas'],
         ];
         $voteCounts = collect($voteLabels)
             ->map(fn ($label, $type) => [
@@ -163,8 +161,20 @@
             <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach($statCards as $card)
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-slate-950/20">
-                        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">{{ $card['label'] }}</p>
-                        <p class="mt-2 text-3xl font-black text-white">{{ $card['value'] }}</p>
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wide text-slate-400">{{ $card['label'] }}</p>
+                                <p class="mt-2 text-3xl font-black text-white">{{ $card['value'] }}</p>
+                            </div>
+                            @if($card['label'] === 'Cartões')
+                                <div class="flex gap-1 pt-1" aria-hidden="true">
+                                    <span class="h-6 w-4 rounded-sm bg-yellow-300 shadow-sm"></span>
+                                    <span class="h-6 w-4 rounded-sm bg-red-500 shadow-sm"></span>
+                                    <span class="h-6 w-4 rounded-sm bg-sky-400 shadow-sm"></span>
+                                </div>
+                            @endif
+                        </div>
+                        <p class="mt-3 text-xs font-semibold text-slate-500">{{ $card['hint'] }}</p>
                     </div>
                 @endforeach
             </section>
@@ -174,37 +184,45 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <h2 class="text-xl font-black">Desempenho nas peladas</h2>
-                            <p class="mt-1 text-sm text-slate-400">Rodadas, gols, cartoes e reputacao social das peladas.</p>
+                            <p class="mt-1 text-sm text-slate-400">Rodadas, gols e cartões registrados nas peladas.</p>
                         </div>
-                        <span class="rounded-full bg-emerald-400 px-3 py-1 text-xs font-black text-slate-950">{{ number_format($peladaPerformance['media'], 2) }}/5</span>
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                        <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                             <p class="text-xs font-bold uppercase text-slate-400">Rodadas</p>
                             <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['jogos'] }}</p>
                         </div>
-                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                        <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                             <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
                             <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['gols'] }}</p>
                         </div>
-                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
-                            <p class="text-xs font-bold uppercase text-slate-400">Cartoes</p>
+                        <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
+                            <p class="text-xs font-bold uppercase text-slate-400">Cartões</p>
                             <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['cartoes'] }}</p>
                         </div>
                     </div>
 
                     <div class="mt-4 grid gap-2 sm:grid-cols-3">
-                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Amarelos: <strong class="text-white">{{ $peladaPerformance['cartoes_amarelos'] }}</strong></p>
-                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Vermelhos: <strong class="text-white">{{ $peladaPerformance['cartoes_vermelhos'] }}</strong></p>
-                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Azuis: <strong class="text-white">{{ $peladaPerformance['cartoes_azuis'] }}</strong></p>
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                            <span class="h-7 w-5 rounded-sm bg-yellow-300 shadow-sm" aria-label="Cartões amarelos"></span>
+                            <strong class="text-white">{{ $peladaPerformance['cartoes_amarelos'] }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                            <span class="h-7 w-5 rounded-sm bg-red-500 shadow-sm" aria-label="Cartões vermelhos"></span>
+                            <strong class="text-white">{{ $peladaPerformance['cartoes_vermelhos'] }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                            <span class="h-7 w-5 rounded-sm bg-sky-400 shadow-sm" aria-label="Cartões azuis"></span>
+                            <strong class="text-white">{{ $peladaPerformance['cartoes_azuis'] }}</strong>
+                        </div>
                     </div>
                 </div>
 
                 <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                     <div>
                         <h2 class="text-xl font-black">Desempenho em torneios</h2>
-                        <p class="mt-1 text-sm text-slate-400">Numeros registrados em sumulas de torneios.</p>
+                        <p class="mt-1 text-sm text-slate-400">Números registrados em súmulas de torneios.</p>
                     </div>
 
                     @if($torneioPerformance['tem_dados'])
@@ -222,18 +240,27 @@
                                 <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['gols'] }}</p>
                             </div>
                             <div class="rounded-md bg-slate-900/70 px-4 py-3">
-                                <p class="text-xs font-bold uppercase text-slate-400">Cartoes</p>
+                                <p class="text-xs font-bold uppercase text-slate-400">Cartões</p>
                                 <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['cartoes'] }}</p>
                             </div>
                         </div>
 
                         <div class="mt-4 grid gap-2 sm:grid-cols-3">
-                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Amarelos: <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong></p>
-                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Vermelhos: <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong></p>
-                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Azuis: <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong></p>
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                                <span class="h-7 w-5 rounded-sm bg-yellow-300 shadow-sm" aria-label="Cartões amarelos"></span>
+                                <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong>
+                            </div>
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                                <span class="h-7 w-5 rounded-sm bg-red-500 shadow-sm" aria-label="Cartões vermelhos"></span>
+                                <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong>
+                            </div>
+                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 px-3 py-2 text-sm">
+                                <span class="h-7 w-5 rounded-sm bg-sky-400 shadow-sm" aria-label="Cartões azuis"></span>
+                                <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong>
+                            </div>
                         </div>
                     @else
-                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400">Ainda nao ha desempenho em torneios registrado.</p>
+                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400">Ainda não há desempenho em torneios registrado.</p>
                     @endif
                 </div>
             </section>
@@ -244,17 +271,17 @@
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 class="text-xl font-black">Nível e reputação</h2>
-                                <p class="mt-1 text-sm text-slate-400">Reputacao definida pela ultima rodada em que o jogador participou.</p>
+                                <p class="mt-1 text-sm text-slate-400">Reputação atual definida pela última rodada finalizada em que o jogador participou.</p>
                             </div>
                             <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ $rankingSocial }}</span>
                         </div>
                         <div class="mt-5 rounded-lg border border-emerald-300 bg-emerald-300/15 p-5 text-center">
-                            <p class="text-xs font-black uppercase tracking-wide text-emerald-200">Reputacao atual</p>
-                            <p class="mt-2 text-2xl font-black text-white">{{ $rankingSocial }}</p>
+                            <p class="text-xs font-black uppercase tracking-wide text-emerald-200">Reputação atual</p>
+                            <p class="mt-2 text-3xl font-black text-white">{{ $rankingSocial }}</p>
                         </div>
 
                         <div class="mt-6">
-                            <h3 class="text-sm font-black uppercase tracking-wide text-slate-300">Votos recebidos</h3>
+                            <h3 class="text-sm font-black uppercase tracking-wide text-slate-300">Votos de destaque recebidos</h3>
                             <div class="mt-3 grid gap-2 sm:grid-cols-2">
                                 @foreach($voteCounts as $vote)
                                     <div class="flex items-center justify-between gap-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm">
@@ -269,28 +296,28 @@
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 class="text-xl font-black">Avaliacoes recebidas</h2>
-                                <p class="mt-1 text-sm text-slate-400">Notas dadas por jogadores presentes nas rodadas.</p>
+                                <h2 class="text-xl font-black">Avaliações recebidas</h2>
+                                <p class="mt-1 text-sm text-slate-400">Média das últimas 5 rodadas em que o jogador recebeu nota.</p>
                             </div>
-                            <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ number_format($stats['media'], 2) }}/5</span>
+                            <span class="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">{{ number_format($reputation['avaliacoes_media'], 2) }}/5</span>
                         </div>
 
                         <div class="mt-5 divide-y divide-white/10">
-                            @forelse($avaliacoesPublicas as $avaliacao)
+                            @forelse($avaliacoesPorRodada as $rodada)
                                 <article class="py-4 first:pt-0 last:pb-0">
-                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <p class="text-lg font-black text-emerald-200">{{ $avaliacao->estrelas }}/5</p>
-                                            <p class="mt-1 text-sm text-slate-400">{{ $avaliacao->jogo?->pelada?->nome ?? 'Pelada' }} - {{ $avaliacao->created_at->format('d/m/Y') }}</p>
+                                            <p class="text-sm font-black text-white">{{ $rodada['jogo']?->pelada?->nome ?? 'Pelada' }}</p>
+                                            <p class="mt-1 text-sm text-slate-400">{{ $rodada['jogo']?->titulo ?? 'Rodada' }} - {{ $rodada['jogo']?->finalizada_em?->format('d/m/Y') ?? $rodada['ultima_avaliacao_em']?->format('d/m/Y') }}</p>
                                         </div>
-                                        <p class="text-sm font-bold text-slate-300">por {{ $avaliacao->avaliador?->apelido ?: ($avaliacao->avaliador?->name ?? 'Jogador') }}</p>
+                                        <div class="text-right">
+                                            <p class="text-lg font-black text-emerald-200">{{ number_format($rodada['media'], 2) }}/5</p>
+                                            <p class="text-xs font-semibold text-slate-400">{{ $rodada['total'] }} nota(s)</p>
+                                        </div>
                                     </div>
-                                    @if($avaliacao->comentario)
-                                        <p class="mt-3 rounded-md bg-slate-900/70 px-3 py-2 text-sm leading-6 text-slate-300">{{ $avaliacao->comentario }}</p>
-                                    @endif
                                 </article>
                             @empty
-                                <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda nao ha avaliacoes publicas recebidas.</p>
+                                <p class="rounded-md bg-slate-900/70 px-3 py-3 text-sm text-slate-400">Ainda não há avaliações públicas recebidas.</p>
                             @endforelse
                         </div>
                     </div>
@@ -349,7 +376,7 @@
                                     <span class="text-slate-300">{{ $perfil->posicao }}</span>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-400">Nenhuma posição especifica informada.</p>
+                                <p class="text-sm text-slate-400">Nenhuma posição específica informada.</p>
                             @endforelse
                         </div>
                     </section>
@@ -360,7 +387,7 @@
                             @forelse($socialLinks as $platform => $link)
                                 <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="rounded-md border border-white/10 bg-slate-900/70 px-3 py-2 text-sm font-bold capitalize text-slate-200 hover:border-emerald-300/60">{{ $platform }}</a>
                             @empty
-                                <p class="text-sm text-slate-400">Sem redes sociais publicas.</p>
+                                <p class="text-sm text-slate-400">Sem redes sociais públicas.</p>
                             @endforelse
                         </div>
                     </section>
@@ -384,7 +411,7 @@
                     @if(! auth()->check() || auth()->id() !== $jogador->id)
                         @include('partials.report-panel', [
                             'title' => 'Denunciar perfil',
-                            'description' => 'Use este canal para informar perfil falso, comportamento abusivo ou conteudo inadequado.',
+                            'description' => 'Use este canal para informar perfil falso, comportamento abusivo ou conteúdo inadequado.',
                             'action' => route('denuncias.peladeiros.store', $profile),
                             'reasons' => $reportReasons,
                             'dark' => true,

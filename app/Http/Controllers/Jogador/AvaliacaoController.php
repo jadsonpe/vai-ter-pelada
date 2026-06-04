@@ -313,6 +313,7 @@ class AvaliacaoController extends Controller
             if ($awardPoints) {
                 $profile->user?->addPoints($score, 'voto_'.$type, 'Recebeu voto: '.$voteType['label'], 'jogo:'.$jogo->id);
             }
+            $this->syncProfileLevel($profile);
         }
 
         $stat = PlayerStat::firstOrCreate([
@@ -336,6 +337,7 @@ class AvaliacaoController extends Controller
 
         if ($score > 0) {
             $profile->decrement('reputation_score', min((int) $profile->reputation_score, $score));
+            $this->syncProfileLevel($profile);
         }
 
         $stat = PlayerStat::firstOrCreate([
@@ -376,6 +378,14 @@ class AvaliacaoController extends Controller
                 'earned_at' => now(),
             ]);
         }
+    }
+
+    private function syncProfileLevel(PlayerProfile $profile): void
+    {
+        $profile->refresh();
+        $profile->forceFill([
+            'nivel_label' => PlayerProfile::levelForScore((int) $profile->reputation_score),
+        ])->save();
     }
 
     private function finalizarRodadasExpiradas(): void

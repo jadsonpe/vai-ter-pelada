@@ -100,6 +100,17 @@ class PlayerProfile extends Model
         return $slug;
     }
 
+    public static function levelForScore(int $score): string
+    {
+        return match (true) {
+            $score >= 700 => 'Dono da Bola',
+            $score >= 500 => 'Rei da Quadra',
+            $score >= 300 => 'Craque do Baba',
+            $score >= 120 => 'Reserva de Luxo',
+            default => 'Novato',
+        };
+    }
+
     public function bannerUrl(): ?string
     {
         if ($this->banner_preset) {
