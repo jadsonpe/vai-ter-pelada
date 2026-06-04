@@ -12,7 +12,7 @@
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('put')
-        <input type="hidden" name="username" value="{{ auth()->user()->email }}" autocomplete="username">
+        <input type="email" name="username" value="{{ auth()->user()->email }}" autocomplete="username" class="sr-only" tabindex="-1" aria-hidden="true">
 
         <div>
             <x-input-label for="update_password_current_password" value="Senha atual" />
