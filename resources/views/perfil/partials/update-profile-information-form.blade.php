@@ -101,7 +101,7 @@
                         $posicoesGerais = [
                             'Goleiro', 'Zagueiro', 'Fixo', 'Lateral Direito', 'Lateral Esquerdo', 
                             'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 
-                            'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Pivô', 'Centroavante'
+                            'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Pivô', 'Centroavante', 'Atacante'
                         ];
                     @endphp
                     <select 
@@ -302,11 +302,11 @@
             @php
                 $perfisPorEsporte = $user->esportePerfis->keyBy('esporte_id');
                 $posicoesPorEsporte = [
-                    'futebol' => ['Goleiro', 'Zagueiro', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Centroavante'],
+                    'futebol' => ['Goleiro', 'Zagueiro', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Segundo Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Atacante', 'Centroavante'],
                     'futsal' => ['Goleiro', 'Fixo', 'Ala Direito', 'Ala Esquerdo', 'Pivô'],
                     'society' => ['Goleiro', 'Zagueiro', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Pivô', 'Centroavante'],
                 ];
-                $posicoesFallback = ['Goleiro', 'Zagueiro', 'Fixo', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Pivô', 'Centroavante'];
+                $posicoesFallback = ['Goleiro', 'Zagueiro', 'Fixo', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Atacante', 'Pivô', 'Centroavante'];
             @endphp
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 @foreach($esportes as $index => $esporte)
