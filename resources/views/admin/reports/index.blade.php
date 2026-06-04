@@ -64,7 +64,7 @@
                         </form>
                     </article>
                 @empty
-                    <p class="p-6 text-sm text-slate-500">Nenhuma denuncia encontrada.</p>
+                    <p class="p-6 text-sm text-slate-500">Nenhuma denúncia encontrada.</p>
                 @endforelse
             </div>
         </div>

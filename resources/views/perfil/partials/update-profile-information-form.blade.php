@@ -23,7 +23,7 @@
                 <div class="flex-1">
                     <x-input-label for="avatar" value="Foto do jogador" />
                     <input id="avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
-                    <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Maximo 2 MB. Essa foto aparecerá nas listas de membros, avaliações e sorteios.</p>
+                    <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Máximo 2 MB. Essa foto aparecerá nas listas de membros, avaliações e sorteios.</p>
                     <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
 
                     @if($user->avatar_path)
@@ -94,9 +94,31 @@
                     <x-input-error class="mt-2" :messages="$errors->get('player_profile.esporte_principal_id')" />
                 </div>
 
+                {{-- BLOCO ALTERADO: De Input de Texto para Select de Posições --}}
                 <div>
-                    <x-input-label for="posicao_favorita" value="Posicao favorita" />
-                    <x-text-input id="posicao_favorita" name="player_profile[posicao_favorita]" type="text" class="mt-1 block w-full" :value="old('player_profile.posicao_favorita', $playerProfile->posicao_favorita)" placeholder="Ex: Atacante, armador, ponteiro..." />
+                    <x-input-label for="posicao_favorita" value="Posição favorita" />
+                    @php
+                        $posicoesGerais = [
+                            'Goleiro', 'Zagueiro', 'Fixo', 'Lateral Direito', 'Lateral Esquerdo', 
+                            'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 
+                            'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Pivô', 'Centroavante'
+                        ];
+                    @endphp
+                    <select 
+                        id="posicao_favorita" 
+                        name="player_profile[posicao_favorita]" 
+                        class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    >
+                        <option value="">Selecione sua posição...</option>
+                        @foreach($posicoesGerais as $posicao)
+                            <option 
+                                value="{{ $posicao }}" 
+                                @selected(old('player_profile.posicao_favorita', $playerProfile->posicao_favorita) == $posicao)
+                            >
+                                {{ $posicao }}
+                            </option>
+                        @endforeach
+                    </select>
                     <x-input-error class="mt-2" :messages="$errors->get('player_profile.posicao_favorita')" />
                 </div>
 
@@ -163,16 +185,16 @@
                                 <div data-image-panel class="{{ $selectedMode === 'image' ? '' : 'hidden' }} mt-4">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Imagens prontas</p>
                                     <div class="mt-2 grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach($imageCoverOptions as $coverFile => $coverLabel)
-                                <label class="group cursor-pointer">
-                                    @php($imageUrl = asset('images/player-covers/'.$coverFile))
-                                    <input type="radio" name="player_profile[banner_preset]" value="{{ $coverFile }}" class="peer sr-only js-cover-image" data-cover-style="background-image: linear-gradient(90deg, rgba(2,6,23,.82), rgba(2,6,23,.22)), url('{{ $imageUrl }}'); background-size: cover; background-position: center;" @checked($selectedCover === $coverFile)>
-                                    <span class="block overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm transition peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-200 group-hover:border-emerald-300">
-                                        <img src="{{ $imageUrl }}" alt="{{ $coverLabel }}" class="h-20 w-full object-cover" loading="lazy">
-                                        <span class="block truncate px-2 py-1.5 text-xs font-semibold text-slate-700">{{ $coverLabel }}</span>
-                                    </span>
-                                </label>
-                            @endforeach
+                                        @foreach($imageCoverOptions as $coverFile => $coverLabel)
+                                            <label class="group cursor-pointer">
+                                                @php $imageUrl = asset('images/player-covers/'.$coverFile) @endphp
+                                                <input type="radio" name="player_profile[banner_preset]" value="{{ $coverFile }}" class="peer sr-only js-cover-image" data-cover-style="background-image: linear-gradient(90deg, rgba(2,6,23,.82), rgba(2,6,23,.22)), url('{{ $imageUrl }}'); background-size: cover; background-position: center;" @checked($selectedCover === $coverFile)>
+                                                <span class="block overflow-hidden rounded-lg border-2 border-slate-200 bg-white shadow-sm transition peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-200 group-hover:border-emerald-300">
+                                                    <img src="{{ $imageUrl }}" alt="{{ $coverLabel }}" class="h-20 w-full object-cover" loading="lazy">
+                                                    <span class="block truncate px-2 py-1.5 text-xs font-semibold text-slate-700">{{ $coverLabel }}</span>
+                                                </span>
+                                            </label>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -207,8 +229,27 @@
                 </div>
 
                 <div>
-                    <x-input-label for="phone" value="Telefone" />
-                    <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" />
+                    <x-input-label for="phone" value="Telefone/WhatsApp" />
+                    <x-text-input 
+                        id="phone" 
+                        name="phone" 
+                        type="text" 
+                        class="mt-1 block w-full" 
+                        :value="old('phone', $user->phone)" 
+                        required 
+                        autocomplete="tel"
+                        
+                        x-data="{ 
+                            mask(value) {
+                                return value
+                                    .replace(/\D/g, '') // Remove tudo o que não é dígito
+                                    .replace(/^(\d{2})(\d)/g, '($1) $2') // Coloca parênteses em volta dos dois primeiros dígitos
+                                    .replace(/(\d{5})(\d)/, '$1-$2') // Coloca hífen entre o quinto e o sexto dígito
+                                    .substring(0, 15); // Limita o tamanho máximo: (11) 99999-9999
+                            }
+                        }"
+                        x-on:input="$el.value = mask($el.value)"
+                    />
                     <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                 </div>
 
@@ -254,25 +295,41 @@
 
         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div>
-                <h3 class="font-semibold text-slate-900">Posicoes por esporte</h3>
-                <p class="mt-1 text-sm text-slate-600">Opcional. Preencha apenas as modalidades em que voce quer mostrar sua posicao no perfil público.</p>
+                <h3 class="font-semibold text-slate-900">Posições por esporte</h3>
+                <p class="mt-1 text-sm text-slate-600">Opcional. Preencha apenas as modalidades em que você quer mostrar sua posição no perfil público.</p>
             </div>
 
-            @php($perfisPorEsporte = $user->esportePerfis->keyBy('esporte_id'))
+            @php
+                $perfisPorEsporte = $user->esportePerfis->keyBy('esporte_id');
+                $posicoesPorEsporte = [
+                    'futebol' => ['Goleiro', 'Zagueiro', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Centroavante'],
+                    'futsal' => ['Goleiro', 'Fixo', 'Ala Direito', 'Ala Esquerdo', 'Pivô'],
+                    'society' => ['Goleiro', 'Zagueiro', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Pivô', 'Centroavante'],
+                ];
+                $posicoesFallback = ['Goleiro', 'Zagueiro', 'Fixo', 'Lateral Direito', 'Lateral Esquerdo', 'Ala Direito', 'Ala Esquerdo', 'Volante', 'Meia Central', 'Meia-Armador', 'Ponta Direita', 'Ponta Esquerda', 'Segundo Atacante', 'Pivô', 'Centroavante'];
+            @endphp
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 @foreach($esportes as $index => $esporte)
-                    @php($perfil = $perfisPorEsporte->get($esporte->id))
+                    @php
+                        $perfil = $perfisPorEsporte->get($esporte->id);
+                        $opcoesPosicoes = $posicoesPorEsporte[$esporte->slug] ?? $posicoesFallback;
+                        $posicaoSelecionada = old('esporte_perfis.'.$index.'.posicao', $perfil?->posicao);
+                    @endphp
                     <div>
                         <input type="hidden" name="esporte_perfis[{{ $index }}][esporte_id]" value="{{ $esporte->id }}">
                         <x-input-label :for="'esporte-posicao-'.$esporte->id" :value="$esporte->nome" />
-                        <x-text-input
-                            :id="'esporte-posicao-'.$esporte->id"
+                        <select
+                            id="esporte-posicao-{{ $esporte->id }}"
                             name="esporte_perfis[{{ $index }}][posicao]"
-                            type="text"
-                            class="mt-1 block w-full"
-                            :value="old('esporte_perfis.'.$index.'.posicao', $perfil?->posicao)"
-                            placeholder="Ex: Goleiro, atacante, levantador..."
-                        />
+                            class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                            <option value="">Selecione sua posição...</option>
+                            @foreach($opcoesPosicoes as $posicao)
+                                <option value="{{ $posicao }}" @selected($posicaoSelecionada === $posicao)>
+                                    {{ $posicao }}
+                                </option>
+                            @endforeach
+                        </select>
                         <x-input-error class="mt-2" :messages="$errors->get('esporte_perfis.'.$index.'.posicao')" />
                     </div>
                 @endforeach

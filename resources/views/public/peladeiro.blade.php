@@ -18,7 +18,7 @@
         $mainSport = $profile->esportePrincipal?->nome ?: 'Multiesporte';
         $mainPosition = $profile->posicao_favorita
             ?: $jogador->esportePerfis->firstWhere('esporte_id', $profile->esporte_principal_id)?->posicao
-            ?: 'Posicao livre';
+            ?: 'Posição livre';
         $coverStyle = $profile->coverStyle();
         $statCards = [
             ['label' => 'Jogos', 'value' => $stats['jogos']],
@@ -169,6 +169,75 @@
                 @endforeach
             </section>
 
+            <section class="grid gap-4 lg:grid-cols-2">
+                <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-black">Desempenho nas peladas</h2>
+                            <p class="mt-1 text-sm text-slate-400">Rodadas, gols, cartoes e reputacao social das peladas.</p>
+                        </div>
+                        <span class="rounded-full bg-emerald-400 px-3 py-1 text-xs font-black text-slate-950">{{ number_format($peladaPerformance['media'], 2) }}/5</span>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-3">
+                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <p class="text-xs font-bold uppercase text-slate-400">Rodadas</p>
+                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['jogos'] }}</p>
+                        </div>
+                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
+                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['gols'] }}</p>
+                        </div>
+                        <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                            <p class="text-xs font-bold uppercase text-slate-400">Cartoes</p>
+                            <p class="mt-1 text-2xl font-black">{{ $peladaPerformance['cartoes'] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid gap-2 sm:grid-cols-3">
+                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Amarelos: <strong class="text-white">{{ $peladaPerformance['cartoes_amarelos'] }}</strong></p>
+                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Vermelhos: <strong class="text-white">{{ $peladaPerformance['cartoes_vermelhos'] }}</strong></p>
+                        <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Azuis: <strong class="text-white">{{ $peladaPerformance['cartoes_azuis'] }}</strong></p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                    <div>
+                        <h2 class="text-xl font-black">Desempenho em torneios</h2>
+                        <p class="mt-1 text-sm text-slate-400">Numeros registrados em sumulas de torneios.</p>
+                    </div>
+
+                    @if($torneioPerformance['tem_dados'])
+                        <div class="mt-5 grid gap-3 sm:grid-cols-4">
+                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                                <p class="text-xs font-bold uppercase text-slate-400">Torneios</p>
+                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['torneios'] }}</p>
+                            </div>
+                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                                <p class="text-xs font-bold uppercase text-slate-400">Jogos</p>
+                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['jogos'] }}</p>
+                            </div>
+                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                                <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
+                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['gols'] }}</p>
+                            </div>
+                            <div class="rounded-md bg-slate-900/70 px-4 py-3">
+                                <p class="text-xs font-bold uppercase text-slate-400">Cartoes</p>
+                                <p class="mt-1 text-2xl font-black">{{ $torneioPerformance['cartoes'] }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 grid gap-2 sm:grid-cols-3">
+                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Amarelos: <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong></p>
+                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Vermelhos: <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong></p>
+                            <p class="rounded-md bg-slate-900/70 px-3 py-2 text-sm text-slate-300">Azuis: <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong></p>
+                        </div>
+                    @else
+                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400">Ainda nao ha desempenho em torneios registrado.</p>
+                    @endif
+                </div>
+            </section>
+
             <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
                 <section class="space-y-6">
                     <div class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
@@ -280,7 +349,7 @@
                                     <span class="text-slate-300">{{ $perfil->posicao }}</span>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-400">Nenhuma posicao especifica informada.</p>
+                                <p class="text-sm text-slate-400">Nenhuma posição especifica informada.</p>
                             @endforelse
                         </div>
                     </section>

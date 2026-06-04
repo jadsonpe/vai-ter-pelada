@@ -49,7 +49,7 @@
                     <label class="text-sm font-medium text-slate-700">Bairro
                         <input name="bairro" value="{{ old('bairro', $user->bairro) }}" class="mt-1 w-full rounded-md border-slate-300">
                     </label>
-                    <label class="text-sm font-medium text-slate-700">Posicao
+                    <label class="text-sm font-medium text-slate-700">Posição
                         <input name="posicao" value="{{ old('posicao', $user->posicao) }}" class="mt-1 w-full rounded-md border-slate-300">
                     </label>
                     <label class="text-sm font-medium text-slate-700">Nivel

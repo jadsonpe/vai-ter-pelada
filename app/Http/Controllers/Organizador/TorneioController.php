@@ -235,7 +235,7 @@ class TorneioController extends Controller
         }
 
         if ($torneio->times()->exists()) {
-            return back()->with('status', 'Os times ja foram sorteados. Agora voce pode apenas adicionar jogadores restantes aos times.');
+            return back()->with('status', 'Os times ja foram sorteados. Agora você pode apenas adicionar jogadores restantes aos times.');
         }
 
         $participantes = $torneio->participantes()

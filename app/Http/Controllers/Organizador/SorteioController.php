@@ -20,9 +20,15 @@ class SorteioController extends Controller
         private readonly SorteioPresencialService $sorteioService,
     ) {}
 
-    public function show(PeladaJogo $jogo): View
+    public function show(PeladaJogo $jogo): View|RedirectResponse
     {
         $this->authorizeOwner($jogo);
+
+        if (! $jogo->liberadoParaOperacao() && ! $jogo->bloqueadoParaEdicao()) {
+            return redirect()
+                ->route('organizador.peladas.jogos.index', $jogo->pelada)
+                ->with('status', 'Esta rodada só será liberada para operação em '.$jogo->operacaoLiberaEm()?->format('d/m/Y H:i').'. Altere a data e hora se precisar liberar antes.');
+        }
 
         return view('organizador.sorteios.show', [
             'jogo' => $jogo->load('pelada'),
@@ -37,6 +43,7 @@ class SorteioController extends Controller
     public function salvarPresencas(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
@@ -76,6 +83,7 @@ class SorteioController extends Controller
     public function adicionarAvulso(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
@@ -104,6 +112,7 @@ class SorteioController extends Controller
     public function sortear(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
@@ -186,6 +195,7 @@ class SorteioController extends Controller
     public function atualizarTimes(Request $request, PeladaJogo $jogo, Sorteio $sorteio): RedirectResponse
     {
         $this->authorizeOwner($jogo);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
         abort_unless($sorteio->pelada_jogo_id === $jogo->id, 404);
 
@@ -283,5 +293,11 @@ class SorteioController extends Controller
             abort(403, 'Rodada finalizada ou cancelada. Edicoes nao estao mais disponiveis.');
         }
     }
-}
 
+    private function bloquearSeNaoLiberada(PeladaJogo $jogo): void
+    {
+        if (! $jogo->liberadoParaOperacao()) {
+            abort(403, 'Esta rodada só será liberada para operação em '.$jogo->operacaoLiberaEm()?->format('d/m/Y H:i').'.');
+        }
+    }
+}

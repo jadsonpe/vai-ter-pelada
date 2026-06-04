@@ -19,7 +19,7 @@
             <label class="text-sm font-medium text-slate-700">Link
                 <input name="link" class="mt-1 w-full rounded-md border-slate-300" placeholder="https://...">
             </label>
-            <label class="text-sm font-medium text-slate-700">Posicao
+            <label class="text-sm font-medium text-slate-700">Posição
                 <input name="posicao" value="home_topo" class="mt-1 w-full rounded-md border-slate-300">
             </label>
             <label class="flex items-center gap-2 text-sm text-slate-700">
@@ -46,7 +46,7 @@
                         <input name="titulo" value="{{ $banner->titulo }}" class="w-full rounded-md border-slate-300 text-sm" placeholder="Titulo">
                         <input name="imagem" value="{{ $banner->imagem }}" class="w-full rounded-md border-slate-300 text-sm" placeholder="URL da imagem">
                         <input name="link" value="{{ $banner->link }}" class="w-full rounded-md border-slate-300 text-sm" placeholder="https://...">
-                        <input name="posicao" value="{{ $banner->posicao }}" class="w-full rounded-md border-slate-300 text-sm" placeholder="Posicao">
+                        <input name="posicao" value="{{ $banner->posicao }}" class="w-full rounded-md border-slate-300 text-sm" placeholder="Posição">
                         <label class="flex items-center gap-2 text-sm text-slate-700">
                             <input type="checkbox" name="ativo" value="1" @checked($banner->ativo)>
                             Ativo

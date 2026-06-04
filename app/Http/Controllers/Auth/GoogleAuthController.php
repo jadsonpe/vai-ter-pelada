@@ -24,7 +24,7 @@ class GoogleAuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (Throwable) {
-            return redirect()->route('login')->with('status', 'Nao foi possivel autenticar com o Google.');
+            return redirect()->route('login')->with('status', 'Não foi possível autenticar com o Google.');
         }
 
         $user = User::where('google_id', $googleUser->getId())

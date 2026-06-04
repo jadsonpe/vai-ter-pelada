@@ -12,7 +12,7 @@ abstract class Controller
 
         redirect()
             ->route('home')
-            ->with('status', 'Voce nao tem permissao para gerenciar essa pelada.')
+            ->with('status', 'Você não tem permissão para gerenciar essa pelada.')
             ->send();
 
         exit;

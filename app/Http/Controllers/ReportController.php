@@ -18,12 +18,12 @@ class ReportController extends Controller
         $data = $this->validateReport($request, 'pelada');
 
         if ($pelada->organizador_id === $request->user()->id) {
-            return back()->with('status', 'Voce nao pode denunciar uma pelada que voce organiza.');
+            return back()->with('status', 'Você não pode denunciar uma pelada que você organiza.');
         }
 
         $this->store($request, $pelada, 'pelada', $data, $pelada->nome, route('peladas.show', $pelada));
 
-        return back()->with('status', 'Denuncia enviada. Nossa equipe vai analisar as informacoes.');
+        return back()->with('status', 'Denúncia enviada. Nossa equipe vai analisar as informações.');
     }
 
     public function storePlayer(Request $request, PlayerProfile $profile): RedirectResponse
@@ -33,13 +33,13 @@ class ReportController extends Controller
         $data = $this->validateReport($request, 'jogador');
 
         if ($profile->user_id === $request->user()->id) {
-            return back()->with('status', 'Voce nao pode denunciar o proprio perfil.');
+            return back()->with('status', 'Você não pode denunciar o próprio perfil.');
         }
 
         $name = $profile->user?->apelido ?: $profile->user?->name ?: 'Peladeiro';
         $this->store($request, $profile, 'jogador', $data, $name, route('peladeiros.show', $profile));
 
-        return back()->with('status', 'Denuncia enviada. Nossa equipe vai analisar as informacoes.');
+        return back()->with('status', 'Denúncia enviada. Nossa equipe vai analisar as informações.');
     }
 
     private function validateReport(Request $request, string $type): array
@@ -48,10 +48,10 @@ class ReportController extends Controller
             'reason' => ['required', Rule::in(array_keys(Report::reasonsFor($type)))],
             'description' => ['nullable', 'string', 'min:10', 'max:2000'],
         ], [
-            'reason.required' => 'Selecione um motivo para a denuncia.',
-            'reason.in' => 'Selecione um motivo valido para a denuncia.',
-            'description.min' => 'Explique a denuncia com pelo menos 10 caracteres.',
-            'description.max' => 'A descricao da denuncia deve ter no maximo 2000 caracteres.',
+            'reason.required' => 'Selecione um motivo para a denúncia.',
+            'reason.in' => 'Selecione um motivo válido para a denúncia.',
+            'description.min' => 'Explique a denúncia com pelo menos 10 caracteres.',
+            'description.max' => 'A descrição da denúncia deve ter no máximo 2000 caracteres.',
         ]);
     }
 
@@ -90,8 +90,8 @@ class ReportController extends Controller
             ->each(function (User $admin) use ($report, $type, $targetName, $targetUrl) {
                 Notificacao::create([
                     'user_id' => $admin->id,
-                    'titulo' => 'Nova denuncia recebida',
-                    'mensagem' => sprintf('Denuncia #%s sobre %s: %s.', $report->id, $type, $targetName),
+                    'titulo' => 'Nova denúncia recebida',
+                    'mensagem' => sprintf('Denúncia #%s sobre %s: %s.', $report->id, $type, $targetName),
                     'link' => $targetUrl,
                 ]);
             });

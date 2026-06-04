@@ -96,7 +96,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
             </svg>
-            <span>Inicio</span>
+            <span>Dash</span>
         </a>
 
         <a href="{{ route('peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('peladas.*')) }}">
@@ -121,7 +121,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
                     <circle cx="12" cy="12" r="8" />
                 </svg>
-                <span>Criar</span>
+                <span>Organizar</span>
             </a>
 
             <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('perfil.edit') }}" class="relative flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('perfil.*') || request()->routeIs('admin.*')) }}">

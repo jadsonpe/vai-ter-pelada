@@ -63,7 +63,7 @@
                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
             <button class="inline-flex w-full items-center justify-center rounded-md bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700">
-                Enviar denuncia
+                Enviar denúncia
             </button>
         </form>
     @else

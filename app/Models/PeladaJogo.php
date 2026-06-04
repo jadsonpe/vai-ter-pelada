@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\AvaliacaoPartida;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -72,6 +73,16 @@ class PeladaJogo extends Model
         return in_array($this->status, ['finalizado', 'cancelado'], true) || $this->prazoEdicaoEncerrado();
     }
 
+    public function liberadoParaOperacao(): bool
+    {
+        return ! $this->data_hora || $this->data_hora->copy()->subDay()->isPast();
+    }
+
+    public function operacaoLiberaEm(): ?\Illuminate\Support\Carbon
+    {
+        return $this->data_hora ? $this->data_hora->copy()->subDay() : null;
+    }
+
     public function avaliacoesAbertas(): bool
     {
         return $this->status === 'finalizado'
@@ -79,10 +90,51 @@ class PeladaJogo extends Model
             && $this->finalizada_em->between(now()->subDays(2), now());
     }
 
+    public function avaliacoesEncerradas(): bool
+    {
+        return $this->status === 'finalizado'
+            && $this->finalizada_em
+            && ($this->finalizada_em->copy()->addDays(2)->isPast() || $this->todosElegiveisAvaliaram());
+    }
+
     public function avaliacoesAbertasAte(): ?\Illuminate\Support\Carbon
     {
         return $this->status === 'finalizado' && $this->finalizada_em
             ? $this->finalizada_em->copy()->addDays(2)
             : null;
+    }
+
+    public function participantesElegiveisAvaliacao(): Collection
+    {
+        return $this->participantes()
+            ->with(['membro', 'user'])
+            ->where('status', 'confirmado')
+            ->where('presente_local', true)
+            ->whereNotNull('user_id')
+            ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista']))
+            ->get();
+    }
+
+    public function todosElegiveisAvaliaram(): bool
+    {
+        $userIds = $this->participantesElegiveisAvaliacao()
+            ->pluck('user_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($userIds->count() < 2) {
+            return false;
+        }
+
+        $esperadas = $userIds->count() * ($userIds->count() - 1);
+        $feitas = $this->avaliacoes()
+            ->whereIn('avaliador_id', $userIds)
+            ->whereIn('avaliado_id', $userIds)
+            ->whereColumn('avaliador_id', '<>', 'avaliado_id')
+            ->distinct()
+            ->count('id');
+
+        return $feitas >= $esperadas;
     }
 }

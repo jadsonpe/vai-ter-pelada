@@ -302,7 +302,7 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <p class="rounded-lg bg-white px-3 py-3 text-sm text-slate-500">Nenhuma rodada pendente de confirmacao agora.</p>
+                                    <p class="rounded-lg bg-white px-3 py-3 text-sm text-slate-500">Nenhuma rodada pendente de confirmação agora.</p>
                                 @endforelse
                             </div>
 

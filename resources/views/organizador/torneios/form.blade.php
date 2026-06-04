@@ -96,7 +96,7 @@
                             Mural de fotos
                             <input type="file" name="mural_fotos[]" accept="image/png,image/jpeg,image/webp" multiple class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
                         </label>
-                        <p class="mt-1 text-xs text-slate-500">O mural aceita no maximo 4 fotos. Formatos: JPG, PNG ou WEBP.</p>
+                        <p class="mt-1 text-xs text-slate-500">O mural aceita no máximo 4 fotos. Formatos: JPG, PNG ou WEBP.</p>
                         <x-input-error :messages="$errors->get('mural_fotos')" class="mt-2" />
                         <x-input-error :messages="$errors->get('mural_fotos.*')" class="mt-2" />
 

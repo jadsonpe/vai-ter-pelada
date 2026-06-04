@@ -28,7 +28,7 @@
                     </div>
 
                     <h1 class="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl">{{ $pelada->nome }}</h1>
-                    <p class="mt-3 leading-7 text-slate-600">{{ $pelada->descricao ?: 'Pelada recorrente aberta para confirmacao de jogadores.' }}</p>
+                    <p class="mt-3 leading-7 text-slate-600">{{ $pelada->descricao ?: 'Pelada recorrente aberta para confirmação de jogadores.' }}</p>
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-2">
                         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">

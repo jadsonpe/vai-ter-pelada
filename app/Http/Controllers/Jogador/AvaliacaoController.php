@@ -22,11 +22,15 @@ class AvaliacaoController extends Controller
         $user = $request->user();
         $this->finalizarRodadasExpiradas();
 
-        $jogos = PeladaJogo::with(['pelada.esporte', 'participantes.user.playerProfile'])
+        $jogos = PeladaJogo::with(['pelada.esporte', 'participantes.user.playerProfile', 'participantes.membro'])
             ->where('status', 'finalizado')
             ->whereNotNull('finalizada_em')
             ->whereBetween('finalizada_em', [now()->subDays(2), now()])
-            ->whereHas('participantes', fn ($query) => $query->where('user_id', $user->id)->where('presente_local', true))
+            ->whereHas('participantes', fn ($query) => $query
+                ->where('user_id', $user->id)
+                ->where('status', 'confirmado')
+                ->where('presente_local', true)
+                ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista'])))
             ->orderByDesc('finalizada_em')
             ->get();
 
@@ -55,7 +59,9 @@ class AvaliacaoController extends Controller
         $pendingGames = $jogos->map(function (PeladaJogo $jogo) use ($user, $avaliacoesFeitas, $profileIdsByUserId, $votosFeitos) {
             $presentes = $jogo->participantes
                 ->filter(fn ($participante) => $participante->user_id && $participante->user_id !== $user->id)
+                ->filter(fn ($participante) => $participante->status === 'confirmado')
                 ->filter(fn ($participante) => $participante->presente_local)
+                ->filter(fn ($participante) => in_array($participante->membro?->tipo, ['mensalista', 'diarista'], true))
                 ->values();
 
             $avaliados = $presentes
@@ -117,11 +123,13 @@ class AvaliacaoController extends Controller
 
         $participacao = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
             ->where('user_id', $user->id)
+            ->where('status', 'confirmado')
             ->where('presente_local', true)
+            ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista']))
             ->first();
 
         if (! $participacao) {
-            return back()->with('status', 'Somente jogadores presentes na partida podem avaliar.');
+            return back()->with('status', 'Somente mensalistas ou diaristas presentes na rodada podem avaliar.');
         }
 
         if ((int) $data['avaliado_id'] === $user->id) {
@@ -131,11 +139,13 @@ class AvaliacaoController extends Controller
         $avaliadoParticipacao = PeladaJogoParticipante::with('user')
             ->where('pelada_jogo_id', $jogo->id)
             ->where('user_id', $data['avaliado_id'])
+            ->where('status', 'confirmado')
             ->where('presente_local', true)
+            ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista']))
             ->first();
 
         if (! $avaliadoParticipacao?->user) {
-            return back()->with('status', 'O jogador avaliado precisa estar presente e cadastrado no sistema.');
+            return back()->with('status', 'O jogador avaliado precisa ser mensalista ou diarista presente e cadastrado no sistema.');
         }
 
         $avaliacao = AvaliacaoPartida::where('pelada_jogo_id', $jogo->id)
@@ -175,7 +185,7 @@ class AvaliacaoController extends Controller
             Notificacao::create([
                 'user_id' => $avaliado->id,
                 'titulo' => 'Voce recebeu uma nova avaliacao',
-                'mensagem' => sprintf('%s avaliou voce com %s estrelas.', $user->name, $data['estrelas']),
+                'mensagem' => sprintf('%s avaliou você com %s estrelas.', $user->name, $data['estrelas']),
                 'link' => route('perfil.edit'),
             ]);
         }
@@ -206,17 +216,21 @@ class AvaliacaoController extends Controller
 
         $votantePresente = PeladaJogoParticipante::where('pelada_jogo_id', $jogo->id)
             ->where('user_id', $user->id)
+            ->where('status', 'confirmado')
             ->where('presente_local', true)
+            ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista']))
             ->exists();
 
         $votadoParticipacao = PeladaJogoParticipante::with('user')
             ->where('pelada_jogo_id', $jogo->id)
             ->where('user_id', $data['voted_user_id'])
+            ->where('status', 'confirmado')
             ->where('presente_local', true)
+            ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista']))
             ->first();
 
         if (! $votantePresente || ! $votadoParticipacao?->user) {
-            return back()->with('status', 'Somente jogadores presentes na rodada podem votar e receber votos.');
+            return back()->with('status', 'Somente mensalistas ou diaristas presentes na rodada podem votar e receber votos.');
         }
 
         $this->syncVote($user, $jogo, $votadoParticipacao->user, $data['type']);
@@ -270,7 +284,7 @@ class AvaliacaoController extends Controller
         Notificacao::create([
             'user_id' => $votedUser->id,
             'titulo' => 'Voce recebeu um voto de destaque',
-            'mensagem' => sprintf('%s votou em voce como %s.', $user->name, $this->voteTypes()[$type]['label']),
+            'mensagem' => sprintf('%s votou em você como %s.', $user->name, $this->voteTypes()[$type]['label']),
             'link' => route('peladeiros.show', $profile),
         ]);
     }

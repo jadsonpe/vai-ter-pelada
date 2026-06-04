@@ -7,6 +7,11 @@ use App\Models\PlayerVote;
 use App\Models\PeladaJogo;
 use App\Models\PeladaJogoParticipanteEstatistica;
 use App\Models\Report;
+use App\Models\TorneioCartao;
+use App\Models\TorneioGol;
+use App\Models\TorneioJogo;
+use App\Models\TorneioParticipante;
+use App\Models\TorneioTimeJogador;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,11 +37,15 @@ class PlayerProfileController extends Controller
         ]);
 
         $user = $profile->user;
-        $voteCounts = PlayerVote::query()
-            ->where('player_profile_id', $profile->id)
-            ->selectRaw('type, COUNT(*) as total')
-            ->groupBy('type')
-            ->pluck('total', 'type');
+        $ultimaRodadaPublica = $this->ultimaRodadaPublica($user);
+        $voteCounts = $ultimaRodadaPublica
+            ? PlayerVote::query()
+                ->where('player_profile_id', $profile->id)
+                ->where('pelada_jogo_id', $ultimaRodadaPublica->id)
+                ->selectRaw('type, COUNT(*) as total')
+                ->groupBy('type')
+                ->pluck('total', 'type')
+            : collect();
 
         $peladas = $user->memberships()
             ->with('pelada.esporte')
@@ -44,14 +53,19 @@ class PlayerProfileController extends Controller
             ->latest()
             ->take(6)
             ->get();
-        $avaliacoesPublicas = $user->avaliacoesRecebidas()
-            ->with(['avaliador.playerProfile', 'jogo.pelada'])
-            ->latest()
-            ->take(6)
-            ->get();
+        $avaliacoesPublicas = $ultimaRodadaPublica
+            ? $user->avaliacoesRecebidas()
+                ->with(['avaliador.playerProfile', 'jogo.pelada'])
+                ->where('pelada_jogo_id', $ultimaRodadaPublica->id)
+                ->latest()
+                ->get()
+            : collect();
 
         $jogosConfirmados = $user->participacoes()->where('status', 'confirmado')->count();
-        $stats = $this->stats($profile, $jogosConfirmados, $voteCounts);
+        $mediaUltimaRodada = round($avaliacoesPublicas->avg('estrelas') ?? 0, 2);
+        $peladaPerformance = $this->peladaPerformance($profile, $jogosConfirmados, $voteCounts, $mediaUltimaRodada);
+        $torneioPerformance = $this->torneioPerformance($user);
+        $stats = $this->stats($peladaPerformance, $torneioPerformance);
         $followersCount = $user->followers()->count();
         $followingCount = $user->following()->count();
         $followersPreview = $user->followers()
@@ -76,13 +90,15 @@ class PlayerProfileController extends Controller
             'peladas' => $peladas,
             'avaliacoesPublicas' => $avaliacoesPublicas,
             'stats' => $stats,
+            'peladaPerformance' => $peladaPerformance,
+            'torneioPerformance' => $torneioPerformance,
             'followersCount' => $followersCount,
             'followingCount' => $followingCount,
             'followersPreview' => $followersPreview,
             'followingPreview' => $followingPreview,
             'isFollowing' => $isFollowing,
             'socialLinks' => $profile->socialLinks->keyBy('platform'),
-            'rankingSocial' => $this->rankingSocial($profile, $user),
+            'rankingSocial' => $this->rankingSocial($profile, $ultimaRodadaPublica),
             'voteLabels' => $this->voteLabels(),
             'voteCounts' => $voteCounts,
             'reportReasons' => Report::reasonsFor('jogador'),
@@ -190,86 +206,153 @@ class PlayerProfileController extends Controller
         ]);
     }
 
-    private function stats(PlayerProfile $profile, int $jogosConfirmados, $voteCounts): array
+    private function stats(array $peladaPerformance, array $torneioPerformance): array
+    {
+        return [
+            'jogos' => $peladaPerformance['jogos'] + $torneioPerformance['jogos'],
+            'vitorias' => $peladaPerformance['vitorias'],
+            'gols' => $peladaPerformance['gols'] + $torneioPerformance['gols'],
+            'cartoes' => $peladaPerformance['cartoes'] + $torneioPerformance['cartoes'],
+            'assistencias' => $peladaPerformance['assistencias'],
+            'mvps' => $peladaPerformance['mvps'],
+            'aproveitamento' => $peladaPerformance['aproveitamento'],
+            'sequencia_vitorias' => $peladaPerformance['sequencia_vitorias'],
+            'media' => $peladaPerformance['media'],
+            'craque_votes' => $peladaPerformance['craque_votes'],
+            'fair_play_votes' => $peladaPerformance['fair_play_votes'],
+            'destaques' => $peladaPerformance['destaques'],
+        ];
+    }
+
+    private function peladaPerformance(PlayerProfile $profile, int $jogosConfirmados, $voteCounts, float $mediaUltimaRodada): array
     {
         $stat = $profile->stats->firstWhere('esporte_id', $profile->esporte_principal_id)
             ?: $profile->stats->first();
         $cartaoStats = PeladaJogoParticipanteEstatistica::query()
             ->where('user_id', $profile->user_id);
+        $gols = (int) PeladaJogoParticipanteEstatistica::query()
+            ->where('user_id', $profile->user_id)
+            ->sum('gols');
+        $jogosComEstatistica = PeladaJogoParticipanteEstatistica::query()
+            ->where('user_id', $profile->user_id)
+            ->distinct('pelada_jogo_id')
+            ->count('pelada_jogo_id');
 
         return [
-            'jogos' => $stat?->jogos ?: $jogosConfirmados,
+            'jogos' => $jogosComEstatistica ?: ($stat?->jogos ?: $jogosConfirmados),
             'vitorias' => $stat?->vitorias ?: 0,
-            'gols' => $stat?->gols ?: 0,
+            'gols' => $gols ?: ($stat?->gols ?: 0),
             'cartoes' => (clone $cartaoStats)->sum('cartoes_amarelos')
                 + (clone $cartaoStats)->sum('cartoes_vermelhos')
                 + (clone $cartaoStats)->sum('cartoes_azuis'),
+            'cartoes_amarelos' => (clone $cartaoStats)->sum('cartoes_amarelos'),
+            'cartoes_vermelhos' => (clone $cartaoStats)->sum('cartoes_vermelhos'),
+            'cartoes_azuis' => (clone $cartaoStats)->sum('cartoes_azuis'),
             'assistencias' => $stat?->assistencias ?: 0,
             'mvps' => $stat?->mvps ?: (int) ($voteCounts['craque'] ?? 0),
             'aproveitamento' => $stat?->aproveitamento ?: 0,
             'sequencia_vitorias' => $stat?->sequencia_vitorias ?: 0,
-            'media' => $profile->user->rating_average,
+            'media' => $mediaUltimaRodada,
             'craque_votes' => (int) ($voteCounts['craque'] ?? 0),
             'fair_play_votes' => (int) ($voteCounts['fair_play'] ?? 0),
             'destaques' => collect($this->voteLabels())->keys()->sum(fn ($type) => (int) ($voteCounts[$type] ?? 0)),
         ];
     }
 
-    private function rankingSocial(PlayerProfile $profile, User $user): string
+    private function torneioPerformance(User $user): array
     {
-        $lastJogo = PeladaJogo::query()
-            ->where('data_hora', '<=', now())
-            ->whereIn('status', ['realizado', 'finalizado'])
-            ->whereHas('participantes', fn ($query) => $query
-                ->where('user_id', $user->id)
-                ->where('presente_local', true))
-            ->orderByDesc('data_hora')
-            ->first();
+        $participanteIds = TorneioParticipante::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'ativo')
+            ->pluck('id');
 
-        if (! $lastJogo) {
-            return 'Peladeiro';
+        if ($participanteIds->isEmpty()) {
+            return [
+                'tem_dados' => false,
+                'torneios' => 0,
+                'jogos' => 0,
+                'gols' => 0,
+                'cartoes' => 0,
+                'cartoes_amarelos' => 0,
+                'cartoes_vermelhos' => 0,
+                'cartoes_azuis' => 0,
+            ];
         }
 
-        $participantProfileIds = $lastJogo->participantes()
-            ->where('presente_local', true)
-            ->whereNotNull('user_id')
-            ->with('user.playerProfile')
-            ->get()
-            ->map(fn ($participante) => $participante->user?->playerProfile?->id)
-            ->filter()
-            ->values();
+        $timeIds = TorneioTimeJogador::query()
+            ->whereIn('torneio_participante_id', $participanteIds)
+            ->pluck('torneio_time_id');
 
-        if ($participantProfileIds->isEmpty()) {
+        $cartoes = TorneioCartao::query()
+            ->whereIn('torneio_participante_id', $participanteIds);
+
+        return [
+            'tem_dados' => true,
+            'torneios' => TorneioParticipante::query()
+                ->whereIn('id', $participanteIds)
+                ->distinct('torneio_id')
+                ->count('torneio_id'),
+            'jogos' => $timeIds->isEmpty()
+                ? 0
+                : TorneioJogo::query()
+                    ->where('status', 'finalizado')
+                    ->where(function ($query) use ($timeIds) {
+                        $query->whereIn('time_a_id', $timeIds)
+                            ->orWhereIn('time_b_id', $timeIds);
+                    })
+                    ->distinct('id')
+                    ->count('id'),
+            'gols' => (int) TorneioGol::query()
+                ->whereIn('torneio_participante_id', $participanteIds)
+                ->sum('quantidade'),
+            'cartoes_amarelos' => (clone $cartoes)->where('tipo', 'amarelo')->sum('quantidade'),
+            'cartoes_vermelhos' => (clone $cartoes)->where('tipo', 'vermelho')->sum('quantidade'),
+            'cartoes_azuis' => (clone $cartoes)->where('tipo', 'azul')->sum('quantidade'),
+            'cartoes' => (clone $cartoes)->sum('quantidade'),
+        ];
+    }
+
+    private function rankingSocial(PlayerProfile $profile, ?PeladaJogo $lastJogo): string
+    {
+        if (! $lastJogo) {
             return 'Peladeiro';
         }
 
         $votesByType = PlayerVote::query()
             ->where('pelada_jogo_id', $lastJogo->id)
-            ->whereIn('player_profile_id', $participantProfileIds)
-            ->selectRaw('type, player_profile_id, COUNT(*) as total')
-            ->groupBy('type', 'player_profile_id')
-            ->get()
-            ->groupBy('type');
+            ->where('player_profile_id', $profile->id)
+            ->selectRaw('type, COUNT(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
 
         $winner = collect($this->voteLabels())
-            ->map(function (string $label, string $type) use ($votesByType, $profile) {
-                $counts = $votesByType->get($type, collect())
-                    ->pluck('total', 'player_profile_id');
-
-                $max = (int) $counts->max();
-                $playerTotal = (int) ($counts[$profile->id] ?? 0);
-
+            ->map(function (string $label, string $type) use ($votesByType) {
                 return [
                     'label' => $label,
-                    'count' => $playerTotal,
-                    'won' => $playerTotal > 0 && $playerTotal === $max,
+                    'count' => (int) ($votesByType[$type] ?? 0),
                 ];
             })
-            ->filter(fn (array $vote) => $vote['won'])
+            ->filter(fn (array $vote) => $vote['count'] > 0)
             ->sortByDesc('count')
             ->first();
 
         return $winner['label'] ?? 'Peladeiro';
+    }
+
+    private function ultimaRodadaPublica(User $user): ?PeladaJogo
+    {
+        return PeladaJogo::query()
+            ->with(['participantes.membro'])
+            ->where('status', 'finalizado')
+            ->whereNotNull('finalizada_em')
+            ->whereHas('participantes', fn ($query) => $query
+                ->where('user_id', $user->id)
+                ->where('status', 'confirmado')
+                ->where('presente_local', true)
+                ->whereHas('membro', fn ($query) => $query->whereIn('tipo', ['mensalista', 'diarista'])))
+            ->orderByDesc('data_hora')
+            ->get()
+            ->first(fn (PeladaJogo $jogo) => $jogo->avaliacoesEncerradas());
     }
 
     private function voteLabels(): array

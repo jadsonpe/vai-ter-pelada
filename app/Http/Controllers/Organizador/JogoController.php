@@ -31,11 +31,17 @@ class JogoController extends Controller
         ]);
     }
 
-    public function show(PeladaJogo $jogo): View
+    public function show(PeladaJogo $jogo): View|RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
         $this->finalizarSeExpirada($jogo);
         $jogo->refresh();
+
+        if (! $jogo->liberadoParaOperacao() && ! $jogo->bloqueadoParaEdicao()) {
+            return redirect()
+                ->route('organizador.peladas.jogos.index', $jogo->pelada)
+                ->with('status', 'Esta rodada só será liberada para operação em '.$jogo->operacaoLiberaEm()?->format('d/m/Y H:i').'. Altere a data e hora se precisar liberar antes.');
+        }
 
         $jogo->load([
             'pelada.membros.user',
@@ -107,7 +113,7 @@ class JogoController extends Controller
         if ($data['status'] === 'finalizado' && strtotime($data['data_hora']) > time()) {
             return back()
                 ->withInput($request->input() + ['editing_jogo_id' => $jogo->id])
-                ->with('status', 'A rodada so pode ser finalizada depois da data de inicio.');
+                ->with('status', 'A rodada so pode ser finalizada depois da data de início.');
         }
 
         $data = $this->statusTimestamps($jogo, $data);
@@ -123,7 +129,7 @@ class JogoController extends Controller
         $this->bloquearSeFinalizada($jogo);
 
         if ($jogo->data_hora && $jogo->data_hora->isFuture()) {
-            return back()->with('status', 'A rodada so pode ser finalizada depois da data de inicio.');
+            return back()->with('status', 'A rodada so pode ser finalizada depois da data de início.');
         }
 
         $jogo->update([
@@ -149,7 +155,7 @@ class JogoController extends Controller
         return back()->with('status', 'Rodada cancelada.');
     }
 
-    public function participantes(PeladaJogo $jogo): View
+    public function participantes(PeladaJogo $jogo): View|RedirectResponse
     {
         return $this->show($jogo);
     }
@@ -157,6 +163,7 @@ class JogoController extends Controller
     public function confirmarMembro(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
@@ -188,6 +195,7 @@ class JogoController extends Controller
     public function salvarEstatisticas(Request $request, PeladaJogo $jogo): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
 
         $data = $request->validate([
@@ -235,6 +243,7 @@ class JogoController extends Controller
     public function removerParticipante(PeladaJogo $jogo, PeladaJogoParticipante $participante): RedirectResponse
     {
         $this->authorizeOwner($jogo->pelada);
+        $this->bloquearSeNaoLiberada($jogo);
         $this->bloquearSeFinalizada($jogo);
         abort_unless($participante->pelada_jogo_id === $jogo->id, 404);
 
@@ -310,7 +319,14 @@ class JogoController extends Controller
         $jogo->refresh();
 
         if ($jogo->bloqueadoParaEdicao()) {
-            abort(403, 'Rodada finalizada ou cancelada. Edicoes nao estao mais disponiveis.');
+            abort(403, 'Rodada finalizada ou cancelada. Edições não estão mais disponíveis.');
+        }
+    }
+
+    private function bloquearSeNaoLiberada(PeladaJogo $jogo): void
+    {
+        if (! $jogo->liberadoParaOperacao()) {
+            abort(403, 'Esta rodada só será liberada para operação em '.$jogo->operacaoLiberaEm()?->format('d/m/Y H:i').'.');
         }
     }
 
