@@ -1,13 +1,11 @@
 <x-app-layout>
     <div class="bg-slate-50">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            @include('shared.status')
-
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Jogador</p>
-                    <h1 class="mt-1 text-3xl font-bold text-slate-950">Avaliacoes</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-600">Avalie quem jogou com voce e acompanhe sua reputacao nas partidas.</p>
+                    <h1 class="mt-1 text-3xl font-bold text-slate-950">Avaliações</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-600">Avalie quem jogou com você e acompanhe sua reputação nas partidas.</p>
                 </div>
                 <a href="{{ route('jogador.peladas.minhas') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                     Minhas peladas
@@ -34,21 +32,37 @@
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
                     <p class="text-sm font-medium text-emerald-800">Pendentes</p>
                     <p class="mt-2 text-3xl font-bold text-emerald-950">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</p>
-                    <p class="mt-1 text-xs text-emerald-800">abertas por ate 2 dias</p>
+                    <p class="mt-1 text-xs text-emerald-800">abertas por até 2 dias</p>
                 </div>
             </section>
 
             <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-                <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                <section id="avaliacoes-pendentes" class="scroll-mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-100 px-5 py-4">
-                        <h2 class="text-lg font-bold text-slate-950">Avaliacoes pendentes</h2>
-                        <p class="mt-1 text-sm text-slate-600">Aparecem aqui partidas realizadas em que sua presenca foi marcada no local.</p>
+                        <h2 class="text-lg font-bold text-slate-950">Avaliações pendentes</h2>
+                        <p class="mt-1 text-sm text-slate-600">Aparecem aqui partidas realizadas em que sua presença foi marcada no local.</p>
                     </div>
+
+                    @if(session('status') || $errors->any())
+                        <div class="border-b border-slate-100 px-5 py-4">
+                            @if(session('status'))
+                                <div class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
+
+                            @if($errors->any())
+                                <div class="{{ session('status') ? 'mt-3' : '' }} rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                                    {{ $errors->first() }}
+                                </div>
+                            @endif
+                        </div>
+                    @endif
 
                     @if($pendingGames->isEmpty())
                         <div class="p-8 text-center">
-                            <p class="font-semibold text-slate-900">Nenhuma avaliacao pendente</p>
-                            <p class="mt-1 text-sm text-slate-500">Depois de uma rodada com presenca marcada, voce podera avaliar os jogadores presentes.</p>
+                            <p class="font-semibold text-slate-900">Nenhuma avaliação pendente</p>
+                            <p class="mt-1 text-sm text-slate-500">Depois de uma rodada com presença marcada, você poderá avaliar os jogadores presentes.</p>
                         </div>
                     @else
                         <div class="divide-y divide-slate-100">
@@ -74,7 +88,7 @@
 
                                     <div class="mt-5 rounded-lg border border-emerald-100 bg-emerald-50/70 p-4">
                                         <div>
-                                            <h4 class="font-bold text-slate-950">Votos e avaliacoes da rodada</h4>
+                                            <h4 class="font-bold text-slate-950">Votos e avaliações da rodada</h4>
                                             <p class="text-sm text-slate-600">Vote nos destaques e avalie os jogadores presentes no mesmo card.</p>
                                         </div>
 
@@ -150,9 +164,9 @@
                     <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <h2 class="text-lg font-bold text-slate-950">Como funciona</h2>
                         <div class="mt-4 space-y-3 text-sm text-slate-600">
-                            <p>1. O organizador marca a presenca no local.</p>
-                            <p>2. A avaliacao fica aberta por 2 dias apos a finalizacao da rodada.</p>
-                            <p>3. Voce avalia apenas jogadores presentes e cadastrados.</p>
+                            <p>1. O organizador marca a presença no local.</p>
+                            <p>2. A avaliação fica aberta por 2 dias apos a finalização da rodada.</p>
+                            <p>3. Você avalia apenas jogadores presentes e cadastrados.</p>
                             <p>4. Notas recebidas impactam media, pontos, badges e ranking.</p>
                         </div>
                     </section>
@@ -172,7 +186,7 @@
                                     @endif
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-500">Voce ainda nao recebeu avaliacoes.</p>
+                                <p class="text-sm text-slate-500">Você ainda não recebeu avaliações.</p>
                             @endforelse
                         </div>
                     </section>
@@ -189,7 +203,7 @@
                                     <p class="mt-1 text-xs text-slate-500">{{ $avaliacao->jogo->pelada->nome ?? 'Pelada' }} - {{ $avaliacao->created_at->format('d/m/Y') }}</p>
                                 </div>
                             @empty
-                                <p class="text-sm text-slate-500">Voce ainda nao avaliou jogadores.</p>
+                                <p class="text-sm text-slate-500">Você ainda não avaliou jogadores.</p>
                             @endforelse
                         </div>
                     </section>
@@ -197,4 +211,15 @@
             </div>
         </div>
     </div>
+
+    @if(session('status') || $errors->any())
+        <script>
+            window.addEventListener('load', () => {
+                document.getElementById('avaliacoes-pendentes')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        </script>
+    @endif
 </x-app-layout>

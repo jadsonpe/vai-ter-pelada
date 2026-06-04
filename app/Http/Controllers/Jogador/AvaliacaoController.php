@@ -84,12 +84,12 @@ class AvaliacaoController extends Controller
             'recebidas' => $user->avaliacoesRecebidas()
                 ->with(['avaliador', 'jogo.pelada'])
                 ->latest()
-                ->take(8)
+                ->take(5)
                 ->get(),
             'feitas' => $user->avaliacoesFeitas()
                 ->with(['avaliado', 'jogo.pelada'])
                 ->latest()
-                ->take(8)
+                ->take(5)
                 ->get(),
             'mediaRecebida' => $user->rating_average,
             'totalRecebidas' => $user->rating_count,
