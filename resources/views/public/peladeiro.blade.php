@@ -241,54 +241,59 @@
                     </div>
 
                     @if($torneioPerformance['tem_dados'])
-                        <div class="mt-5 grid gap-3 sm:grid-cols-4">
+                        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Torneios</p>
                                 <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['torneios'] }}</p>
                             </div>
+
                             <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Jogos</p>
                                 <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['jogos'] }}</p>
                             </div>
+
                             <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Gols</p>
                                 <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['gols'] }}</p>
                             </div>
+
                             <div class="rounded-md border border-white/10 bg-slate-900/70 px-4 py-3">
                                 <p class="text-xs font-bold uppercase text-slate-400">Cartões</p>
                                 <p class="mt-1 text-2xl font-black text-white">{{ $torneioPerformance['cartoes'] }}</p>
                             </div>
                         </div>
 
-                        {{-- Grid dos Cartões Corrigidos e Profissionais (Torneio) --}}
-                        <div class="mt-4 grid gap-2 sm:grid-cols-3">
-                            {{-- Cartão Amarelo --}}
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #facc15;" aria-label="Cartões amarelos"></div>
-                                    <span class="text-xs font-medium text-slate-400">Amarelos</span>
-                                </div>
-                                <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong>
+                        {{-- Grid dos Cartões Corrigidos e Profissionais --}}
+                    <div class="mt-4 grid gap-2 sm:grid-cols-3">
+                        {{-- Cartão Amarelo --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #facc15;" aria-label="Cartões amarelos"></div>
+                                <span class="text-xs font-medium text-slate-400">Amarelos</span>
                             </div>
-                            {{-- Cartão Vermelho --}}
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #ef4444;" aria-label="Cartões vermelhos"></div>
-                                    <span class="text-xs font-medium text-slate-400">Vermelhos</span>
-                                </div>
-                                <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong>
-                            </div>
-                            {{-- Cartão Azul --}}
-                            <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #38bdf8;" aria-label="Cartões azuis"></div>
-                                    <span class="text-xs font-medium text-slate-400">Azuis</span>
-                                </div>
-                                <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong>
-                            </div>
+                            <strong class="text-white">{{ $torneioPerformance['cartoes_amarelos'] }}</strong>
                         </div>
+                        {{-- Cartão Vermelho --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #ef4444;" aria-label="Cartões vermelhos"></div>
+                                <span class="text-xs font-medium text-slate-400">Vermelhos</span>
+                            </div>
+                            <strong class="text-white">{{ $torneioPerformance['cartoes_vermelhos'] }}</strong>
+                        </div>
+                        {{-- Cartão Azul --}}
+                        <div class="flex items-center justify-between rounded-md bg-slate-900/70 p-3 text-sm border border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #38bdf8;" aria-label="Cartões azuis"></div>
+                                <span class="text-xs font-medium text-slate-400">Azuis</span>
+                            </div>
+                            <strong class="text-white">{{ $torneioPerformance['cartoes_azuis'] }}</strong>
+                        </div>
+                    </div>
                     @else
-                        <p class="mt-5 rounded-md bg-slate-900/70 px-4 py-4 text-sm text-slate-400 border border-white/5">Ainda não há desempenho em torneios registrado.</p>
+                        <p class="mt-5 rounded-md border border-white/10 bg-slate-900/70 px-4 py-4 text-sm text-slate-400">
+                            Ainda não há desempenho em torneios registrado.
+                        </p>
                     @endif
                 </div>
             </section>
