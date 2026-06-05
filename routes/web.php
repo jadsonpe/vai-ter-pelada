@@ -60,11 +60,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/denuncias/peladeiros/{profile:slug}', [ReportController::class, 'storePlayer'])->name('denuncias.peladeiros.store');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
-        Route::get('/avaliacoes', [AvaliacaoController::class, 'index'])->name('avaliacoes.index');
+        Route::get('/avaliacoes', fn () => redirect()->route('dashboard', ['aba' => 'avaliacoes']))->name('avaliacoes.index');
         Route::post('/avaliacoes', [AvaliacaoController::class, 'store'])->name('avaliacoes.store');
         Route::post('/votos', [AvaliacaoController::class, 'vote'])->name('votos.store');
 
-        Route::get('/minhas-peladas', [JogadorPeladaController::class, 'minhas'])->name('peladas.minhas');
+        Route::get('/minhas-peladas', fn () => redirect()->route('dashboard', ['aba' => 'peladas']))->name('peladas.minhas');
         Route::post('/jogos/{jogo}/confirmar', [JogadorPeladaController::class, 'confirmar'])->name('jogos.confirmar');
         Route::delete('/jogos/{jogo}/cancelar', [JogadorPeladaController::class, 'cancelar'])->name('jogos.cancelar');
         Route::post('/peladas/{pelada}/solicitar-mensalista', [JogadorPeladaController::class, 'solicitarMensalista'])->name('peladas.solicitar-mensalista');

@@ -45,7 +45,7 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'apelido' => ['nullable', 'string', 'max:80'],
             'username' => [
-                'nullable',
+                'required',
                 'string',
                 'min:3',
                 'max:40',

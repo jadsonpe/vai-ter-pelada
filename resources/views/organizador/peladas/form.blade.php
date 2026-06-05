@@ -167,14 +167,37 @@
             const contador = document.getElementById('descricao-count');
             const regras = document.getElementById('regras');
             const usarRegrasPadrao = document.getElementById('usar-regras-padrao');
-            const regrasPadrao = `1. Respeito mútuo acima de tudo: discussões pesadas, ofensas ou violência física geram exclusão imediata.
-2. Pontualidade: os jogos começam no horário agendado. Atrasos prejudicam o tempo de quadra/campo de todos.
-3. Divisão de times: as equipes serão sorteadas ou definidas pela organização para manter o equilíbrio.
-4. Tempo de jogo: cada partida terá a duração padrão combinada no dia (ex: 10 a 15 minutos, ou pontuação limite), rodando os times de forma justa.
-5. Mensalistas e Diaristas: prioridade de vaga para mensalistas. Diaristas devem confirmar presença e realizar o pagamento antes do início do jogo.
-6. Cuidado com o espaço e materiais: zele pela quadra/campo, coletes e bolas da turma.`;
+          const regrasPadrao = `1. Respeito e Fair Play: o respeito entre todos os participantes é obrigatório. Não serão toleradas ofensas, discriminação, ameaças ou agressões físicas. Atitudes antidesportivas podem gerar advertência, suspensão ou exclusão da pelada.
 
-            function atualizarContador() {
+2. Pontualidade: os jogos começam no horário agendado. Atrasos prejudicam o tempo de quadra/campo de todos e podem resultar em perda da vaga ou redução do tempo de jogo.
+
+3. Confirmação de presença: os participantes devem confirmar presença dentro do prazo definido pela organização. Ausências sem aviso podem gerar perda de prioridade em futuras peladas.
+
+4. Divisão de times: as equipes serão sorteadas ou definidas pela organização para manter o equilíbrio e a competitividade saudável entre os participantes.
+
+5. Tempo de jogo: cada partida terá a duração padrão definida pela organização (tempo corrido, número de gols ou sistema de rodízio), garantindo a participação justa de todos.
+
+6. Substituições: as trocas de jogadores devem ocorrer de forma organizada, sem prejudicar o andamento das partidas.
+
+7. Faltas e conduta em campo: entradas violentas, agressões ou atitudes que coloquem outros participantes em risco não serão toleradas.
+
+8. Cartões disciplinares: a organização poderá registrar cartões amarelos e vermelhos. Expulsões e reincidências podem resultar em suspensão temporária ou definitiva.
+
+9. Mensalistas e diaristas: mensalistas possuem prioridade nas vagas. Diaristas devem confirmar presença e realizar o pagamento antes do início da pelada.
+
+10. W.O. (ausência): participantes que confirmarem presença e não comparecerem sem justificativa poderão receber advertência e perder prioridade em futuras inscrições.
+
+11. Cuidado com o espaço e materiais: zele pela quadra, campo, coletes, bolas e demais equipamentos utilizados pela turma.
+
+12. Segurança: cada participante é responsável por suas condições físicas para a prática esportiva e pelo uso adequado dos equipamentos.
+
+13. Estatísticas: a organização poderá registrar gols, assistências, cartões, presenças, vitórias e demais dados para rankings e histórico dos participantes.
+
+14. Decisões da organização: situações não previstas nestas regras serão resolvidas pela organização, visando o bom andamento da pelada.
+
+15. Objetivo principal: promover diversão, amizade, integração, saúde e espírito esportivo entre todos os participantes.`;
+
+function atualizarContador() {
                 if (!descricao || !contador) return;
                 contador.textContent = descricao.value.length;
             }

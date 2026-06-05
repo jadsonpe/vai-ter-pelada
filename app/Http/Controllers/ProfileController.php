@@ -93,7 +93,6 @@ class ProfileController extends Controller
     {
         $profile = PlayerProfile::ensureForUser($user);
         $profileData = $request->validated()['player_profile'] ?? [];
-        $slugBase = $user->apelido ?: $user->name ?: 'peladeiro';
 
         $coverMode = $profileData['cover_mode'] ?? ($profileData['banner_preset'] ?? null ? 'image' : 'gradient');
 
@@ -108,7 +107,7 @@ class ProfileController extends Controller
             'banner_preset' => $coverMode === 'image'
                 ? ($profileData['banner_preset'] ?? null)
                 : null,
-            'slug' => PlayerProfile::uniqueSlug($slugBase, $profile->id),
+            'slug' => $user->username ?: PlayerProfile::uniqueSlug($user->apelido ?: $user->name ?: 'peladeiro', $profile->id),
         ]);
 
         if ($profile->banner_path) {

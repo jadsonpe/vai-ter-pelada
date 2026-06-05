@@ -168,9 +168,9 @@
                             </div>
                             @if($card['label'] === 'Cartões')
                                 <div class="flex gap-1 pt-1" aria-hidden="true">
-                                    <span class="h-6 w-4 rounded-sm bg-yellow-300 shadow-sm"></span>
-                                    <span class="h-6 w-4 rounded-sm bg-red-500 shadow-sm"></span>
-                                    <span class="h-6 w-4 rounded-sm bg-sky-400 shadow-sm"></span>
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #facc15;" aria-label="Cartões amarelos"></div>
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #ef4444;" aria-label="Cartões vermelhos"></div>
+                                    <div class="h-6 w-4 flex-shrink-0 rounded-[3px]" style="background-color: #38bdf8;" aria-label="Cartões azuis"></div>
                                 </div>
                             @endif
                         </div>

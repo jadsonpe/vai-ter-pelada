@@ -105,10 +105,22 @@
                     </div>
 
                     @if($pelada->regras)
-                        <div class="mt-6 rounded-lg bg-slate-50 p-4">
-                            <p class="text-sm font-semibold text-slate-500">Regras</p>
-                            <p class="mt-2 whitespace-pre-line leading-7 text-slate-700">{{ $pelada->regras }}</p>
-                        </div>
+                        <details class="group mt-6 rounded-lg border border-slate-200 bg-slate-50">
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                                <span>
+                                    <span class="block text-sm font-bold text-slate-900">Regras da pelada</span>
+                                    <span class="mt-0.5 block text-xs text-slate-500">Clique para ver as regras definidas pelo organizador.</span>
+                                </span>
+                                <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-slate-600 ring-1 ring-slate-200 transition group-open:rotate-180">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            </summary>
+                            <div class="border-t border-slate-200 px-4 py-4">
+                                <p class="whitespace-pre-line leading-7 text-slate-700">{{ $pelada->regras }}</p>
+                            </div>
+                        </details>
                     @endif
                 </section>
 
@@ -231,7 +243,7 @@
                             <h2 class="text-xl font-bold text-slate-950">Próximas rodadas</h2>
                             <p class="mt-1 text-sm text-slate-600">Confira as rodadas abertas e confirme sua presença se você já participa da pelada.</p>
                         </div>
-                        <span class="text-sm font-medium text-slate-500">{{ $rodadas->total() }} rodada(s)</span>
+                        <span class="text-sm font-medium text-slate-500">{{ $rodadas->count() }} próxima(s)</span>
                     </div>
 
                     <div class="mt-4 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -292,11 +304,6 @@
                         @endforelse
                     </div>
 
-                    @if($rodadas->hasPages())
-                        <div class="mt-5">
-                            {{ $rodadas->links() }}
-                        </div>
-                    @endif
                 </section>
             </main>
         </div>

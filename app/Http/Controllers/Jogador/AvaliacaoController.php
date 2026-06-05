@@ -293,7 +293,7 @@ class AvaliacaoController extends Controller
     {
         return [
             'craque' => ['label' => 'Craque da rodada', 'score' => 15],
-            'garcom' => ['label' => 'Garcom', 'score' => 8],
+            'garcom' => ['label' => 'Garçom', 'score' => 8],
             'muralha' => ['label' => 'Muralha', 'score' => 8],
             'fair_play' => ['label' => 'Fair play', 'score' => 8],
             'carcara' => ['label' => 'Carcara', 'score' => 8],

@@ -31,10 +31,45 @@
 
         <div class="mt-8">
             @if($players === null)
-                <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                    <p class="font-semibold text-slate-800">Comece pesquisando por nome, apelido ou username.</p>
-                    <p class="mt-2 text-sm text-slate-500">A busca só consulta o banco quando você envia o formulário.</p>
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-950">Peladeiros recentes</h2>
+                        <p class="mt-1 text-sm text-slate-500">Jogadores ativos que participaram de rodadas nos últimos 90 dias.</p>
+                    </div>
                 </div>
+
+                @if($featuredPlayers->isEmpty())
+                    <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                        <p class="font-semibold text-slate-800">Comece pesquisando por nome, apelido ou username.</p>
+                        <p class="mt-2 text-sm text-slate-500">A busca só consulta o banco quando você envia o formulário.</p>
+                    </div>
+                @else
+                    <div class="grid gap-4 md:grid-cols-2">
+                        @foreach($featuredPlayers as $player)
+                            @php
+                                $profile = $player->playerProfile;
+                                $profileUrl = $profile && $profile->publico
+                                    ? route('peladeiros.show', $profile)
+                                    : route('jogadores.show', $player);
+                            @endphp
+
+                            <a href="{{ $profileUrl }}" class="group flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md">
+                                <x-user-avatar :user="$player" size="lg" />
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h2 class="truncate text-lg font-black text-slate-950 group-hover:text-emerald-700">{{ $player->name }}</h2>
+                                        @if($player->username)
+                                            <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">{{ '@'.$player->username }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-slate-500">{{ $player->apelido ?: 'Sem apelido informado' }}</p>
+                                    <p class="mt-1 text-xs font-semibold text-slate-400">{{ $player->participacoes_recentes_count }} participação(ões) recente(s)</p>
+                                </div>
+                                <span class="shrink-0 text-sm font-bold text-emerald-700">Ver perfil</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             @elseif($players->isEmpty())
                 <div class="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
                     <p class="font-semibold text-slate-800">Nenhum jogador encontrado.</p>
@@ -62,7 +97,7 @@
                                 <div class="flex flex-wrap items-center gap-2">
                                     <h2 class="truncate text-lg font-black text-slate-950 group-hover:text-emerald-700">{{ $player->name }}</h2>
                                     @if($player->username)
-                                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">@{{ $player->username }}</span>
+                                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">{{ '@'.$player->username }}</span>
                                     @endif
                                 </div>
                                 <p class="mt-1 truncate text-sm text-slate-500">{{ $player->apelido ?: 'Sem apelido informado' }}</p>

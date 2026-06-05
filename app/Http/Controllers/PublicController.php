@@ -246,8 +246,8 @@ class PublicController extends Controller
             ->whereIn('status', ['aberto', 'fechado'])
             ->where('data_hora', '>=', now()->startOfDay())
             ->orderBy('data_hora')
-            ->paginate(6, ['*'], 'rodadas_page')
-            ->withQueryString();
+            ->take(5)
+            ->get();
 
         $pelada->load(['esporte', 'organizador']);
         $membrosAtivosCount = $pelada->membros()->where('status', 'ativo')->count();

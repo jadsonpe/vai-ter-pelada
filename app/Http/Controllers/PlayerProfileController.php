@@ -360,7 +360,7 @@ class PlayerProfileController extends Controller
     {
         return [
             'craque' => 'Craque da rodada',
-            'garcom' => 'Garcom',
+            'garcom' => 'Garçom',
             'muralha' => 'Muralha',
             'fair_play' => 'Fair play',
             'carcara' => 'Carcara',

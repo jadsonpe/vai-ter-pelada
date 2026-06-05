@@ -1,3 +1,33 @@
+@php
+    $tabs = [
+        'resumo' => 'Resumo',
+        'peladas' => 'Minhas peladas',
+        'avaliacoes' => 'Avaliações',
+        'mensagens' => 'Mensagens',
+    ];
+
+    if($peladasOrganizadas->isNotEmpty()) {
+        $tabs['organizacao'] = 'Organização';
+    }
+
+    $statusClasses = [
+        'ativo' => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+        'pendente' => 'bg-amber-50 text-amber-800 ring-amber-200',
+        'bloqueado' => 'bg-red-50 text-red-800 ring-red-200',
+        'saiu' => 'bg-slate-100 text-slate-700 ring-slate-200',
+        'inativo' => 'bg-slate-100 text-slate-700 ring-slate-200',
+        'aprovada' => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+        'recusada' => 'bg-red-50 text-red-800 ring-red-200',
+    ];
+
+    $tipoLabels = [
+        'mensalista' => 'Mensalista',
+        'diarista' => 'Diarista',
+        'entrar_pelada' => 'Entrada na pelada',
+        'virar_mensalista' => 'Virar mensalista',
+    ];
+@endphp
+
 <div class="bg-slate-100">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         @include('shared.status')
@@ -22,21 +52,23 @@
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Painel do jogador</p>
                     <h1 class="mt-2 text-3xl font-bold sm:text-4xl">Oi, {{ auth()->user()->name }}</h1>
-                    <p class="mt-3 max-w-2xl text-slate-300">Encontre peladas para jogar ou crie a sua própria. Quando você cria uma pelada, passa a ser o organizador dela.</p>
+                    <p class="mt-3 max-w-2xl text-slate-300">Confirme presença, responda convites, avalie rodadas e acompanhe suas mensagens em um só lugar.</p>
                     <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <a href="{{ route('peladas.index') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400">Encontrar peladas</a>
                         <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-slate-100">Criar pelada</a>
-                        <a href="{{ route('jogador.peladas.minhas') }}" class="inline-flex items-center justify-center rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">Minhas peladas</a>
-                        <a href="{{ route('jogador.avaliacoes.index') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-200">Avaliações pendentes</a>
+                        @if($peladasOrganizadas->isNotEmpty())
+                            <a href="{{ route('dashboard', ['aba' => 'organizacao']) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 px-4 py-2 text-sm font-semibold text-emerald-100 hover:bg-white/10">Organizar minhas peladas</a>
+                        @endif
+                        <a href="{{ route('peladeiros.show', auth()->user()->publicProfile()) }}" class="inline-flex items-center justify-center rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">Meu perfil público</a>
                     </div>
                 </div>
 
                 <div class="rounded-lg border border-white/10 bg-white/10 p-5">
                     <div class="flex items-center gap-4">
                         <x-user-avatar :user="auth()->user()" size="lg" class="border-2 border-emerald-300" />
-                        <div>
-                            <p class="font-semibold">{{ auth()->user()->name }}</p>
-                            <p class="text-sm text-slate-300">{{ auth()->user()->email }}</p>
+                        <div class="min-w-0">
+                            <p class="truncate font-semibold">{{ auth()->user()->name }}</p>
+                            <p class="truncate text-sm text-slate-300">{{ auth()->user()->username }}</p>
                             <span class="mt-2 inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">{{ auth()->user()->role }}</span>
                         </div>
                     </div>
@@ -44,185 +76,431 @@
             </div>
         </section>
 
-        <section class="mt-6 grid gap-4 md:grid-cols-4">
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Peladas</p>
-                <p class="mt-2 text-3xl font-bold text-slate-900">{{ $membros->count() }}</p>
+        <nav class="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+            <div class="flex min-w-max gap-2">
+                @foreach($tabs as $key => $label)
+                    <a href="{{ route('dashboard', ['aba' => $key]) }}" class="rounded-md px-4 py-2 text-sm font-bold transition {{ $aba === $key ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' }}">
+                        {{ $label }}
+                        @if($key === 'mensagens' && $notificacoesNaoLidasPainel)
+                            <span class="ml-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] text-white">{{ $notificacoesNaoLidasPainel }}</span>
+                        @endif
+                        @if($key === 'avaliacoes' && $pendingGames->isNotEmpty())
+                            <span class="ml-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] text-white">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</span>
+                        @endif
+                    </a>
+                @endforeach
             </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Mensalista</p>
-                <p class="mt-2 text-3xl font-bold text-emerald-700">{{ $mensalistasCount }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Diarista</p>
-                <p class="mt-2 text-3xl font-bold text-slate-900">{{ $diaristasCount }}</p>
-            </div>
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Confirmações recentes</p>
-                <p class="mt-2 text-3xl font-bold text-slate-900">{{ $confirmacoesCount }}</p>
-            </div>
-        </section>
+        </nav>
 
-        <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-            <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-100 px-5 py-4">
-                    <h2 class="text-lg font-semibold text-slate-900">Próximas rodadas</h2>
-                    <p class="mt-1 text-sm text-slate-500">Confirme presença ou acompanhe sua posição na fila.</p>
+        @if($aba === 'resumo')
+            <section class="mt-6 grid gap-4 md:grid-cols-4">
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Peladas</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">{{ $membros->count() }}</p>
                 </div>
-                <div class="divide-y divide-slate-100">
-                    @forelse($proximosJogos as $jogo)
-                        @php
-                            $participacao = $jogo->participantes->first();
-                            $capacidade = $jogo->vagas_totais ?: $jogo->capacidade ?: $jogo->pelada->vagas_totais ?: $jogo->pelada->capacidade;
-                            $vagas = max(0, $capacidade - $jogo->confirmados_count);
-                        @endphp
-                        <article class="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center">
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="font-semibold text-slate-900">{{ $jogo->pelada->nome }}</h3>
-                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $jogo->pelada->esporte->nome }}</span>
-                                    @if($participacao)
-                                        <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $participacao->status === 'confirmado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
-                                            {{ $participacao->status === 'confirmado' ? 'Confirmado' : 'Fila #' . $participacao->posicao_fila }}
-                                        </span>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Rodadas próximas</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">{{ $totalJogosProximos }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Convites pendentes</p>
+                    <p class="mt-2 text-3xl font-bold text-emerald-700">{{ $convitesPendentes }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Avaliações pendentes</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</p>
+                </div>
+            </section>
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
+                <section class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 px-5 py-4">
+                        <h2 class="text-lg font-semibold text-slate-900">Próximas rodadas</h2>
+                        <p class="mt-1 text-sm text-slate-500">Confirme presença ou acompanhe sua posição na fila.</p>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        @forelse($proximosJogos as $jogo)
+                            @php
+                                $participacao = $jogo->participantes->first();
+                                $capacidade = $jogo->vagas_totais ?: $jogo->capacidade ?: $jogo->pelada->vagas_totais ?: $jogo->pelada->capacidade;
+                                $vagas = max(0, $capacidade - $jogo->confirmados_count);
+                            @endphp
+                            <article class="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h3 class="font-semibold text-slate-900">{{ $jogo->pelada->nome }}</h3>
+                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $jogo->pelada->esporte->nome }}</span>
+                                        @if($participacao)
+                                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $participacao->status === 'confirmado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                                {{ $participacao->status === 'confirmado' ? 'Confirmado' : 'Fila #' . $participacao->posicao_fila }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="mt-1 text-sm text-slate-600">{{ $jogo->titulo }} - {{ $jogo->data_hora->format('d/m/Y H:i') }}</p>
+                                    <div class="mt-3 flex flex-wrap gap-3 text-sm text-slate-500">
+                                        <span>{{ $jogo->confirmados_count }}/{{ $capacidade }} confirmados</span>
+                                        <span>{{ $vagas }} vagas abertas</span>
+                                        <span>{{ $jogo->fila_count }} na fila</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2 sm:flex-row md:justify-end">
+                                    @if($participacao && in_array($participacao->status, ['confirmado', 'fila'], true))
+                                        <form method="POST" action="{{ route('jogador.jogos.cancelar', $jogo) }}" class="w-full sm:w-auto">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto">Cancelar</button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('jogador.jogos.confirmar', $jogo) }}" class="w-full sm:w-auto">
+                                            @csrf
+                                            <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 sm:w-auto">Confirmar</button>
+                                        </form>
                                     @endif
                                 </div>
-                                <p class="mt-1 text-sm text-slate-600">{{ $jogo->titulo }} - {{ $jogo->data_hora->format('d/m/Y H:i') }}</p>
-                                <div class="mt-3 flex flex-wrap gap-3 text-sm text-slate-500">
-                                    <span>{{ $jogo->confirmados_count }}/{{ $capacidade }} confirmados</span>
-                                    <span>{{ $vagas }} vagas abertas</span>
-                                    <span>{{ $jogo->fila_count }} na fila</span>
+                            </article>
+                        @empty
+                            <div class="p-8 text-center">
+                                <h3 class="font-semibold text-slate-900">Nenhuma rodada futura encontrada</h3>
+                                <p class="mt-2 text-sm text-slate-500">Entre em uma pelada, ou crie uma para organizar seu grupo.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </section>
+
+                <aside class="space-y-6">
+                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <h2 class="text-lg font-semibold text-slate-900">Mensagens recentes</h2>
+                        <div class="mt-4 divide-y divide-slate-100">
+                            @forelse($notificacoes as $notificacao)
+                                <a href="{{ $notificacao->link ?: '#' }}" class="block py-3 hover:bg-slate-50">
+                                    <p class="text-sm font-semibold text-slate-900">{{ $notificacao->titulo }}</p>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $notificacao->mensagem }}</p>
+                                </a>
+                            @empty
+                                <p class="py-4 text-sm text-slate-500">Nenhuma mensagem nova.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <h2 class="text-lg font-semibold text-slate-900">Minhas peladas</h2>
+                        <div class="mt-4 space-y-3">
+                            @forelse($membros->take(5) as $membro)
+                                <a href="{{ route('peladas.show', $membro->pelada) }}" class="block rounded-md border border-slate-200 p-4 hover:border-emerald-300">
+                                    <p class="font-semibold text-slate-900">{{ $membro->pelada->nome }}</p>
+                                    <p class="mt-1 text-sm text-slate-500">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</p>
+                                </a>
+                            @empty
+                                <p class="text-sm text-slate-500">Você ainda não participa de nenhuma pelada.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        @elseif($aba === 'peladas')
+            <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-950">Convites recebidos</h2>
+                    <div class="mt-4 divide-y divide-slate-100">
+                        @forelse($convites as $convite)
+                            @php $tipoConvite = str_replace('convite_', '', $convite->tipo_solicitacao ?? ''); @endphp
+                            <div class="py-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <span class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 {{ $statusClasses[$convite->status] ?? 'bg-slate-100 text-slate-700 ring-slate-200' }}">{{ ucfirst($convite->status) }}</span>
+                                        <p class="mt-3 font-semibold text-slate-950">{{ $convite->pelada->nome }}</p>
+                                        <p class="mt-1 text-xs text-slate-500">Convite para {{ $tipoLabels[$tipoConvite] ?? $tipoConvite }}</p>
+                                    </div>
+                                    @if($convite->status === 'pendente')
+                                        <div class="flex shrink-0 gap-2">
+                                            <form method="POST" action="{{ route('jogador.solicitacoes.aceitar-convite', $convite) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">Aceitar</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('jogador.solicitacoes.recusar-convite', $convite) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button class="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Recusar</button>
+                                            </form>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-2 sm:flex-row md:justify-end">
-                                @if($participacao && in_array($participacao->status, ['confirmado', 'fila'], true))
-                                    <form method="POST" action="{{ route('jogador.jogos.cancelar', $jogo) }}" class="w-full sm:w-auto">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto">Cancelar</button>
-                                    </form>
-                                @else
-                                    <form method="POST" action="{{ route('jogador.jogos.confirmar', $jogo) }}" class="w-full sm:w-auto">
-                                        @csrf
-                                        <button class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 sm:w-auto">Confirmar</button>
-                                    </form>
-                                @endif
+                        @empty
+                            <p class="py-8 text-center text-sm text-slate-500">Nenhum convite encontrado.</p>
+                        @endforelse
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-950">Solicitações enviadas</h2>
+                    <div class="mt-4 divide-y divide-slate-100">
+                        @forelse($solicitacoes as $solicitacao)
+                            @php $tipoSolicitacao = $solicitacao->tipo_solicitacao ?: $solicitacao->tipo; @endphp
+                            <div class="py-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <span class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 {{ $statusClasses[$solicitacao->status] ?? 'bg-slate-100 text-slate-700 ring-slate-200' }}">{{ ucfirst($solicitacao->status) }}</span>
+                                        <p class="mt-3 font-semibold text-slate-950">{{ $solicitacao->pelada->nome }}</p>
+                                        <p class="mt-1 text-xs text-slate-500">{{ $tipoLabels[$tipoSolicitacao] ?? str_replace('_', ' ', ucfirst($tipoSolicitacao)) }}</p>
+                                    </div>
+                                    <a href="{{ route('peladas.show', $solicitacao->pelada) }}" class="inline-flex shrink-0 items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                        Ver pelada
+                                    </a>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="py-8 text-center text-sm text-slate-500">Nenhuma solicitação encontrada.</p>
+                        @endforelse
+                    </div>
+                </section>
+            </div>
+
+            <section class="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-950">Minhas participações</h2>
+                <div class="mt-5 overflow-hidden rounded-lg border border-slate-200">
+                    @forelse($membros as $membro)
+                        <article class="border-b border-slate-200 bg-white p-4 last:border-b-0">
+                            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 {{ $statusClasses[$membro->status] ?? 'bg-slate-100 text-slate-700 ring-slate-200' }}">{{ ucfirst($membro->status) }}</span>
+                                        @php $tipoLabel = $tipoLabels[$membro->tipo] ?? ucfirst($membro->tipo); @endphp
+                                        <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">{{ $tipoLabel }}</span>
+                                    </div>
+                                    <h3 class="mt-3 text-lg font-bold text-slate-950">{{ $membro->pelada->nome }}</h3>
+                                    <p class="mt-1 text-sm text-slate-600">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</p>
+                                </div>
+                                <a href="{{ route('peladas.show', $membro->pelada) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">
+                                    Abrir pelada
+                                </a>
+                            </div>
+
+                            @php $rodadas = $membro->pelada->jogos ?? collect(); @endphp
+                            @php $rodadasConfirmadas = $rodadas->filter(fn ($jogo) => $jogo->participantes->first()?->status === 'confirmado')->values(); @endphp
+                            @php $rodadasFila = $rodadas->filter(fn ($jogo) => $jogo->participantes->first()?->status === 'fila')->values(); @endphp
+                            @php $rodadasParaConfirmar = $rodadas->filter(fn ($jogo) => ! in_array($jogo->participantes->first()?->status, ['confirmado', 'fila'], true))->values(); @endphp
+                            @php $rodadasPendentes = $rodadasFila->merge($rodadasParaConfirmar); @endphp
+
+                            <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                    <h4 class="font-semibold text-slate-900">Próximas rodadas</h4>
+                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">{{ $rodadas->count() }} encontrada(s)</span>
+                                </div>
+                                <div class="mt-3 divide-y divide-slate-200">
+                                    @forelse($rodadasPendentes as $jogo)
+                                        @php $participacao = $jogo->participantes->first(); @endphp
+                                        <div class="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <p class="text-sm font-semibold text-slate-900">{{ $jogo->titulo }}</p>
+                                                <p class="mt-0.5 text-xs text-slate-500">{{ $jogo->data_hora->format('d/m/Y H:i') }}</p>
+                                            </div>
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                                @if($participacao && in_array($participacao->status, ['confirmado', 'fila'], true))
+                                                    <span class="inline-flex items-center justify-center rounded-md px-3 py-2 text-xs font-semibold {{ $participacao->status === 'confirmado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                                        {{ $participacao->status === 'confirmado' ? 'Confirmado' : 'Fila #'.$participacao->posicao_fila }}
+                                                    </span>
+                                                    <form method="POST" action="{{ route('jogador.jogos.cancelar', $jogo) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-white">Cancelar</button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('jogador.jogos.confirmar', $jogo) }}">
+                                                        @csrf
+                                                        <button class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">Confirmar</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="rounded-lg bg-white px-3 py-3 text-sm text-slate-500">Nenhuma rodada pendente de confirmação agora.</p>
+                                    @endforelse
+                                </div>
                             </div>
                         </article>
                     @empty
                         <div class="p-8 text-center">
-                            <h3 class="font-semibold text-slate-900">Nenhuma rodada futura encontrada</h3>
-                            <p class="mt-2 text-sm text-slate-500">Entre em uma pelada, ou crie uma para organizar seu grupo.</p>
-                            <div class="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
-                                <a href="{{ route('peladas.index') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Ver peladas</a>
-                                <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Criar pelada</a>
-                            </div>
+                            <p class="font-semibold text-slate-900">Nenhuma pelada encontrada.</p>
                         </div>
                     @endforelse
                 </div>
             </section>
+        @elseif($aba === 'avaliacoes')
+            <section class="mt-6 grid gap-4 md:grid-cols-4">
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Média recebida</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-950">{{ number_format($mediaRecebida, 2) }}</p>
+                    <p class="mt-1 text-xs text-slate-500">de 5 estrelas</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Recebidas</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-950">{{ $totalRecebidas }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500">Feitas</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-950">{{ $totalFeitas }}</p>
+                </div>
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                    <p class="text-sm font-medium text-emerald-800">Pendentes</p>
+                    <p class="mt-2 text-3xl font-bold text-emerald-950">{{ $pendingGames->sum(fn ($item) => $item->avaliados->count()) }}</p>
+                    <p class="mt-1 text-xs text-emerald-800">abertas por até 2 dias</p>
+                </div>
+            </section>
 
-            <aside class="space-y-6">
-                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    @php 
-                        $mensagensNaoLidas = $notificacoes->whereNull('lida_em')->count(); 
-                    @endphp
-                    
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h2 class="text-lg font-semibold text-slate-900">
-                            Mensagens
-                            @if($mensagensNaoLidas > 0)
-                                <span class="ml-2 inline-flex items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
-                                    {{ $mensagensNaoLidas }}
-                                </span>
-                            @endif
-                        </h2>
-                        @if($mensagensNaoLidas > 0)
-                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
-                                <span class="relative flex h-2.5 w-2.5">
-                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                                </span>
-                                Nova
-                            </span>
-                        @endif
+            <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+                <section id="avaliacoes-pendentes" class="scroll-mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 px-5 py-4">
+                        <h2 class="text-lg font-bold text-slate-950">Avaliações pendentes</h2>
+                        <p class="mt-1 text-sm text-slate-600">Aparecem aqui partidas realizadas em que sua presença foi marcada no local.</p>
                     </div>
-                    
-                    <div class="mt-4 divide-y divide-slate-100">
-                        @forelse($notificacoes as $notificacao)
-                            <a href="{{ $notificacao->link ?: '#' }}" 
-                            class="block py-3 transition-all duration-200 
-                                    {{ !$notificacao->lida_em ? 'animate-pulse bg-gradient-to-r from-emerald-50 via-white to-transparent -mx-2 rounded-lg border-l-4 border-emerald-500 px-2 shadow-sm ring-1 ring-emerald-100' : 'hover:bg-slate-50' }}">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-semibold {{ !$notificacao->lida_em ? 'text-emerald-950' : 'text-slate-900' }}">
-                                            {{ $notificacao->titulo }}
-                                            @if(!$notificacao->lida_em)
-                                                <span class="ml-2 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
-                                                    Nova
-                                                </span>
-                                            @endif
-                                        </p>
-                                        <p class="mt-1 text-xs {{ !$notificacao->lida_em ? 'font-medium text-emerald-700' : 'text-slate-500' }}">
-                                            {{ $notificacao->mensagem }}
-                                        </p>
-                                    </div>
-                                    @if(!$notificacao->lida_em)
-                                        <div class="flex-shrink-0">
-                                            <div class="relative flex h-3 w-3">
-                                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                                <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
-                                            </div>
+                    @if($pendingGames->isEmpty())
+                        <div class="p-8 text-center">
+                            <p class="font-semibold text-slate-900">Nenhuma avaliação pendente</p>
+                            <p class="mt-1 text-sm text-slate-500">Depois de uma rodada com presença marcada, você poderá avaliar os jogadores presentes.</p>
+                        </div>
+                    @else
+                        <div class="divide-y divide-slate-100">
+                            @foreach($pendingGames as $item)
+                                @php
+                                    $jogo = $item->jogo;
+                                    $pendentes = $item->votaveis->filter(fn ($p) => ! $p->avaliacao_atual);
+                                    $avaliados = $item->votaveis->filter(fn ($p) => $p->avaliacao_atual);
+                                @endphp
+                                <article class="p-5">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">{{ $jogo->pelada->esporte->nome }}</p>
+                                            <h3 class="mt-1 font-bold text-slate-950">{{ $jogo->pelada->nome }}</h3>
+                                            <p class="mt-1 text-sm text-slate-500">{{ $jogo->titulo }} - {{ $jogo->data_hora->format('d/m/Y H:i') }}</p>
                                         </div>
+                                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">{{ $pendentes->count() }} pendente(s)</span>
+                                    </div>
+                                    <div class="mt-5 grid gap-3">
+                                        @foreach($pendentes as $participante)
+                                            @php
+                                                $currentReview = $participante->avaliacao_atual;
+                                                $needsReview = ! $currentReview;
+                                                $oldForThisPlayer = (int) old('avaliado_id') === (int) $participante->user_id;
+                                                $selectedVote = $oldForThisPlayer ? old('vote_type') : $participante->voto_atual;
+                                                $selectedStars = $oldForThisPlayer ? old('estrelas') : optional($currentReview)->estrelas;
+                                                $commentValue = $oldForThisPlayer ? old('comentario') : optional($currentReview)->comentario;
+                                            @endphp
+                                            @include('jogador.avaliacoes._card-avaliacao')
+                                        @endforeach
+                                    </div>
+                                    @if($avaliados->isNotEmpty())
+                                        <details class="mt-5 rounded-lg border border-slate-300 bg-slate-50 p-4">
+                                            <summary class="cursor-pointer text-sm font-bold text-slate-700">Ver jogadores já avaliados ({{ $avaliados->count() }})</summary>
+                                            <div class="mt-4 grid gap-3">
+                                                @foreach($avaliados as $participante)
+                                                    @php
+                                                        $currentReview = $participante->avaliacao_atual;
+                                                        $needsReview = ! $currentReview;
+                                                        $oldForThisPlayer = (int) old('avaliado_id') === (int) $participante->user_id;
+                                                        $selectedVote = $oldForThisPlayer ? old('vote_type') : $participante->voto_atual;
+                                                        $selectedStars = $oldForThisPlayer ? old('estrelas') : optional($currentReview)->estrelas;
+                                                        $commentValue = $oldForThisPlayer ? old('comentario') : optional($currentReview)->comentario;
+                                                    @endphp
+                                                    @include('jogador.avaliacoes._card-avaliacao')
+                                                @endforeach
+                                            </div>
+                                        </details>
                                     @endif
-                                </div>
-                            </a>
-                        @empty
-                            <p class="py-4 text-center text-sm text-slate-500">Nenhuma mensagem nova.</p>
-                        @endforelse
-                    </div>
-                    
-                    @if($mensagensNaoLidas > 0)
-                        <div class="mt-4 pt-3 border-t border-slate-100">
-                            <p class="text-center text-[11px] text-slate-400">
-                                Você tem {{ $mensagensNaoLidas }} mensagem(ns) não lida(s)
-                            </p>
+                                </article>
+                            @endforeach
                         </div>
                     @endif
                 </section>
-                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-lg font-semibold text-slate-900">Minhas peladas</h2>
-                    <div class="mt-4 space-y-3">
-                        @forelse($membros as $membro)
-                            <a href="{{ route('peladas.show', $membro->pelada) }}" class="block rounded-md border border-slate-200 p-4 hover:border-emerald-300">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p class="font-semibold text-slate-900">{{ $membro->pelada->nome }}</p>
-                                        <p class="mt-1 text-sm text-slate-500">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</p>
-                                    </div>
-                                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">{{ $membro->tipo }}</span>
-                                </div>
-                            </a>
-                        @empty
-                            <p class="text-sm text-slate-500">Você ainda não participa de nenhuma pelada.</p>
-                        @endforelse
-                    </div>
-                </section>
 
-                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-lg font-semibold text-slate-900">Histórico recente</h2>
-                    <div class="mt-4 divide-y divide-slate-100">
-                        @forelse($participacoes as $participacao)
-                            <div class="py-3">
-                                <p class="text-sm font-semibold text-slate-900">{{ $participacao->jogo->pelada->nome }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ $participacao->jogo->titulo }} - {{ $participacao->status }}</p>
-                            </div>
-                        @empty
-                            <p class="text-sm text-slate-500">Nenhuma participação registrada ainda.</p>
-                        @endforelse
+                <aside class="space-y-6">
+                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <h2 class="text-lg font-bold text-slate-950">Recebidas recentes</h2>
+                        <div class="mt-4 divide-y divide-slate-100">
+                            @forelse($recebidas as $avaliacao)
+                                <div class="py-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <p class="font-semibold text-slate-900">{{ $avaliacao->estrelas }}/5</p>
+                                        <p class="text-xs text-slate-500">{{ $avaliacao->created_at->format('d/m/Y') }}</p>
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $avaliacao->jogo->pelada->nome ?? 'Pelada' }} - por {{ $avaliacao->avaliador->name ?? 'Jogador' }}</p>
+                                </div>
+                            @empty
+                                <p class="text-sm text-slate-500">Você ainda não recebeu avaliações.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <h2 class="text-lg font-bold text-slate-950">Feitas recentes</h2>
+                        <div class="mt-4 divide-y divide-slate-100">
+                            @forelse($feitas as $avaliacao)
+                                <div class="py-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <p class="font-semibold text-slate-900">{{ $avaliacao->avaliado->name ?? 'Jogador' }}</p>
+                                        <p class="text-xs text-slate-500">{{ $avaliacao->estrelas }}/5</p>
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $avaliacao->jogo->pelada->nome ?? 'Pelada' }} - {{ $avaliacao->created_at->format('d/m/Y') }}</p>
+                                </div>
+                            @empty
+                                <p class="text-sm text-slate-500">Você ainda não avaliou jogadores.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                </aside>
+            </div>
+        @elseif($aba === 'mensagens')
+            <section class="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-950">Mensagens</h2>
+                <div class="mt-4 divide-y divide-slate-100">
+                    @forelse($notificacoes as $notificacao)
+                        <a href="{{ $notificacao->link ?: '#' }}" class="block py-4 transition hover:bg-slate-50">
+                            <p class="text-sm font-semibold text-slate-900">{{ $notificacao->titulo }}</p>
+                            <p class="mt-1 text-sm text-slate-600">{{ $notificacao->mensagem }}</p>
+                            <p class="mt-1 text-xs text-slate-400">{{ $notificacao->created_at->format('d/m/Y H:i') }}</p>
+                        </a>
+                    @empty
+                        <p class="py-8 text-center text-sm text-slate-500">Nenhuma mensagem nova.</p>
+                    @endforelse
+                </div>
+            </section>
+        @elseif($aba === 'organizacao' && $peladasOrganizadas->isNotEmpty())
+            <section class="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-950">Organização</h2>
+                        <p class="mt-1 text-sm text-slate-600">Peladas que você criou e administra.</p>
                     </div>
-                </section>
-            </aside>
-        </div>
+                    <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                        Criar nova pelada
+                    </a>
+                </div>
+
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    @foreach($peladasOrganizadas as $pelada)
+                        <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">{{ $pelada->esporte?->nome ?: 'Pelada' }}</span>
+                                        <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ ucfirst($pelada->status) }}</span>
+                                    </div>
+                                    <h3 class="mt-3 text-lg font-black text-slate-950">{{ $pelada->nome }}</h3>
+                                    <p class="mt-1 text-sm text-slate-600">{{ $pelada->local_nome ?: $pelada->local }}</p>
+                                    <div class="mt-3 flex flex-wrap gap-3 text-xs font-semibold text-slate-500">
+                                        <span>{{ $pelada->membros_count }} membro(s)</span>
+                                        <span>{{ $pelada->jogos_count }} rodada(s)</span>
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0 flex-col gap-2 sm:w-40">
+                                    <a href="{{ route('organizador.peladas.jogos.index', $pelada) }}" class="inline-flex items-center justify-center rounded-md bg-slate-950 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">Rodadas</a>
+                                    <a href="{{ route('organizador.peladas.membros.index', $pelada) }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Membros</a>
+                                    <a href="{{ route('organizador.peladas.edit', $pelada) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Editar</a>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 </div>

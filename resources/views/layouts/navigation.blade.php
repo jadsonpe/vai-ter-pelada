@@ -11,11 +11,8 @@
                     {{-- <x-nav-link :href="route('ranking')" :active="request()->routeIs('ranking')">Ranking</x-nav-link> --}}
                     {{-- <x-nav-link :href="route('arenas.index')" :active="request()->routeIs('arenas.*')">Arenas</x-nav-link> --}}
                     @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <x-nav-link :href="route('jogador.peladas.minhas')" :active="request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.jogos.*')">Jogador</x-nav-link>
-                        <x-nav-link :href="route('jogadores.index')" :active="request()->routeIs('jogadores.index')">Jogadores</x-nav-link>
-                        <x-nav-link :href="route('jogador.avaliacoes.index')" :active="request()->routeIs('jogador.avaliacoes.*')">Avaliacoes</x-nav-link>
-                        <x-nav-link :href="route('organizador.peladas.index')" :active="request()->routeIs('organizador.*')">Organizar</x-nav-link>
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.avaliacoes.*')">Jogador</x-nav-link>
+                        <x-nav-link :href="route('jogadores.index')" :active="request()->routeIs('jogadores.index')">Peladeiros</x-nav-link>
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-nav-link>
                         @endif
@@ -39,8 +36,8 @@
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
-                            <x-dropdown-link :href="route('jogador.avaliacoes.index')">Avaliacoes</x-dropdown-link>
-                            <x-dropdown-link :href="route('dashboard')">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard', ['aba' => 'mensagens'])">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Sair</x-dropdown-link>
@@ -67,9 +64,9 @@
 
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
-                            <x-dropdown-link :href="route('dashboard')">Dashboard</x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard')">Painel do jogador</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
-                            <x-dropdown-link :href="route('jogador.avaliacoes.index')">Avaliacoes</x-dropdown-link>
+                            <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Sair</x-dropdown-link>
@@ -94,12 +91,12 @@
 
 <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
     <div class="mx-auto grid max-w-lg grid-cols-5 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2">
-        <a href="{{ route('home') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('home') || request()->routeIs('dashboard')) }}">
+        <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(auth()->check() ? request()->routeIs('dashboard') : request()->routeIs('home')) }}">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
             </svg>
-            <span>Dash</span>
+            <span>{{ auth()->check() ? 'Jogador' : 'Início' }}</span>
         </a>
 
         <a href="{{ route('peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('peladas.*')) }}">
@@ -111,7 +108,7 @@
         </a>
 
         @auth
-            <a href="{{ route('jogador.peladas.minhas') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.jogos.*')) }}">
+            <a href="{{ route('dashboard', ['aba' => 'peladas']) }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogador.peladas.*') || (request()->routeIs('dashboard') && request('aba') === 'peladas')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 12h8M8 17h5" />
                     <rect x="4" y="4" width="16" height="16" rx="2" />
@@ -119,12 +116,12 @@
                 <span>Minhas</span>
             </a>
 
-            <a href="{{ route('organizador.peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('organizador.*')) }}">
+            <a href="{{ route('dashboard', ['aba' => 'mensagens']) }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('dashboard') && request('aba') === 'mensagens') }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
-                    <circle cx="12" cy="12" r="8" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4 7 8 6 8-6" />
                 </svg>
-                <span>Organizar</span>
+                <span>Msg</span>
             </a>
 
             <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('perfil.edit') }}" class="relative flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('perfil.*') || request()->routeIs('admin.*')) }}">
