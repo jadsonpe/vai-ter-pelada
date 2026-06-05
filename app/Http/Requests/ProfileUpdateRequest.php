@@ -15,6 +15,13 @@ class ProfileUpdateRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $birthDate = trim((string) $this->input('data_nascimento'));
+        $username = trim((string) $this->input('username'));
+
+        if ($username !== '') {
+            $this->merge([
+                'username' => str($username)->lower()->replace('@', '')->toString(),
+            ]);
+        }
 
         if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $birthDate)) {
             $parsed = Carbon::createFromFormat('d/m/Y', $birthDate);
@@ -37,6 +44,14 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'apelido' => ['nullable', 'string', 'max:80'],
+            'username' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:40',
+                'regex:/^[a-z0-9._-]+$/',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ],
             'email' => [
                 'required',
                 'string',

@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'apelido',
+        'username',
         'email',
         'google_id',
         'password',
@@ -264,5 +265,23 @@ class User extends Authenticatable
     public function publicProfile(): PlayerProfile
     {
         return PlayerProfile::ensureForUser($this);
+    }
+
+    public static function uniqueUsernameFrom(string $value, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($value, '') ?: 'jogador';
+        $base = Str::limit($base, 32, '');
+        $candidate = $base;
+        $suffix = 1;
+
+        while (static::query()
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->where('username', $candidate)
+            ->exists()) {
+            $candidate = Str::limit($base, 32, '').$suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 }

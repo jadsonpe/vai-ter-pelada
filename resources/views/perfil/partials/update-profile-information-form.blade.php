@@ -223,6 +223,16 @@
                 </div>
 
                 <div>
+                    <x-input-label for="username" value="Username público" />
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm font-semibold text-slate-500">@</span>
+                        <x-text-input id="username" name="username" type="text" class="block w-full rounded-l-none" :value="old('username', $user->username)" autocomplete="username" placeholder="gustavocanhota" />
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500">Use letras, números, ponto, underline ou hífen. Não inclua o @.</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                </div>
+
+                <div>
                     <x-input-label for="email" value="Email" />
                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
                     <x-input-error class="mt-2" :messages="$errors->get('email')" />

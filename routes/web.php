@@ -17,6 +17,7 @@ use App\Http\Controllers\Organizador\SolicitacaoController;
 use App\Http\Controllers\Organizador\SorteioController;
 use App\Http\Controllers\Organizador\TorneioController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\JogadorSearchController;
 use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
@@ -48,6 +49,8 @@ Route::get('/dashboard', JogadorDashboardController::class)
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/jogadores', JogadorSearchController::class)->name('jogadores.index');
+
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
