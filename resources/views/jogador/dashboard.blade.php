@@ -76,10 +76,10 @@
             </div>
         </section>
 
-        <nav class="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-            <div class="flex min-w-max gap-2">
+        <nav class="mt-6 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+            <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 @foreach($tabs as $key => $label)
-                    <a href="{{ route('dashboard', ['aba' => $key]) }}" class="rounded-md px-4 py-2 text-sm font-bold transition {{ $aba === $key ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' }}">
+                    <a href="{{ route('dashboard', ['aba' => $key]) }}" class="flex min-w-0 items-center justify-center rounded-md px-3 py-2 text-center text-sm font-bold transition sm:px-4 {{ $aba === $key ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' }}">
                         {{ $label }}
                         @if($key === 'mensagens' && $notificacoesNaoLidasPainel)
                             <span class="ml-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] text-white">{{ $notificacoesNaoLidasPainel }}</span>

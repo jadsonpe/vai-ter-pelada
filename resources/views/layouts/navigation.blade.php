@@ -90,65 +90,56 @@
 @endphp
 
 <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
-    <div class="mx-auto grid max-w-lg grid-cols-5 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2">
-        <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(auth()->check() ? request()->routeIs('dashboard') : request()->routeIs('home')) }}">
+    <div class="mx-auto flex max-w-lg items-center justify-around gap-1 px-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2">
+        <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(auth()->check() ? request()->routeIs('dashboard') : request()->routeIs('home')) }}">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 10v10h14V10" />
             </svg>
-            <span>{{ auth()->check() ? 'Jogador' : 'Início' }}</span>
+            <span class="block max-w-full truncate leading-none">{{ auth()->check() ? 'Jogador' : 'Inicio' }}</span>
         </a>
 
-        <a href="{{ route('peladas.index') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('peladas.*')) }}">
+        <a href="{{ route('peladas.index') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('peladas.*')) }}">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="8" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="m8 9 4-2 4 2v5l-4 3-4-3z" />
             </svg>
-            <span>Peladas</span>
+            <span class="block max-w-full truncate leading-none">Peladas</span>
         </a>
 
         @auth
-            <a href="{{ route('dashboard', ['aba' => 'peladas']) }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogador.peladas.*') || (request()->routeIs('dashboard') && request('aba') === 'peladas')) }}">
+            <a href="{{ route('jogadores.index') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogadores.*')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 12h8M8 17h5" />
-                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                    <circle cx="11" cy="11" r="6" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
                 </svg>
-                <span>Minhas</span>
+                <span class="block max-w-full truncate leading-none">Peladeiros</span>
             </a>
 
-            <a href="{{ route('dashboard', ['aba' => 'mensagens']) }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('dashboard') && request('aba') === 'mensagens') }}">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m4 7 8 6 8-6" />
-                </svg>
-                <span>Msg</span>
-            </a>
-
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('perfil.edit') }}" class="relative flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('perfil.*') || request()->routeIs('admin.*')) }}">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('perfil.edit') }}" class="relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('perfil.*') || request()->routeIs('admin.*')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="8" r="4" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
                 </svg>
-                <span>{{ auth()->user()->isAdmin() ? 'Admin' : 'Perfil' }}</span>
+                <span class="block max-w-full truncate leading-none">{{ auth()->user()->isAdmin() ? 'Admin' : 'Perfil' }}</span>
                 @if(($notificacoesNaoLidas ?? 0) && !auth()->user()->isAdmin())
                     <span class="absolute right-4 top-1 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $notificacoesNaoLidas }}</span>
                 @endif
             </a>
-
         @else
-            <a href="{{ route('login') }}" class="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('login')) }}">
+            <a href="{{ route('login') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('login')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4v18h-4" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 17l5-5-5-5M15 12H3" />
                 </svg>
-                <span>Entrar</span>
+                <span class="block max-w-full truncate leading-none">Entrar</span>
             </a>
 
-            <a href="{{ route('register') }}" class="col-span-2 flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('register')) }}">
+            <a href="{{ route('register') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('register')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
                 </svg>
-                <span>Cadastrar</span>
+                <span class="block max-w-full truncate leading-none">Cadastrar</span>
             </a>
         @endauth
     </div>
