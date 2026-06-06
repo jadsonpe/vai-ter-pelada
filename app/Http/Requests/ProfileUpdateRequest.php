@@ -90,4 +90,19 @@ class ProfileUpdateRequest extends FormRequest
             'social_links.whatsapp' => ['nullable', 'string', 'max:30'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'username.unique' => 'Este username já está em uso.',
+            'username.regex' => 'O username pode conter apenas letras, números, ponto, underline ou hífen.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'username' => 'username público',
+        ];
+    }
 }

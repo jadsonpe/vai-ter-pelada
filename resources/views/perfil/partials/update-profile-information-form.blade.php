@@ -222,7 +222,7 @@
                     <x-input-error class="mt-2" :messages="$errors->get('apelido')" />
                 </div>
 
-                <div>
+                <div id="profile-field-username" class="scroll-mt-24">
                     <x-input-label for="username" value="Username público" />
                     <div class="mt-1 flex rounded-md shadow-sm">
                         <span class="inline-flex items-center rounded-l-md border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm font-semibold text-slate-500">@</span>
@@ -404,6 +404,22 @@
             @endif
         </div>
     </form>
+
+    @if($errors->has('username'))
+        <script>
+            window.addEventListener('load', () => {
+                const field = document.getElementById('profile-field-username');
+                const input = document.getElementById('username');
+
+                if (!field || !input) {
+                    return;
+                }
+
+                field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                window.setTimeout(() => input.focus({ preventScroll: true }), 350);
+            });
+        </script>
+    @endif
 
     <script>
         (() => {

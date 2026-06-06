@@ -13,6 +13,22 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900 shadow-sm" role="alert">
+                    <p class="font-semibold">Não foi possível salvar o perfil.</p>
+                    <ul class="mt-2 space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+
+                    @if($errors->has('username'))
+                        <a href="#profile-field-username" class="mt-3 inline-flex text-sm font-semibold text-red-800 underline underline-offset-4">
+                        </a>
+                    @endif
+                </div>
+            @endif
+
             <div class="rounded-lg border border-emerald-200 bg-white p-5 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
