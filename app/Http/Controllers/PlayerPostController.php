@@ -11,9 +11,27 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class PlayerPostController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $user = $request->user()->load([
+            'posts' => fn ($query) => $query
+                ->publicado()
+                ->withCount('likes')
+                ->latest('publicado_em')
+                ->latest(),
+        ]);
+
+        return view('jogador.publicacoes.index', [
+            'user' => $user,
+            'postCategoryLabels' => self::categoryLabels(),
+            'maxPlayerPosts' => PlayerPost::MAX_ACTIVE_POSTS,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $user = $request->user();

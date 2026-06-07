@@ -55,7 +55,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
-    Route::post('/perfil/publicacoes', [PlayerPostController::class, 'store'])->name('player-posts.store');
+    Route::get('/jogador/publicacoes', [PlayerPostController::class, 'index'])->name('player-posts.index');
+    Route::post('/jogador/publicacoes', [PlayerPostController::class, 'store'])->name('player-posts.store');
     Route::delete('/publicacoes/{post}', [PlayerPostController::class, 'destroy'])->name('player-posts.destroy');
     Route::post('/publicacoes/{post}/curtir', [PlayerPostController::class, 'toggleLike'])->name('player-posts.likes.toggle');
     Route::post('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'follow'])->name('peladeiros.follow');

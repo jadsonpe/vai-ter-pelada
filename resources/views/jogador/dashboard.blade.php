@@ -220,11 +220,14 @@
 
                     </div>
 
-                    <a href="{{ route('jogadores.index') }}" class="inline-flex w-fit items-center justify-center rounded-md border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">
-
-                        Encontrar jogadores
-
-                    </a>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('player-posts.index') }}" class="inline-flex w-fit items-center justify-center rounded-md bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">
+                            Publicar
+                        </a>
+                        <a href="{{ route('jogadores.index') }}" class="inline-flex w-fit items-center justify-center rounded-md border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">
+                            Encontrar jogadores
+                        </a>
+                    </div>
 
                 </div>
 

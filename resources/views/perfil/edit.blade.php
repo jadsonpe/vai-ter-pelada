@@ -81,10 +81,6 @@
                 @include('perfil.partials.update-profile-information-form')
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-                @include('perfil.partials.player-posts-form')
-            </div>
-
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
                     @include('perfil.partials.update-password-form')

@@ -172,8 +172,8 @@
 
                     @auth
                         @if(auth()->id() === $jogador->id)
-                            <a href="{{ route('perfil.edit') }}" class="inline-flex w-fit items-center justify-center rounded-md bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
-                                Gerenciar publicações
+                            <a href="{{ route('player-posts.index') }}" class="inline-flex w-fit items-center justify-center rounded-md bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
+                                Publicar
                             </a>
                         @endif
                     @else
@@ -248,7 +248,7 @@
                                     @auth
                                         <div class="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
                                             @if($post->canBeManagedBy(auth()->user()))
-                                                <form method="post" action="{{ route('player-posts.destroy', $post) }}" onsubmit="return confirm('Remover esta publicaÃ§Ã£o?')">
+                                                <form method="post" action="{{ route('player-posts.destroy', $post) }}" onsubmit="return confirm('Remover esta publicação?')">
                                                     @csrf
                                                     @method('delete')
                                                     <button type="submit" class="rounded-md border border-red-400/30 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-400/10">
@@ -257,7 +257,7 @@
                                                 </form>
                                             @elseif(auth()->id() !== $post->user_id)
                                                 <details class="w-full">
-                                                    <summary class="cursor-pointer text-xs font-bold text-slate-400 hover:text-slate-200">Denunciar publicaÃ§Ã£o</summary>
+                                                    <summary class="cursor-pointer text-xs font-bold text-slate-400 hover:text-slate-200">Denunciar publicação</summary>
                                                     <form method="post" action="{{ route('denuncias.player-posts.store', $post) }}" class="mt-3 space-y-2">
                                                         @csrf
                                                         <select name="reason" class="block w-full rounded-md border-white/10 bg-slate-950 text-sm text-slate-100 focus:border-emerald-400 focus:ring-emerald-400">

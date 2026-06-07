@@ -71,7 +71,6 @@ class DashboardController extends Controller
                 ->pluck('player_posts.id')
                 ->all()
             : [];
-
         if ($aba === 'mensagens' || $aba === 'resumo') {
             $user->notificacoes()->whereNull('lida_em')->update(['lida_em' => now()]);
         }
