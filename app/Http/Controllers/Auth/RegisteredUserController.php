@@ -59,6 +59,6 @@ class RegisteredUserController extends Controller
 
         return redirect()
             ->route('perfil.edit')
-            ->with('status', 'complete-profile');
+            ->with('status', 'Complete o seu perfil para aproveitar ao máximo a plataforma!');
     }
 }
