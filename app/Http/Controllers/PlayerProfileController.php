@@ -72,6 +72,19 @@ class PlayerProfileController extends Controller
         $isFollowing = auth()->check() && auth()->id() !== $user->id
             ? auth()->user()->isFollowing($user)
             : false;
+        $posts = $profile->posts()
+            ->publicado()
+            ->with(['user', 'profile'])
+            ->withCount('likes')
+            ->latest('publicado_em')
+            ->latest()
+            ->get();
+        $likedPostIds = auth()->check() && $posts->isNotEmpty()
+            ? auth()->user()->likedPosts()
+                ->whereIn('player_posts.id', $posts->pluck('id'))
+                ->pluck('player_posts.id')
+                ->all()
+            : [];
 
         return view('public.peladeiro', [
             'profile' => $profile,
@@ -98,6 +111,9 @@ class PlayerProfileController extends Controller
             'voteLabels' => $this->voteLabels(),
             'voteCounts' => $voteCounts,
             'reportReasons' => Report::reasonsFor('jogador'),
+            'posts' => $posts,
+            'likedPostIds' => $likedPostIds,
+            'postReportReasons' => Report::reasonsFor('publicacao'),
             'whatsappShareUrl' => 'https://wa.me/?text='.rawurlencode(
                 'Olha meu perfil no Vai Ter Pelada: '.$profile->shareUrl()
             ),

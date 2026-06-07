@@ -11,11 +11,15 @@
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 shadow-sm">
                     Perfil salvo com sucesso.
                 </div>
+            @elseif(session('status'))
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-900 shadow-sm">
+                    {{ session('status') }}
+                </div>
             @endif
 
             @if($errors->any())
                 <div class="rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900 shadow-sm" role="alert">
-                    <p class="font-semibold">Não foi possível salvar o perfil.</p>
+                    <p class="font-semibold">Não foi possível salvar as alterações.</p>
                     <ul class="mt-2 space-y-1">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -24,6 +28,7 @@
 
                     @if($errors->has('username'))
                         <a href="#profile-field-username" class="mt-3 inline-flex text-sm font-semibold text-red-800 underline underline-offset-4">
+                            Ir para o campo de username
                         </a>
                     @endif
                 </div>
@@ -44,7 +49,7 @@
             @if(session('status') === 'complete-profile')
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
                     <h2 class="font-semibold">Complete seu perfil para jogar melhor</h2>
-                    <p class="mt-1 text-sm text-emerald-800">Adicione foto, telefone, estado, cidade, bairro e dados de jogador. Isso ajuda organizadores a confirmar sua participacao e deixa suas avaliações mais confiaveis.</p>
+                    <p class="mt-1 text-sm text-emerald-800">Adicione foto, telefone, estado, cidade, bairro e dados de jogador. Isso ajuda organizadores a confirmar sua participação e deixa suas avaliações mais confiáveis.</p>
                 </div>
             @endif
 
@@ -74,6 +79,10 @@
 
             <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
                 @include('perfil.partials.update-profile-information-form')
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+                @include('perfil.partials.player-posts-form')
             </div>
 
             <div class="grid gap-6 lg:grid-cols-2">

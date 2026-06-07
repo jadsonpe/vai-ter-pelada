@@ -309,7 +309,7 @@
                             @if($rodadasConfirmadas->isNotEmpty())
                                 <details class="mt-3 rounded-lg border border-emerald-100 bg-white">
                                     <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-emerald-900">
-                                        <span>Rodadas ja confirmadas</span>
+                                        <span>Rodadas já confirmadas</span>
                                         <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">{{ $rodadasConfirmadas->count() }}</span>
                                     </summary>
                                     <div class="divide-y divide-slate-100 border-t border-emerald-50 px-3">

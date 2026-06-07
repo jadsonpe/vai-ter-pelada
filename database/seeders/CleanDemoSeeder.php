@@ -58,6 +58,7 @@ class CleanDemoSeeder extends Seeder
         $this->createPeladaGames($peladas, $users);
         $this->createTournaments($peladas, $users);
         $this->refreshProfileSummaries($users);
+        $this->call(PlayerPostsDemoSeeder::class);
     }
 
     private function cleanDatabase(): void
@@ -76,6 +77,8 @@ class CleanDemoSeeder extends Seeder
             'torneios',
             'avaliacoes_partidas',
             'avaliacoes',
+            'player_post_likes',
+            'player_posts',
             'player_votes',
             'player_rankings',
             'player_achievements',

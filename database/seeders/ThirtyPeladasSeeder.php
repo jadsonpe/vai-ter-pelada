@@ -63,7 +63,7 @@ class ThirtyPeladasSeeder extends Seeder
                     'organizador_id' => $user->id,
                     'esporte_id' => $esporte->id,
                     'nome' => $nome,
-                    'descricao' => 'Pelada extra criada para teste com organizador diferente ja cadastrado no banco.',
+                    'descricao' => 'Pelada extra criada para teste com organizador diferente já cadastrado no banco.',
                     'data_fundacao' => now()->subMonths(($index % 24) + 1)->toDateString(),
                     'categoria' => $index % 4 === 0 ? 'infantil' : 'adulto',
                     'cidade' => $local['cidade'],

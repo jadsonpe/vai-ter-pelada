@@ -122,6 +122,16 @@ class User extends Authenticatable
         return $this->hasMany(UserBadge::class);
     }
 
+    public function posts(): HasMany
+    {
+        return $this->hasMany(PlayerPost::class);
+    }
+
+    public function likedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(PlayerPost::class, 'player_post_likes')->withTimestamps();
+    }
+
     public function followers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'player_follows', 'followed_id', 'follower_id')

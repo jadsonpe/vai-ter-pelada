@@ -18,6 +18,7 @@ use App\Http\Controllers\Organizador\SorteioController;
 use App\Http\Controllers\Organizador\TorneioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\JogadorSearchController;
+use App\Http\Controllers\PlayerPostController;
 use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
@@ -54,10 +55,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('perfil.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('perfil.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('perfil.destroy');
+    Route::post('/perfil/publicacoes', [PlayerPostController::class, 'store'])->name('player-posts.store');
+    Route::delete('/publicacoes/{post}', [PlayerPostController::class, 'destroy'])->name('player-posts.destroy');
+    Route::post('/publicacoes/{post}/curtir', [PlayerPostController::class, 'toggleLike'])->name('player-posts.likes.toggle');
     Route::post('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'follow'])->name('peladeiros.follow');
     Route::delete('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'unfollow'])->name('peladeiros.unfollow');
     Route::post('/denuncias/peladas/{pelada:slug}', [ReportController::class, 'storePelada'])->name('denuncias.peladas.store');
     Route::post('/denuncias/peladeiros/{profile:slug}', [ReportController::class, 'storePlayer'])->name('denuncias.peladeiros.store');
+    Route::post('/denuncias/publicacoes/{post}', [ReportController::class, 'storePlayerPost'])->name('denuncias.player-posts.store');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
         Route::get('/avaliacoes', fn () => redirect()->route('dashboard', ['aba' => 'avaliacoes']))->name('avaliacoes.index');

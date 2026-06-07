@@ -34,6 +34,7 @@
             ])
             ->sortByDesc('count')
             ->values();
+        $postCategoryLabels = \App\Http\Controllers\PlayerPostController::categoryLabels();
     @endphp
 
     <div class="bg-slate-950 text-white">
@@ -160,6 +161,125 @@
                         @endforelse
                     </div>
                 </div>
+            </section>
+
+            <section class="rounded-lg border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-slate-950/20">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-white">Publicações</h2>
+                        <p class="mt-1 text-sm text-slate-400">Momentos compartilhados pelo jogador no perfil público.</p>
+                    </div>
+
+                    @auth
+                        @if(auth()->id() === $jogador->id)
+                            <a href="{{ route('perfil.edit') }}" class="inline-flex w-fit items-center justify-center rounded-md bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
+                                Gerenciar publicações
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('login', ['redirect' => $profile->shareUrl()]) }}" class="inline-flex w-fit items-center justify-center rounded-md border border-emerald-300/40 bg-emerald-300/10 px-4 py-2 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20">
+                            Entrar para interagir
+                        </a>
+                    @endauth
+                </div>
+
+                @if($posts->isEmpty())
+                    <div class="mt-5 rounded-lg border border-dashed border-white/10 bg-slate-900/70 p-6 text-center text-sm text-slate-400">
+                        Ainda não há publicações neste perfil.
+                    </div>
+                @else
+                    <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach($posts as $post)
+                            @php
+                                $isLiked = in_array($post->id, $likedPostIds, true);
+                                $postUrl = route('peladeiros.show', $profile).'#publicacao-'.$post->id;
+                                $shareTitle = 'Publicação de '.$displayName;
+                            @endphp
+
+                            <article id="publicacao-{{ $post->id }}" class="overflow-hidden rounded-lg border border-white/10 bg-slate-900/80 shadow-lg shadow-slate-950/20">
+                                <a href="{{ $post->mediaUrl() }}" target="_blank" rel="noopener noreferrer" class="block">
+                                    <img src="{{ $post->thumbnailUrl() }}" alt="Publicação de {{ $displayName }}" class="aspect-square w-full object-cover">
+                                </a>
+
+                                <div class="space-y-4 p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <span class="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-black uppercase tracking-wide text-emerald-200">
+                                                {{ $postCategoryLabels[$post->categoria] ?? 'Momento' }}
+                                            </span>
+                                            <p class="mt-2 text-xs text-slate-500">
+                                                {{ optional($post->publicado_em ?: $post->created_at)->format('d/m/Y') }}
+                                            </p>
+                                        </div>
+
+                                        <div class="flex items-center gap-2">
+                                        @auth
+                                            <form method="post" action="{{ route('player-posts.likes.toggle', $post) }}" data-like-form data-post-id="{{ $post->id }}">
+                                                @csrf
+                                                <button type="submit" data-like-button data-liked-classes="bg-emerald-400 text-slate-950" data-unliked-classes="bg-white/10 text-slate-200 hover:bg-white/15" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black transition {{ $isLiked ? 'bg-emerald-400 text-slate-950' : 'bg-white/10 text-slate-200 hover:bg-white/15' }}" aria-label="{{ $isLiked ? 'Remover curtida' : 'Curtir publicação' }}" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                        <path d="M7 11v10H3V11h4z" />
+                                                        <path d="M7 11l4.2-8a2.2 2.2 0 0 1 2.1 2.8L12 9h6.6a2 2 0 0 1 2 2.3l-1.2 7.4A2.7 2.7 0 0 1 16.7 21H7" />
+                                                    </svg>
+                                                    <span data-like-count="{{ $post->id }}">{{ $post->likes_count }}</span>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('login', ['redirect' => $profile->shareUrl().'#publicacao-'.$post->id]) }}" class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-black text-slate-200 hover:bg-white/15">
+                                                Curtir {{ $post->likes_count }}
+                                            </a>
+                                        @endauth
+                                            <button type="button" data-share-post data-share-url="{{ $postUrl }}" data-share-title="{{ $shareTitle }}" data-share-text="{{ $post->legenda ?: 'Olha esta publicação no Vai Ter Pelada.' }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-slate-200 transition hover:bg-white/15" aria-label="Compartilhar publicação">
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                    <circle cx="18" cy="5" r="3" />
+                                                    <circle cx="6" cy="12" r="3" />
+                                                    <circle cx="18" cy="19" r="3" />
+                                                    <path d="m8.6 13.5 6.8 4" />
+                                                    <path d="m15.4 6.5-6.8 4" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if($post->legenda)
+                                        <p class="text-sm leading-6 text-slate-200">{{ $post->legenda }}</p>
+                                    @endif
+
+                                    @auth
+                                        <div class="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
+                                            @if($post->canBeManagedBy(auth()->user()))
+                                                <form method="post" action="{{ route('player-posts.destroy', $post) }}" onsubmit="return confirm('Remover esta publicaÃ§Ã£o?')">
+                                                    @csrf
+                                                    @method('delete')
+                                                    <button type="submit" class="rounded-md border border-red-400/30 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-400/10">
+                                                        Remover
+                                                    </button>
+                                                </form>
+                                            @elseif(auth()->id() !== $post->user_id)
+                                                <details class="w-full">
+                                                    <summary class="cursor-pointer text-xs font-bold text-slate-400 hover:text-slate-200">Denunciar publicaÃ§Ã£o</summary>
+                                                    <form method="post" action="{{ route('denuncias.player-posts.store', $post) }}" class="mt-3 space-y-2">
+                                                        @csrf
+                                                        <select name="reason" class="block w-full rounded-md border-white/10 bg-slate-950 text-sm text-slate-100 focus:border-emerald-400 focus:ring-emerald-400">
+                                                            <option value="">Motivo da denúncia</option>
+                                                            @foreach($postReportReasons as $value => $label)
+                                                                <option value="{{ $value }}">{{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <textarea name="description" rows="2" class="block w-full rounded-md border-white/10 bg-slate-950 text-sm text-slate-100 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Explique rapidamente o problema."></textarea>
+                                                        <button type="submit" class="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-950 hover:bg-white">
+                                                            Enviar denúncia
+                                                        </button>
+                                                    </form>
+                                                </details>
+                                            @endif
+                                        </div>
+                                    @endauth
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
             </section>
 
             <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

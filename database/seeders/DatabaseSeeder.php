@@ -8,6 +8,7 @@ use Database\Seeders\BrazilFullDemoSeeder;
 use Database\Seeders\CompleteDemoCoverageSeeder;
 use Database\Seeders\DemoDataSeeder;
 use Database\Seeders\FiveCompletedPeladasSeeder;
+use Database\Seeders\PlayerPostsDemoSeeder;
 use Database\Seeders\ThirtyMembersPerPeladaSeeder;
 use Database\Seeders\ThirtyPeladasSeeder;
 use Database\Seeders\TorneiosDemoSeeder;
@@ -54,5 +55,6 @@ class DatabaseSeeder extends Seeder
         $this->call(FiveCompletedPeladasSeeder::class);
         $this->call(CompleteDemoCoverageSeeder::class);
         $this->call(TorneiosDemoSeeder::class);
+        $this->call(PlayerPostsDemoSeeder::class);
     }
 }

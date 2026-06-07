@@ -222,13 +222,13 @@ class PeladaController extends Controller
                 ]
             );
 
-            return back()->with('status', 'Voce e o organizador desta pelada e ja esta cadastrado como mensalista.');
+            return back()->with('status', 'Voce e o organizador desta pelada e já esta cadastrado como mensalista.');
         }
 
         $membro = PeladaMembro::where('pelada_id', $pelada->id)->where('user_id', $user->id)->first();
 
         if ($membro && $membro->tipo === 'mensalista' && $membro->status === 'ativo') {
-            return back()->with('status', 'Voce ja participa desta pelada como mensalista.');
+            return back()->with('status', 'Você já participa desta pelada como mensalista.');
         }
 
         $tipoSolicitacao = $membro ? 'virar_mensalista' : 'entrar_pelada';
@@ -254,7 +254,7 @@ class PeladaController extends Controller
             ->exists();
 
         if ($pendente) {
-            return back()->with('status', 'Voce ja possui uma solicitacao pendente para esta pelada.');
+            return back()->with('status', 'Você já possui uma solicitacao pendente para esta pelada.');
         }
 
         PeladaSolicitacao::create([

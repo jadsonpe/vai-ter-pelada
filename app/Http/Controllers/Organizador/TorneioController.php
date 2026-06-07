@@ -235,7 +235,7 @@ class TorneioController extends Controller
         }
 
         if ($torneio->times()->exists()) {
-            return back()->with('status', 'Os times ja foram sorteados. Agora você pode apenas adicionar jogadores restantes aos times.');
+            return back()->with('status', 'Os times já foram sorteados. Agora você pode apenas adicionar jogadores restantes aos times.');
         }
 
         $participantes = $torneio->participantes()
@@ -311,7 +311,7 @@ class TorneioController extends Controller
         }
 
         if ($participante->timeJogador()->exists()) {
-            return back()->with('status', 'Esse jogador ja esta em um time.');
+            return back()->with('status', 'Esse jogador já está em um time.');
         }
 
         TorneioTimeJogador::create([
@@ -474,7 +474,7 @@ class TorneioController extends Controller
             return null;
         }
 
-        return back()->with('status', 'A final ja foi realizada. Times, jogadores e súmulas deste torneio estão bloqueados.');
+        return back()->with('status', 'A final já foi realizada. Times, jogadores e súmulas deste torneio estão bloqueados.');
     }
 
     private function validatedTorneioImages(Request $request): void

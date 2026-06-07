@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Jogador;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PlayerPostController;
 use App\Models\AvaliacaoPartida;
 use App\Models\Pelada;
 use App\Models\PeladaJogo;
 use App\Models\PeladaSolicitacao;
+use App\Models\PlayerPost;
 use App\Models\PlayerVote;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -53,6 +55,22 @@ class DashboardController extends Controller
         $participacoes = $user->participacoes()->with('jogo.pelada')->latest()->take(5)->get();
         $notificacoes = $user->notificacoes()->latest()->take(5)->get();
         $notificacoesNaoLidas = $user->notificacoes()->whereNull('lida_em')->count();
+        $followingIds = $user->following()->pluck('users.id');
+        $feedPosts = PlayerPost::query()
+            ->publicado()
+            ->with(['user.playerProfile'])
+            ->withCount('likes')
+            ->whereIn('user_id', $followingIds)
+            ->latest('publicado_em')
+            ->latest()
+            ->take(20)
+            ->get();
+        $likedFeedPostIds = $feedPosts->isNotEmpty()
+            ? $user->likedPosts()
+                ->whereIn('player_posts.id', $feedPosts->pluck('id'))
+                ->pluck('player_posts.id')
+                ->all()
+            : [];
 
         if ($aba === 'mensagens' || $aba === 'resumo') {
             $user->notificacoes()->whereNull('lida_em')->update(['lida_em' => now()]);
@@ -97,6 +115,9 @@ class DashboardController extends Controller
             'confirmacoesCount' => $participacoes->where('status', 'confirmado')->count(),
             'notificacoes' => $notificacoes,
             'notificacoesNaoLidasPainel' => $notificacoesNaoLidas,
+            'feedPosts' => $feedPosts,
+            'likedFeedPostIds' => $likedFeedPostIds,
+            'postCategoryLabels' => PlayerPostController::categoryLabels(),
             'convites' => $convites,
             'solicitacoes' => $solicitacoes,
             'totalJogosProximos' => $membros->sum(fn ($membro) => $membro->pelada->jogos->count()),

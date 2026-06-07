@@ -65,6 +65,11 @@ class PlayerProfile extends Model
         return $this->hasMany(PlayerAchievement::class);
     }
 
+    public function posts(): HasMany
+    {
+        return $this->hasMany(PlayerPost::class);
+    }
+
     public function rankings(): HasMany
     {
         return $this->hasMany(PlayerRanking::class);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Esporte;
+use App\Models\PlayerPost;
 use App\Models\PlayerProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,10 +21,20 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('perfil.edit', [
-            'user' => $request->user()->load(['esportePerfis.esporte', 'playerProfile.socialLinks']),
+            'user' => $request->user()->load([
+                'esportePerfis.esporte',
+                'playerProfile.socialLinks',
+                'posts' => fn ($query) => $query
+                    ->publicado()
+                    ->withCount('likes')
+                    ->latest('publicado_em')
+                    ->latest(),
+            ]),
             'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
             'imageCoverOptions' => PlayerProfile::imageCoverOptions(),
             'gradientCoverOptions' => PlayerProfile::gradientCoverOptions(),
+            'postCategoryLabels' => PlayerPostController::categoryLabels(),
+            'maxPlayerPosts' => PlayerPost::MAX_ACTIVE_POSTS,
         ]);
     }
 

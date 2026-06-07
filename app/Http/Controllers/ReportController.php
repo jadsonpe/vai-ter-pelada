@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notificacao;
 use App\Models\Pelada;
+use App\Models\PlayerPost;
 use App\Models\PlayerProfile;
 use App\Models\Report;
 use App\Models\User;
@@ -38,6 +39,24 @@ class ReportController extends Controller
 
         $name = $profile->user?->apelido ?: $profile->user?->name ?: 'Peladeiro';
         $this->store($request, $profile, 'jogador', $data, $name, route('peladeiros.show', $profile));
+
+        return back()->with('status', 'Denúncia enviada. Nossa equipe vai analisar as informações.');
+    }
+
+    public function storePlayerPost(Request $request, PlayerPost $post): RedirectResponse
+    {
+        abort_unless($post->status === PlayerPost::STATUS_PUBLICADO, 404);
+
+        $data = $this->validateReport($request, 'publicacao');
+
+        if ($post->user_id === $request->user()->id) {
+            return back()->with('status', 'Você não pode denunciar a própria publicação.');
+        }
+
+        $name = 'Publicação de '.($post->user?->apelido ?: $post->user?->name ?: 'Peladeiro');
+        $url = ($post->profile?->shareUrl() ?: route('peladeiros.show', $post->profile)).'#publicacao-'.$post->id;
+
+        $this->store($request, $post, 'publicação', $data, $name, $url);
 
         return back()->with('status', 'Denúncia enviada. Nossa equipe vai analisar as informações.');
     }
