@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PlayerPost;
 use App\Models\PlayerProfile;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,11 +38,6 @@ class PlayerPostController extends Controller
         $user = $request->user();
         $profile = PlayerProfile::ensureForUser($user);
 
-        $activePosts = $user->posts()->publicado()->count();
-        if ($activePosts >= PlayerPost::MAX_ACTIVE_POSTS) {
-            return back()->with('status', 'Você já tem 5 publicações ativas. Remova uma publicação antiga para postar outra.');
-        }
-
         $data = $request->validate([
             'media' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'categoria' => ['required', Rule::in(array_keys($this->categoryLabels()))],
@@ -69,7 +65,9 @@ class PlayerPostController extends Controller
             'publicado_em' => now(),
         ]);
 
-        return back()->with('status', 'Publicação criada.');
+        $this->removeOldestPostsOverLimit($user);
+
+        return back()->with('status', 'Publicação criada. Se você passou do limite de 5 fotos, a mais antiga foi removida automaticamente.');
     }
 
     public function destroy(Request $request, PlayerPost $post): RedirectResponse
@@ -188,5 +186,21 @@ class PlayerPostController extends Controller
         imagedestroy($target);
 
         Storage::disk('public')->put($path, $webp);
+    }
+
+    private function removeOldestPostsOverLimit(User $user): void
+    {
+        $overflowPosts = $user->posts()
+            ->publicado()
+            ->orderByDesc('publicado_em')
+            ->orderByDesc('created_at')
+            ->skip(PlayerPost::MAX_ACTIVE_POSTS)
+            ->take(50)
+            ->get();
+
+        foreach ($overflowPosts as $post) {
+            $post->removeMedia();
+            $post->update(['status' => PlayerPost::STATUS_REMOVIDO]);
+        }
     }
 }

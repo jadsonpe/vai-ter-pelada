@@ -1,7 +1,6 @@
 <x-app-layout>
     @php
         $activePosts = $user->posts ?? collect();
-        $remainingPosts = max(0, $maxPlayerPosts - $activePosts->count());
     @endphp
 
     <div class="bg-slate-100">
@@ -19,7 +18,7 @@
                     <div>
                         <h2 class="text-lg font-semibold text-slate-950">Publicar no perfil</h2>
                         <p class="mt-1 text-sm text-slate-600">
-                            Você pode manter até {{ $maxPlayerPosts }} imagens ativas no seu perfil de jogador.
+                            Você pode manter até {{ $maxPlayerPosts }} imagens ativas. Ao publicar uma nova foto acima desse limite, a mais antiga é removida automaticamente.
                         </p>
                     </div>
 
@@ -28,8 +27,7 @@
                     </span>
                 </header>
 
-                @if($remainingPosts > 0)
-                    <form method="post" action="{{ route('player-posts.store') }}" enctype="multipart/form-data" class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_180px]">
+                <form method="post" action="{{ route('player-posts.store') }}" enctype="multipart/form-data" class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_180px]">
                         @csrf
 
                         <div class="space-y-4">
@@ -79,12 +77,7 @@
                                 Publicar
                             </button>
                         </div>
-                    </form>
-                @else
-                    <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                        Você atingiu o limite de {{ $maxPlayerPosts }} publicações ativas. Remova uma publicação antiga para enviar outra.
-                    </div>
-                @endif
+                </form>
             </section>
 
             <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8">

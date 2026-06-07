@@ -13,6 +13,7 @@
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.avaliacoes.*')">Jogador</x-nav-link>
                         <x-nav-link :href="route('jogadores.index')" :active="request()->routeIs('jogadores.index')">Peladeiros</x-nav-link>
+                        <x-nav-link :href="route('player-posts.index')" :active="request()->routeIs('player-posts.*')">Publicações</x-nav-link>
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-nav-link>
                         @endif
@@ -35,6 +36,7 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-posts.index')">Publicações</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'mensagens'])">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
@@ -65,6 +67,7 @@
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Painel do jogador</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-posts.index')">Publicações</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
@@ -108,6 +111,15 @@
         </a>
 
         @auth
+            <a href="{{ route('player-posts.index') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('player-posts.*')) }}">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="5" width="16" height="14" rx="2" />
+                    <circle cx="9" cy="10" r="1.5" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m7 17 4-4 3 3 2-2 3 3" />
+                </svg>
+                <span class="block max-w-full truncate leading-none">Publicar</span>
+            </a>
+
             <a href="{{ route('jogadores.index') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('jogadores.*')) }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="6" />
