@@ -303,7 +303,7 @@
 
                                             </a>
 
-                                            <p class="truncate text-xs text-slate-500">{{ $postCategoryLabels[$post->categoria] ?? 'Momento' }} Â· {{ optional($post->publicado_em ?: $post->created_at)->format('d/m/Y') }}</p>
+                                            <p class="truncate text-xs text-slate-500">{{ $postCategoryLabels[$post->categoria] ?? 'Momento' }} · {{ optional($post->publicado_em ?: $post->created_at)->format('d/m/Y') }}</p>
 
                                         </div>
 

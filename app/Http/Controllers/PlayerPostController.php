@@ -112,10 +112,18 @@ class PlayerPostController extends Controller
         return [
             'momento' => 'Momento',
             'gol' => 'Gol bonito',
+            'penalti' => 'Pênalti',
+            'ataque' => 'Ataque',
+            'chute' => 'Chute',
+            'cartao' => 'Cartão',
             'defesa' => 'Defesaça',
             'resenha' => 'Resenha',
             'conquista' => 'Conquista',
             'convite' => 'Convite',
+            'falta' => 'Falta boba',
+            'drible' => 'Drible',
+            'time' => 'Time',
+            'jogo' => 'Jogo',
         ];
     }
 
