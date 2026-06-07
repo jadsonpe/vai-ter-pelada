@@ -44,7 +44,7 @@ class PeladaController extends Controller
 
         return view('organizador.peladas.form', [
             'pelada' => new Pelada(),
-            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::ensureFootballModalities(),
         ]);
     }
 
@@ -93,7 +93,7 @@ class PeladaController extends Controller
 
         return view('organizador.peladas.form', [
             'pelada' => $pelada,
-            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::ensureFootballModalities(),
         ]);
     }
 

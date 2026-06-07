@@ -24,7 +24,7 @@ class ProfileController extends Controller
                 'esportePerfis.esporte',
                 'playerProfile.socialLinks',
             ]),
-            'esportes' => Esporte::permitidos()->where('ativo', true)->orderBy('nome')->get(),
+            'esportes' => Esporte::ensureFootballModalities(),
             'imageCoverOptions' => PlayerProfile::imageCoverOptions(),
             'gradientCoverOptions' => PlayerProfile::gradientCoverOptions(),
         ]);

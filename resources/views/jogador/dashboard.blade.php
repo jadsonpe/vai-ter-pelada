@@ -98,29 +98,33 @@
 
         <section class="overflow-hidden rounded-lg bg-slate-950 text-white shadow-sm">
 
-            <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1fr_320px] lg:px-8">
+            <div class="grid gap-3 px-4 py-3 sm:px-5 lg:grid-cols-[1fr_auto] lg:items-center">
 
                 <div>
 
-                    <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Painel do jogador</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Painel do jogador</p>
 
-                    <h1 class="mt-2 text-3xl font-bold sm:text-4xl">Oi, {{ auth()->user()->name }}</h1>
+                    <h1 class="mt-1 text-xl font-bold sm:text-2xl">Oi, {{ auth()->user()->name }}</h1>
 
-                    <p class="mt-3 max-w-2xl text-slate-300">Confirme presença, responda convites, avalie rodadas e acompanhe suas mensagens em um só lugar.</p>
+                    <div class="hidden sm:block">
 
-                    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <p class="mt-1 max-w-2xl text-sm text-slate-300">Confirme presença, responda convites e acompanhe sua rotina de peladas.</p>
 
-                        <a href="{{ route('peladas.index') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400">Encontrar peladas</a>
+                    </div>
 
-                        <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-slate-100">Criar pelada</a>
+                    <div class="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+
+                        <a href="{{ route('peladas.index') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-500 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-emerald-400">Encontrar peladas</a>
+
+                        <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-slate-100">Criar pelada</a>
 
                         @if($peladasOrganizadas->isNotEmpty())
 
-                            <a href="{{ route('dashboard', ['aba' => 'organizacao']) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 px-4 py-2 text-sm font-semibold text-emerald-100 hover:bg-white/10">Organizar minhas peladas</a>
+                            <a href="{{ route('dashboard', ['aba' => 'organizacao']) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 px-3 py-2 text-xs font-semibold text-emerald-100 hover:bg-white/10">Organizar</a>
 
                         @endif
 
-                        <a href="{{ route('peladeiros.show', auth()->user()->publicProfile()) }}" class="inline-flex items-center justify-center rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">Meu perfil público</a>
+                        {{-- <a href="{{ route('peladeiros.show', auth()->user()->publicProfile()) }}" class="inline-flex items-center justify-center rounded-md border border-white/20 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10">Perfil</a> --}}
 
                     </div>
 
@@ -128,19 +132,19 @@
 
 
 
-                <div class="rounded-lg border border-white/10 bg-white/10 p-5">
+                <div class="hidden rounded-md border border-white/10 bg-white/10 p-2 sm:block lg:w-60">
 
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
 
-                        <x-user-avatar :user="auth()->user()" size="lg" class="border-2 border-emerald-300" />
+                        <x-user-avatar :user="auth()->user()" size="sm" class="border-2 border-emerald-300" />
 
                         <div class="min-w-0">
 
-                            <p class="truncate font-semibold">{{ auth()->user()->name }}</p>
+                            <p class="truncate text-sm font-semibold">{{ auth()->user()->name }}</p>
 
-                            <p class="truncate text-sm text-slate-300">{{ auth()->user()->username }}</p>
+                            <p class="truncate text-xs text-slate-300">{{ auth()->user()->username }}</p>
 
-                            <span class="mt-2 inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">{{ auth()->user()->role }}</span>
+                            <span class="mt-1 inline-flex rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200">{{ auth()->user()->role }}</span>
 
                         </div>
 
