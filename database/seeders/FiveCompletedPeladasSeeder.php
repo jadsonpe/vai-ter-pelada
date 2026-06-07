@@ -45,7 +45,7 @@ class FiveCompletedPeladasSeeder extends Seeder
                         'vagas_totais' => 30,
                         'vagas_diaristas' => 0,
                         'status' => 'realizado',
-                        'observacao' => 'Rodada efetuada para teste com presencas e avaliacoes.',
+                        'observacao' => 'Rodada efetuada para teste com presenças e avaliações.',
                     ]
                 );
 

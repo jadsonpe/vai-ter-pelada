@@ -59,7 +59,7 @@
                     <li>Titulo, mensagem, link e data de leitura de notificacoes internas.</li>
                 </ul>
 
-                <h3 class="mt-5 font-semibold text-slate-900">Dados de sorteio, ranking e avaliacoes</h3>
+                <h3 class="mt-5 font-semibold text-slate-900">Dados de sorteio, ranking e avaliações</h3>
                 <ul class="mt-2 list-disc space-y-1 pl-5 leading-7 text-slate-700">
                     <li>Jogadores presentes usados no sorteio, times gerados, ordem nos times e criterio usado.</li>
                     <li>Avaliações feitas e recebidas, estrelas/notas, comentários, média e quantidade de avaliações.</li>

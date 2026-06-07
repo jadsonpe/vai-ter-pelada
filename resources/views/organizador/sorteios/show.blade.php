@@ -87,7 +87,7 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <label class="text-sm font-medium text-slate-700">
-                    Numero de times
+                    Número de times
                     <input
                         type="number"
                         name="quantidade_times"

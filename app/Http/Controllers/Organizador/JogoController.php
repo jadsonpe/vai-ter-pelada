@@ -138,7 +138,7 @@ class JogoController extends Controller
             'cancelada_em' => null,
         ]);
 
-        return back()->with('status', 'Rodada finalizada. Avaliacoes liberadas para jogadores presentes por 2 dias.');
+        return back()->with('status', 'Rodada finalizada. Avaliações liberadas para jogadores presentes por 2 dias.');
     }
 
     public function cancelar(PeladaJogo $jogo): RedirectResponse
@@ -237,7 +237,7 @@ class JogoController extends Controller
             $this->atualizarGolsDosUsuarios($jogo);
         });
 
-        return back()->with('status', 'Estatisticas da rodada salvas.');
+        return back()->with('status', 'Estatísticas da rodada salvas.');
     }
 
     public function removerParticipante(PeladaJogo $jogo, PeladaJogoParticipante $participante): RedirectResponse
@@ -264,7 +264,7 @@ class JogoController extends Controller
 
     private function authorizeOwner(Pelada $pelada): void
     {
-        $this->redirectIfNotPeladaOwner($pelada);
+        $this->redirectIfNotPeladaManager($pelada);
     }
 
     private function proximoTituloRodada(Pelada $pelada): string

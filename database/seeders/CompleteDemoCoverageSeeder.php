@@ -153,7 +153,7 @@ class CompleteDemoCoverageSeeder extends Seeder
                         'vagas_totais' => 30,
                         'vagas_diaristas' => 0,
                         'status' => 'realizado',
-                        'observacao' => 'Rodada completa para testar presenca, sorteio, votos, caixa e avaliacoes.',
+                        'observacao' => 'Rodada completa para testar presença, sorteio, votos, caixa e avaliações.',
                     ]
                 );
 

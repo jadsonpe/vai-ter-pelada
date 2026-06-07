@@ -25,7 +25,7 @@
 
         @if($torneioEncerrado)
             <div class="mt-6 rounded-lg border border-slate-300 bg-slate-100 p-4 text-sm font-semibold text-slate-700">
-                Final realizada. Times, jogadores e sumulas deste torneio estao bloqueados para preservar o historico.
+                Final realizada. Times, jogadores e súmulas deste torneio estão bloqueados para preservar o historico.
             </div>
         @endif
 

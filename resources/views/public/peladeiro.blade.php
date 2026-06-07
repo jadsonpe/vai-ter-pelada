@@ -70,9 +70,13 @@
                     </div>
 
                     <div class="grid gap-2 sm:grid-cols-2 lg:min-w-[520px] lg:grid-cols-4">
-                        <a href="{{ route('peladas.index') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300">Convidar para pelada</a>
+                        <a href="{{ auth()->check() ? route('peladas.index') : route('login', ['redirect' => $profile->shareUrl()]) }}" class="inline-flex items-center justify-center rounded-md bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300">Convidar para pelada</a>
                         <button type="button" onclick="navigator.share ? navigator.share({title: document.title, url: '{{ $profile->shareUrl() }}'}) : navigator.clipboard.writeText('{{ $profile->shareUrl() }}')" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/15">Compartilhar perfil</button>
-                        <a href="{{ $whatsappShareUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20">WhatsApp</a>
+                        @auth
+                            <a href="{{ $whatsappShareUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20">WhatsApp</a>
+                        @else
+                            <a href="{{ route('login', ['redirect' => $profile->shareUrl()]) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-300/40 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20">WhatsApp</a>
+                        @endauth
                         @auth
                             @if(auth()->id() === $jogador->id)
                                 <a href="{{ route('perfil.edit') }}" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-bold text-slate-200">Editar perfil</a>

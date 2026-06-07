@@ -49,12 +49,12 @@ class SolicitacaoController extends Controller
 
         Notificacao::create([
             'user_id' => $solicitacao->user_id,
-            'titulo' => 'Solicitacao aprovada',
+            'titulo' => 'Solicitação aprovada',
             'mensagem' => 'Seu pedido em '.$solicitacao->pelada->nome.' foi aprovado.',
             'link' => route('peladas.show', $solicitacao->pelada),
         ]);
 
-        return back()->with('status', 'Solicitacao aprovada.');
+        return back()->with('status', 'Solicitação aprovada.');
     }
 
     public function recusar(PeladaSolicitacao $solicitacao): RedirectResponse
@@ -70,16 +70,16 @@ class SolicitacaoController extends Controller
 
         Notificacao::create([
             'user_id' => $solicitacao->user_id,
-            'titulo' => 'Solicitacao recusada',
+            'titulo' => 'Solicitação recusada',
             'mensagem' => 'Seu pedido em '.$solicitacao->pelada->nome.' foi recusado.',
             'link' => route('peladas.show', $solicitacao->pelada),
         ]);
 
-        return back()->with('status', 'Solicitacao recusada.');
+        return back()->with('status', 'Solicitação recusada.');
     }
 
     private function authorizeOwner(Pelada $pelada): void
     {
-        $this->redirectIfNotPeladaOwner($pelada);
+        $this->redirectIfNotPeladaManager($pelada);
     }
 }

@@ -274,7 +274,7 @@ class SorteioController extends Controller
 
     private function authorizeOwner(PeladaJogo $jogo): void
     {
-        $this->redirectIfNotPeladaOwner($jogo->pelada);
+        $this->redirectIfNotPeladaManager($jogo->pelada);
     }
 
     private function bloquearSeFinalizada(PeladaJogo $jogo): void
@@ -290,7 +290,7 @@ class SorteioController extends Controller
         $jogo->refresh();
 
         if ($jogo->bloqueadoParaEdicao()) {
-            abort(403, 'Rodada finalizada ou cancelada. Edicoes nao estao mais disponiveis.');
+            abort(403, 'Rodada finalizada ou cancelada. Edições não estão mais disponíveis.');
         }
     }
 

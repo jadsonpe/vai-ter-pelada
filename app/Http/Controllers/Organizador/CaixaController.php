@@ -145,7 +145,7 @@ class CaixaController extends Controller
                 'user_id' => $participante->user_id,
                 'registrado_por' => $request->user()->id,
                 'tipo' => 'entrada',
-                'descricao' => 'Diaria - '.($participante->membro?->nomeExibicao() ?: $participante->user->name),
+                'descricao' => 'Diária - '.($participante->membro?->nomeExibicao() ?: $participante->user->name),
                 'valor' => $data['valor'],
                 'data_pagamento' => now()->toDateString(),
                 'competencia' => optional($jogo->data_hora)->startOfMonth()?->toDateString(),
@@ -154,7 +154,7 @@ class CaixaController extends Controller
             ]
         );
 
-        return back()->with('status', 'Diaria registrada.');
+        return back()->with('status', 'Diária registrada.');
     }
 
     public function store(Request $request, Pelada $pelada): RedirectResponse
@@ -178,7 +178,7 @@ class CaixaController extends Controller
             'competencia' => Carbon::parse($data['data_pagamento'])->startOfMonth()->toDateString(),
         ]);
 
-        return back()->with('status', 'Lancamento registrado no caixa.');
+        return back()->with('status', 'Lançamento registrado no caixa.');
     }
 
     public function destroy(Pelada $pelada, PeladaCaixaMovimentacao $movimentacao): RedirectResponse
@@ -188,12 +188,12 @@ class CaixaController extends Controller
 
         $movimentacao->delete();
 
-        return back()->with('status', 'Lancamento removido.');
+        return back()->with('status', 'Lançamento removido.');
     }
 
     private function authorizeOwner(Pelada $pelada): void
     {
-        $this->redirectIfNotPeladaOwner($pelada);
+        $this->redirectIfNotPeladaManager($pelada);
     }
 
     private function parseMoney(mixed $value): float

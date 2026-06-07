@@ -44,7 +44,7 @@
             @if(session('status') === 'complete-profile')
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
                     <h2 class="font-semibold">Complete seu perfil para jogar melhor</h2>
-                    <p class="mt-1 text-sm text-emerald-800">Adicione foto, telefone, estado, cidade, bairro e dados de jogador. Isso ajuda organizadores a confirmar sua participacao e deixa suas avaliacoes mais confiaveis.</p>
+                    <p class="mt-1 text-sm text-emerald-800">Adicione foto, telefone, estado, cidade, bairro e dados de jogador. Isso ajuda organizadores a confirmar sua participacao e deixa suas avaliações mais confiaveis.</p>
                 </div>
             @endif
 

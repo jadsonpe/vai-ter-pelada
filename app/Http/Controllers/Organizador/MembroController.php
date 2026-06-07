@@ -16,16 +16,18 @@ class MembroController extends Controller
 {
     public function index(Pelada $pelada): View
     {
-        $this->authorizeOwner($pelada);
+        $this->authorizeManager($pelada);
 
         return view('organizador.membros.index', [
             'pelada' => $pelada->load('membros.user'),
+            'canManageDirectors' => $pelada->isOwner(auth()->user()) || auth()->user()?->isAdmin(),
         ]);
     }
 
     public function store(Request $request, Pelada $pelada): RedirectResponse
     {
-        $this->authorizeOwner($pelada);
+        $this->authorizeManager($pelada);
+
         $data = $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
             'tipo' => ['required', 'in:mensalista,diarista'],
@@ -73,8 +75,16 @@ class MembroController extends Controller
 
     public function destroy(Pelada $pelada, PeladaMembro $membro): RedirectResponse
     {
-        $this->authorizeOwner($pelada);
+        $this->authorizeManager($pelada);
         abort_unless($membro->pelada_id === $pelada->id, 404);
+
+        if ($membro->user_id === $pelada->organizador_id) {
+            return back()->with('status', 'O organizador principal não pode ser removido da pelada.');
+        }
+
+        if ($membro->isDiretor() && ! ($pelada->isOwner(auth()->user()) || auth()->user()?->isAdmin())) {
+            return back()->with('status', 'Somente o organizador principal pode remover diretores.');
+        }
 
         $membro->delete();
 
@@ -83,18 +93,38 @@ class MembroController extends Controller
 
     public function updateMany(Request $request, Pelada $pelada): RedirectResponse
     {
-        $this->authorizeOwner($pelada);
+        $this->authorizeManager($pelada);
+        $canManageDirectors = $pelada->isOwner($request->user()) || $request->user()?->isAdmin();
 
         $data = $request->validate([
             'membros' => ['array'],
-            'membros.*.apelido' => ['nullable', 'max:255'],
             'membros.*.tipo' => ['required', 'in:mensalista,diarista'],
+            'membros.*.papel' => ['nullable', 'in:jogador,diretor,organizador'],
             'membros.*.status' => ['required', 'in:ativo,pendente,bloqueado,saiu,inativo'],
             'membros.*.prioridade' => ['nullable', 'integer', 'min:0'],
             'membros.*.observacao' => ['nullable'],
         ]);
 
         foreach ($data['membros'] ?? [] as $membroId => $membroData) {
+            $membro = PeladaMembro::where('pelada_id', $pelada->id)->where('id', $membroId)->first();
+
+            if (! $membro) {
+                continue;
+            }
+
+            if ($membro->user_id === $pelada->organizador_id && ! $canManageDirectors) {
+                continue;
+            }
+
+            if ($membro->user_id === $pelada->organizador_id) {
+                $membroData['papel'] = PeladaMembro::PAPEL_ORGANIZADOR;
+                $membroData['status'] = 'ativo';
+            } elseif (! $canManageDirectors) {
+                unset($membroData['papel']);
+            } elseif (($membroData['papel'] ?? null) === PeladaMembro::PAPEL_ORGANIZADOR) {
+                $membroData['papel'] = PeladaMembro::PAPEL_DIRETOR;
+            }
+
             PeladaMembro::where('pelada_id', $pelada->id)
                 ->where('id', $membroId)
                 ->update($membroData);
@@ -103,8 +133,8 @@ class MembroController extends Controller
         return back()->with('status', 'Membros atualizados.');
     }
 
-    private function authorizeOwner(Pelada $pelada): void
+    private function authorizeManager(Pelada $pelada): void
     {
-        $this->redirectIfNotPeladaOwner($pelada);
+        $this->redirectIfNotPeladaManager($pelada);
     }
 }

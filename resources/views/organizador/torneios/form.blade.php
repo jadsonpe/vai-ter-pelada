@@ -122,7 +122,7 @@
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</span>
                     <div>
                         <h2 class="font-bold text-slate-950">Formato principal</h2>
-                        <p class="text-sm text-slate-600">As opcoes mudam automaticamente conforme a quantidade de times.</p>
+                        <p class="text-sm text-slate-600">As opções mudam automaticamente conforme a quantidade de times.</p>
                     </div>
                 </div>
 
@@ -276,7 +276,7 @@
             const isPowerOfTwo = (number) => number > 0 && (number & (number - 1)) === 0;
             const currentFormat = () => root.querySelector('[data-format-radio]:checked')?.value || 'pontos_corridos';
 
-            const fillSelect = (select, values, selected, emptyLabel = 'Sem opcoes validas') => {
+            const fillSelect = (select, values, selected, emptyLabel = 'Sem opções validas') => {
                 select.innerHTML = '';
 
                 if (!values.length) {

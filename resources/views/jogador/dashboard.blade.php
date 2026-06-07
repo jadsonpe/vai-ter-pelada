@@ -468,7 +468,7 @@
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-slate-950">Organização</h2>
-                        <p class="mt-1 text-sm text-slate-600">Peladas que você criou e administra.</p>
+                        <p class="mt-1 text-sm text-slate-600">Peladas que você criou ou onde atua como diretor.</p>
                     </div>
                     <a href="{{ route('organizador.peladas.create') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
                         Criar nova pelada
@@ -483,6 +483,7 @@
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">{{ $pelada->esporte?->nome ?: 'Pelada' }}</span>
                                         <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ ucfirst($pelada->status) }}</span>
+                                        <span class="rounded-full bg-slate-950 px-2.5 py-1 text-xs font-bold text-white">{{ $pelada->isOwner(auth()->user()) ? 'Organizador' : 'Diretor' }}</span>
                                     </div>
                                     <h3 class="mt-3 text-lg font-black text-slate-950">{{ $pelada->nome }}</h3>
                                     <p class="mt-1 text-sm text-slate-600">{{ $pelada->local_nome ?: $pelada->local }}</p>
@@ -494,7 +495,9 @@
                                 <div class="flex shrink-0 flex-col gap-2 sm:w-40">
                                     <a href="{{ route('organizador.peladas.jogos.index', $pelada) }}" class="inline-flex items-center justify-center rounded-md bg-slate-950 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">Rodadas</a>
                                     <a href="{{ route('organizador.peladas.membros.index', $pelada) }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Membros</a>
-                                    <a href="{{ route('organizador.peladas.edit', $pelada) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Editar</a>
+                                    @if($pelada->isOwner(auth()->user()) || auth()->user()->isAdmin())
+                                        <a href="{{ route('organizador.peladas.edit', $pelada) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">Editar</a>
+                                    @endif
                                 </div>
                             </div>
                         </article>

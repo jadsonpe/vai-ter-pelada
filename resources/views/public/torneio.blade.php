@@ -119,7 +119,7 @@
         @endphp
 
         <section class="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-xl font-bold text-slate-950">Jogos e sumulas</h2>
+            <h2 class="text-xl font-bold text-slate-950">Jogos e súmulas</h2>
             <div class="mt-4 grid gap-3 md:grid-cols-2">
                 @forelse($jogosOrdenados as $jogo)
                     <article class="rounded-lg border border-slate-200 p-4">
@@ -235,7 +235,7 @@
                             </strong>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-500">Sem cartoes registrados.</p>
+                        <p class="text-sm text-slate-500">Sem cartões registrados.</p>
                     @endforelse
                 </div>
             </section>

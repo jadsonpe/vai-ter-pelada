@@ -7,6 +7,7 @@ use App\Notifications\ResetPasswordNotification;
 use App\Models\UserBadge;
 use App\Models\UserPoint;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -66,6 +67,19 @@ class User extends Authenticatable
     public function peladasOrganizadas(): HasMany
     {
         return $this->hasMany(Pelada::class, 'organizador_id');
+    }
+
+    public function peladasGerenciaveis(): Builder
+    {
+        return Pelada::query()
+            ->where(function (Builder $query) {
+                $query->where('organizador_id', $this->id)
+                    ->orWhereHas('membros', function (Builder $membros) {
+                        $membros->where('user_id', $this->id)
+                            ->where('status', 'ativo')
+                            ->whereIn('papel', [PeladaMembro::PAPEL_ORGANIZADOR, PeladaMembro::PAPEL_DIRETOR]);
+                    });
+            });
     }
 
     public function memberships(): HasMany
@@ -206,7 +220,7 @@ class User extends Authenticatable
 
     public function isOrganizador(): bool
     {
-        return in_array($this->role, ['admin', 'organizador'], true) || $this->peladasOrganizadas()->exists();
+        return in_array($this->role, ['admin', 'organizador'], true) || $this->peladasGerenciaveis()->exists();
     }
 
     public function podeCriarPelada(): bool

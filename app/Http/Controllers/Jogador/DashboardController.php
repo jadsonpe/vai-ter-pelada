@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jogador;
 
 use App\Http\Controllers\Controller;
 use App\Models\AvaliacaoPartida;
+use App\Models\Pelada;
 use App\Models\PeladaJogo;
 use App\Models\PeladaSolicitacao;
 use App\Models\PlayerVote;
@@ -15,9 +16,17 @@ class DashboardController extends Controller
     public function __invoke(Request $request): View
     {
         $user = $request->user();
-        $peladasOrganizadas = $user->peladasOrganizadas()
+        $peladasOrganizadas = Pelada::query()
             ->with(['esporte'])
             ->withCount(['membros', 'jogos'])
+            ->where(function ($query) use ($user) {
+                $query->where('organizador_id', $user->id)
+                    ->orWhereHas('membros', function ($membros) use ($user) {
+                        $membros->where('user_id', $user->id)
+                            ->where('status', 'ativo')
+                            ->whereIn('papel', ['organizador', 'diretor']);
+                    });
+            })
             ->latest()
             ->get();
 

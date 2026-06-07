@@ -20,7 +20,14 @@ class PeladaController extends Controller
     {
         return view('organizador.peladas.index', [
             'peladas' => Pelada::with('esporte')
-                ->where('organizador_id', $request->user()->id)
+                ->where(function ($query) use ($request) {
+                    $query->where('organizador_id', $request->user()->id)
+                        ->orWhereHas('membros', function ($membros) use ($request) {
+                            $membros->where('user_id', $request->user()->id)
+                                ->where('status', 'ativo')
+                                ->whereIn('papel', [PeladaMembro::PAPEL_ORGANIZADOR, PeladaMembro::PAPEL_DIRETOR]);
+                        });
+                })
                 ->latest()
                 ->get(),
         ]);
@@ -64,6 +71,7 @@ class PeladaController extends Controller
             ['pelada_id' => $pelada->id, 'user_id' => $request->user()->id],
             [
                 'tipo' => 'mensalista',
+                'papel' => PeladaMembro::PAPEL_ORGANIZADOR,
                 'status' => 'ativo',
                 'prioridade' => 100,
                 'data_entrada' => now()->toDateString(),
@@ -71,6 +79,10 @@ class PeladaController extends Controller
                 'observacao' => 'Organizador da pelada',
             ]
         );
+
+        if ($request->user()->role === 'jogador') {
+            $request->user()->update(['role' => 'organizador']);
+        }
 
         return redirect()->route('organizador.peladas.index')->with('status', 'Pelada criada.');
     }

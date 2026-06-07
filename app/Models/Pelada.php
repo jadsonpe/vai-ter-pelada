@@ -97,6 +97,51 @@ class Pelada extends Model
         return $this->hasMany(Torneio::class);
     }
 
+    public function isOwner(?User $user): bool
+    {
+        return $user && (int) $this->organizador_id === (int) $user->id;
+    }
+
+    public function diretorias(): HasMany
+    {
+        return $this->membros()
+            ->where('status', 'ativo')
+            ->whereIn('papel', [PeladaMembro::PAPEL_ORGANIZADOR, PeladaMembro::PAPEL_DIRETOR]);
+    }
+
+    public function isManagedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin() || $this->isOwner($user)) {
+            return true;
+        }
+
+        return $this->membros()
+            ->where('user_id', $user->id)
+            ->where('status', 'ativo')
+            ->where('papel', PeladaMembro::PAPEL_DIRETOR)
+            ->exists();
+    }
+
+    public function papelDoUsuario(?User $user): string
+    {
+        if ($this->isOwner($user)) {
+            return PeladaMembro::PAPEL_ORGANIZADOR;
+        }
+
+        if (! $user) {
+            return PeladaMembro::PAPEL_JOGADOR;
+        }
+
+        return (string) ($this->membros()
+            ->where('user_id', $user->id)
+            ->where('status', 'ativo')
+            ->value('papel') ?: PeladaMembro::PAPEL_JOGADOR);
+    }
+
     public function getVagasTotaisAttribute($value): int
     {
         return (int) ($value ?: $this->capacidade ?: 0);

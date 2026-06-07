@@ -9,7 +9,7 @@
                 <h1 class="mt-2 text-3xl font-bold text-slate-900">{{ $jogo->titulo }}</h1>
                 <p class="mt-1 text-sm text-slate-600">{{ $jogo->data_hora->format('d/m/Y H:i') }} - {{ $confirmados->count() }} confirmado(s)</p>
                 @if($jogo->avaliacoesAbertas())
-                    <p class="mt-1 text-xs font-semibold text-emerald-700">Avaliacoes abertas ate {{ $jogo->avaliacoesAbertasAte()?->format('d/m/Y H:i') }}.</p>
+                    <p class="mt-1 text-xs font-semibold text-emerald-700">Avaliações abertas até {{ $jogo->avaliacoesAbertasAte()?->format('d/m/Y H:i') }}.</p>
                 @endif
             </div>
             <div class="flex flex-col gap-2 sm:items-end">
@@ -31,7 +31,7 @@
 
         @if($rodadaBloqueada)
             <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-                Esta rodada esta {{ $jogo->status }}. As opcoes de edicao, presenca, sorteio, gols e cartoes estao indisponiveis.
+                Esta rodada está com status de {{ $jogo->status }}(a). As opções de edição, presenca, sorteio, gols e cartões estão indisponíveis.
             </div>
         @endif
 
@@ -143,7 +143,7 @@
             <h2 class="text-lg font-bold text-slate-950">Sortear times</h2>
             <div class="mt-4 grid gap-4 sm:grid-cols-3">
                 <label class="text-sm font-medium text-slate-700">
-                    Numero de times
+                    Número de times
                     <input id="quantidade_times" type="number" name="quantidade_times" min="1" max="20" value="{{ old('quantidade_times', 2) }}" required class="mt-1 w-full rounded-md border-slate-300" @disabled($rodadaBloqueada)>
                 </label>
                 <label class="text-sm font-medium text-slate-700">
@@ -184,7 +184,7 @@
             <section class="mt-6 rounded-lg border border-slate-200 bg-white p-5">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-950">Times do ultimo sorteio</h2>
+                        <h2 class="text-lg font-bold text-slate-950">Times do último sorteio</h2>
                         <p class="mt-1 text-sm text-slate-600">{{ $ultimoSorteio->created_at->format('d/m/Y H:i') }} - {{ $ultimoSorteio->jogadores_por_time }} por time</p>
                     </div>
                 </div>
@@ -213,8 +213,8 @@
         @if($confirmados->isNotEmpty())
             <form method="POST" action="{{ route('organizador.jogos.estatisticas.store', $jogo) }}" class="mt-6 rounded-lg border border-slate-200 bg-white p-5">
                 @csrf
-                <h2 class="text-lg font-bold text-slate-950">Gols e cartoes da rodada</h2>
-                <p class="mt-1 text-sm text-slate-600">Registre gols e cartoes aplicados pelo organizador. As avaliacoes ficam por conta dos jogadores presentes.</p>
+                <h2 class="text-lg font-bold text-slate-950">Gols e cartões da rodada</h2>
+                <p class="mt-1 text-sm text-slate-600">Registre gols e cartões aplicados pelo organizador. As avaliações ficam por conta dos jogadores presentes.</p>
                 <div class="mt-4 overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-sm">
                         <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
@@ -242,7 +242,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button class="mt-4 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" @disabled($rodadaBloqueada)>Salvar gols e cartoes</button>
+                <button class="mt-4 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" @disabled($rodadaBloqueada)>Salvar gols e cartões</button>
             </form>
         @endif
     </div>

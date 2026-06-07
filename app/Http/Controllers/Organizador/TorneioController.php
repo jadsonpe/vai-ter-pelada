@@ -474,7 +474,7 @@ class TorneioController extends Controller
             return null;
         }
 
-        return back()->with('status', 'A final ja foi realizada. Times, jogadores e sumulas deste torneio estao bloqueados.');
+        return back()->with('status', 'A final ja foi realizada. Times, jogadores e súmulas deste torneio estão bloqueados.');
     }
 
     private function validatedTorneioImages(Request $request): void
@@ -894,7 +894,7 @@ class TorneioController extends Controller
 
     private function authorizeOwner(Pelada $pelada): void
     {
-        $this->redirectIfNotPeladaOwner($pelada);
+        $this->redirectIfNotPeladaManager($pelada);
     }
 
     private function authorizeSupportedSport(Pelada $pelada): void
