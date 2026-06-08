@@ -55,13 +55,18 @@ class DashboardController extends Controller
         $participacoes = $user->participacoes()->with('jogo.pelada')->latest()->take(5)->get();
         $notificacoes = $user->notificacoes()->latest()->take(5)->get();
         $notificacoesNaoLidas = $user->notificacoes()->whereNull('lida_em')->count();
-        $followingIds = $user->following()->pluck('users.id');
+        $feedUserIds = $user->following()
+            ->pluck('users.id')
+            ->push($user->id)
+            ->unique()
+            ->values();
+
         $feedMode = 'following';
         $feedPosts = PlayerPost::query()
             ->publicado()
             ->with(['user.playerProfile'])
             ->withCount('likes')
-            ->whereIn('user_id', $followingIds)
+            ->whereIn('user_id', $feedUserIds)
             ->latest('publicado_em')
             ->latest()
             ->take(20)

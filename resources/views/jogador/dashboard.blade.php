@@ -220,7 +220,7 @@
 
                         <h2 class="text-lg font-semibold text-slate-900">Feed dos peladeiros</h2>
 
-                        <p class="mt-1 text-sm text-slate-500">{{ $feedMode === 'discover' ? 'Siga seus amigos peladeiros para ver suas atualizações, enquanto isso, mostramos publicações recentes de outros peladeiros.' : 'Publicações recentes dos jogadores que você segue.' }}</p>
+                        <p class="mt-1 text-sm text-slate-500">{{ $feedMode === 'discover' ? 'Siga seus amigos peladeiros para ver suas atualizações, enquanto isso, mostramos publicações recentes de outros peladeiros.' : 'Suas publicações e as publicações recentes dos jogadores que você segue.' }}</p>
 
                     </div>
 
