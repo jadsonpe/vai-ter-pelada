@@ -72,7 +72,7 @@
 
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    <div>
+                    <div data-feed-heading>
 
                         <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Perfil incompleto</p>
 
@@ -220,7 +220,7 @@
 
                         <h2 class="text-lg font-semibold text-slate-900">Feed dos peladeiros</h2>
 
-                        <p class="mt-1 text-sm text-slate-500">Publicações recentes dos jogadores que você segue.</p>
+                        <p class="mt-1 text-sm text-slate-500">{{ $feedMode === 'discover' ? 'Siga seus amigos peladeiros para ver suas atualizações, enquanto isso, mostramos publicações recentes de outros peladeiros.' : 'Publicações recentes dos jogadores que você segue.' }}</p>
 
                     </div>
 
@@ -243,7 +243,7 @@
 
                         <p class="font-semibold text-slate-900">Seu feed ainda está vazio</p>
 
-                        <p class="mt-1 text-sm text-slate-500">Siga outros peladeiros para acompanhar as publicações deles por aqui.</p>
+                        <p class="mt-1 text-sm text-slate-500">Aínda não encontramos publicações para mostrar. Siga outros peladeiros para acompanhar as postagens deles por aqui.</p>
 
                         <a href="{{ route('jogadores.index') }}" class="mt-4 inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
 
@@ -254,6 +254,14 @@
                     </div>
 
                 @else
+
+                    @if($feedMode === 'discover')
+
+                        <div class="border-b border-emerald-100 bg-emerald-50/70 px-5 py-3 text-sm text-emerald-900">
+                            Estas são publicações recentes da comunidade para movimentar seu início no app.
+                        </div>
+
+                    @endif
 
                     <div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
 
@@ -343,7 +351,7 @@
 
 
 
-                                            <a href="{{ $postUrl }}" class="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Ver coment?rios">
+                                            {{-- <a href="{{ $postUrl }}" class="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Ver coment?rios">
 
                                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 
@@ -351,7 +359,7 @@
 
                                                 </svg>
 
-                                            </a>
+                                            </a> --}}
 
 
 

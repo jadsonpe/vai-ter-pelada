@@ -56,6 +56,7 @@ class DashboardController extends Controller
         $notificacoes = $user->notificacoes()->latest()->take(5)->get();
         $notificacoesNaoLidas = $user->notificacoes()->whereNull('lida_em')->count();
         $followingIds = $user->following()->pluck('users.id');
+        $feedMode = 'following';
         $feedPosts = PlayerPost::query()
             ->publicado()
             ->with(['user.playerProfile'])
@@ -65,6 +66,20 @@ class DashboardController extends Controller
             ->latest()
             ->take(20)
             ->get();
+
+        if ($feedPosts->isEmpty()) {
+            $feedMode = 'discover';
+            $feedPosts = PlayerPost::query()
+                ->publicado()
+                ->with(['user.playerProfile'])
+                ->withCount('likes')
+                ->where('user_id', '!=', $user->id)
+                ->latest('publicado_em')
+                ->latest()
+                ->take(12)
+                ->get();
+        }
+
         $likedFeedPostIds = $feedPosts->isNotEmpty()
             ? $user->likedPosts()
                 ->whereIn('player_posts.id', $feedPosts->pluck('id'))
@@ -115,6 +130,7 @@ class DashboardController extends Controller
             'notificacoes' => $notificacoes,
             'notificacoesNaoLidasPainel' => $notificacoesNaoLidas,
             'feedPosts' => $feedPosts,
+            'feedMode' => $feedMode,
             'likedFeedPostIds' => $likedFeedPostIds,
             'postCategoryLabels' => PlayerPostController::categoryLabels(),
             'convites' => $convites,
