@@ -6,6 +6,7 @@ use App\Models\PlayerProfile;
 use App\Models\PlayerVote;
 use App\Models\PeladaJogo;
 use App\Models\PeladaJogoParticipanteEstatistica;
+use App\Models\Notificacao;
 use App\Models\Report;
 use App\Models\TorneioCartao;
 use App\Models\TorneioGol;
@@ -16,6 +17,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -132,9 +134,24 @@ class PlayerProfileController extends Controller
         $target = $profile->user;
         abort_if($request->user()->is($target), 403);
 
-        $request->user()->following()->syncWithoutDetaching([$target->id]);
+        $follower = $request->user();
+        $changes = $follower->following()->syncWithoutDetaching([$target->id]);
 
-        return back()->with('status', 'Voce agora segue este peladeiro.');
+        if (! empty($changes['attached'])) {
+            $followerProfile = $follower->publicProfile();
+            $followerName = $follower->apelido ?: $follower->name ?: 'Um peladeiro';
+
+            Notificacao::create([
+                'user_id' => $target->id,
+                'titulo' => 'Novo seguidor',
+                'mensagem' => "{$followerName} seguiu você.",
+                'link' => route('peladeiros.show', $followerProfile),
+            ]);
+
+            Cache::forget("users.{$target->id}.notificacoes_nao_lidas");
+        }
+
+        return back()->with('status', 'Você agora segue este peladeiro.');
     }
 
     public function unfollow(Request $request, PlayerProfile $profile): RedirectResponse
@@ -143,7 +160,7 @@ class PlayerProfileController extends Controller
 
         $request->user()->following()->detach($profile->user_id);
 
-        return back()->with('status', 'Voce deixou de seguir este peladeiro.');
+        return back()->with('status', 'Você deixou de seguir este peladeiro.');
     }
 
     public function followers(PlayerProfile $profile): View
