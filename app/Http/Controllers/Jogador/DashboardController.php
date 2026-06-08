@@ -61,7 +61,6 @@ class DashboardController extends Controller
             ->unique()
             ->values();
 
-        $feedMode = 'following';
         $feedPosts = PlayerPost::query()
             ->publicado()
             ->with(['user.playerProfile'])
@@ -72,22 +71,24 @@ class DashboardController extends Controller
             ->take(20)
             ->get();
 
-        if ($feedPosts->isEmpty()) {
-            $feedMode = 'discover';
-            $feedPosts = PlayerPost::query()
-                ->publicado()
-                ->with(['user.playerProfile'])
-                ->withCount('likes')
-                ->where('user_id', '!=', $user->id)
-                ->latest('publicado_em')
-                ->latest()
-                ->take(12)
-                ->get();
-        }
+        $discoverPosts = PlayerPost::query()
+            ->publicado()
+            ->with(['user.playerProfile'])
+            ->withCount('likes')
+            ->whereNotIn('user_id', $feedUserIds)
+            ->latest('publicado_em')
+            ->latest()
+            ->take(8)
+            ->get();
 
-        $likedFeedPostIds = $feedPosts->isNotEmpty()
+        $visibleFeedPostIds = $feedPosts->pluck('id')
+            ->merge($discoverPosts->pluck('id'))
+            ->unique()
+            ->values();
+
+        $likedFeedPostIds = $visibleFeedPostIds->isNotEmpty()
             ? $user->likedPosts()
-                ->whereIn('player_posts.id', $feedPosts->pluck('id'))
+                ->whereIn('player_posts.id', $visibleFeedPostIds)
                 ->pluck('player_posts.id')
                 ->all()
             : [];
@@ -135,7 +136,7 @@ class DashboardController extends Controller
             'notificacoes' => $notificacoes,
             'notificacoesNaoLidasPainel' => $notificacoesNaoLidas,
             'feedPosts' => $feedPosts,
-            'feedMode' => $feedMode,
+            'discoverPosts' => $discoverPosts,
             'likedFeedPostIds' => $likedFeedPostIds,
             'postCategoryLabels' => PlayerPostController::categoryLabels(),
             'convites' => $convites,

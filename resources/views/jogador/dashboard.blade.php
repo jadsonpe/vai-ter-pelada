@@ -220,7 +220,7 @@
 
                         <h2 class="text-lg font-semibold text-slate-900">Feed dos peladeiros</h2>
 
-                        <p class="mt-1 text-sm text-slate-500">{{ $feedMode === 'discover' ? 'Siga seus amigos peladeiros para ver suas atualizações, enquanto isso, mostramos publicações recentes de outros peladeiros.' : 'Suas publicações e as publicações recentes dos jogadores que você segue.' }}</p>
+                        <p class="mt-1 text-sm text-slate-500">Suas publicações e as publicações recentes dos jogadores que você segue.</p>
 
                     </div>
 
@@ -254,14 +254,6 @@
                     </div>
 
                 @else
-
-                    @if($feedMode === 'discover')
-
-                        <div class="border-b border-emerald-100 bg-emerald-50/70 px-5 py-3 text-sm text-emerald-900">
-                            Estas são publicações recentes da comunidade para movimentar seu início no app.
-                        </div>
-
-                    @endif
 
                     <div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
 
@@ -420,6 +412,145 @@
                 @endif
 
             </section>
+
+
+            @if($discoverPosts->isNotEmpty())
+
+                <section class="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+
+                    <div class="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div>
+
+                            <h2 class="text-base font-bold text-slate-900">Outros peladeiros</h2>
+
+                            <p class="mt-1 text-sm text-slate-500">Publicações recentes de jogadores que você ainda não segue.</p>
+
+                        </div>
+
+                        <a href="{{ route('jogadores.index') }}" class="inline-flex w-fit items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                            Ver jogadores
+                        </a>
+
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 p-4 sm:gap-4 sm:p-5">
+
+                        @foreach($discoverPosts as $post)
+
+                            @php
+
+                                $postAuthor = $post->user;
+
+                                $postProfile = $postAuthor?->playerProfile ?: $postAuthor?->publicProfile();
+
+                                $isLiked = in_array($post->id, $likedFeedPostIds, true);
+
+                                $postUrl = $postProfile ? route('peladeiros.show', $postProfile).'#publicacao-'.$post->id : $post->mediaUrl();
+
+                                $shareTitle = 'Publicação de '.($postAuthor?->apelido ?: $postAuthor?->name ?: 'Peladeiro');
+
+                            @endphp
+
+
+                            <article class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+
+                                <a href="{{ $postUrl }}" class="block">
+
+                                    <img src="{{ $post->thumbnailUrl() }}" alt="Publicação de {{ $postAuthor?->apelido ?: $postAuthor?->name ?: 'Peladeiro' }}" class="aspect-[4/3] w-full object-cover">
+
+                                </a>
+
+
+                                <div class="space-y-3 p-3">
+
+                                    <div class="flex min-w-0 items-center gap-2">
+
+                                        @if($postAuthor)
+
+                                            <x-user-avatar :user="$postAuthor" size="xs" />
+
+                                        @endif
+
+                                        <div class="min-w-0">
+
+                                            <a href="{{ $postProfile ? route('peladeiros.show', $postProfile) : '#' }}" class="block truncate text-xs font-bold text-slate-950 hover:text-emerald-700">
+
+                                                {{ $postAuthor?->apelido ?: $postAuthor?->name ?: 'Peladeiro' }}
+
+                                            </a>
+
+                                            <p class="truncate text-[11px] text-slate-500">{{ optional($post->publicado_em ?: $post->created_at)->format('d/m/Y') }}</p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    @if($post->legenda)
+
+                                        <p class="line-clamp-2 text-xs leading-5 text-slate-600">{{ $post->legenda }}</p>
+
+                                    @endif
+
+
+                                    <div class="flex items-center justify-between border-t border-slate-100 pt-2">
+
+                                        <div class="flex items-center gap-1">
+
+                                            <form method="post" action="{{ route('player-posts.likes.toggle', $post) }}" data-like-form data-post-id="{{ $post->id }}">
+
+                                                @csrf
+
+                                                <button type="submit" data-like-button data-liked-classes="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100" data-unliked-classes="text-slate-500 hover:bg-slate-100 hover:text-emerald-700" class="inline-flex h-8 w-8 items-center justify-center rounded-full transition {{ $isLiked ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'text-slate-500 hover:bg-slate-100 hover:text-emerald-700' }}" aria-label="{{ $isLiked ? 'Remover curtida' : 'Curtir publicação' }}" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
+
+                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                                                        <path d="M7 11v10H3V11h4z" />
+
+                                                        <path d="M7 11l4.2-8a2.2 2.2 0 0 1 2.1 2.8L12 9h6.6a2 2 0 0 1 2 2.3l-1.2 7.4A2.7 2.7 0 0 1 16.7 21H7" />
+
+                                                    </svg>
+
+                                                </button>
+
+                                            </form>
+
+                                            <button type="button" data-share-post data-share-url="{{ $postUrl }}" data-share-title="{{ $shareTitle }}" data-share-text="{{ $post->legenda ?: 'Olha esta publicação no Vai Ter Pelada.' }}" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Compartilhar publicação">
+
+                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                                                    <circle cx="18" cy="5" r="3" />
+
+                                                    <circle cx="6" cy="12" r="3" />
+
+                                                    <circle cx="18" cy="19" r="3" />
+
+                                                    <path d="m8.6 13.5 6.8 4" />
+
+                                                    <path d="m15.4 6.5-6.8 4" />
+
+                                                </svg>
+
+                                            </button>
+
+                                        </div>
+
+                                        <span data-like-count="{{ $post->id }}" class="text-[11px] font-bold text-slate-500">{{ $post->likes_count }}</span>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+
+                        @endforeach
+
+                    </div>
+
+                </section>
+
+            @endif
 
 
 
