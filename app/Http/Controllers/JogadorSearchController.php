@@ -15,6 +15,7 @@ class JogadorSearchController extends Controller
         $normalized = ltrim(str($term)->lower()->toString(), '@');
         $players = null;
         $featuredPlayers = $this->featuredPlayers();
+        $newPlayers = $this->newPlayers();
 
         if (mb_strlen($normalized) >= 2) {
             $like = '%'.$normalized.'%';
@@ -41,6 +42,7 @@ class JogadorSearchController extends Controller
         return view('jogadores.index', [
             'players' => $players,
             'featuredPlayers' => $featuredPlayers,
+            'newPlayers' => $newPlayers,
             'term' => $term,
             'normalized' => $normalized,
         ]);
@@ -80,6 +82,50 @@ class JogadorSearchController extends Controller
                     ->where('data_hora', '>=', now()->subDays(90))))
             ->orderByDesc($latestParticipation)
             ->take(8)
+            ->get();
+    }
+
+    private function newPlayers()
+    {
+        return User::query()
+            ->select(['id', 'name', 'apelido', 'username', 'avatar_url', 'avatar_path', 'active', 'status', 'estado', 'cidade', 'posicao', 'created_at'])
+            ->with([
+                'playerProfile:id,user_id,slug,publico,esporte_principal_id,posicao_favorita',
+                'playerProfile.esportePrincipal:id,nome,slug',
+            ])
+            ->where('active', true)
+            ->where(function ($query): void {
+                $query->whereNull('status')
+                    ->orWhere('status', '!=', 'bloqueado');
+            })
+            ->whereNotNull('name')
+            ->where('name', '!=', '')
+            ->where(function ($query): void {
+                $query->whereNotNull('avatar_path')
+                    ->where('avatar_path', '!=', '')
+                    ->orWhere(function ($query): void {
+                        $query->whereNotNull('avatar_url')
+                            ->where('avatar_url', '!=', '');
+                    });
+            })
+            ->whereNotNull('estado')
+            ->where('estado', '!=', '')
+            ->whereNotNull('cidade')
+            ->where('cidade', '!=', '')
+            ->whereHas('playerProfile', function ($query): void {
+                $query->where('publico', true)
+                    ->whereNotNull('esporte_principal_id');
+            })
+            ->where(function ($query): void {
+                $query->whereNotNull('posicao')
+                    ->where('posicao', '!=', '')
+                    ->orWhereHas('playerProfile', function ($query): void {
+                        $query->whereNotNull('posicao_favorita')
+                            ->where('posicao_favorita', '!=', '');
+                    });
+            })
+            ->latest()
+            ->take(10)
             ->get();
     }
 }

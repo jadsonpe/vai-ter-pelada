@@ -29,6 +29,43 @@
             <p class="mt-2 text-xs text-slate-500">Digite pelo menos 2 caracteres para buscar.</p>
         </form>
 
+        @if($newPlayers->isNotEmpty())
+            <section class="mt-8">
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-950">Novos peladeiros cadastrados</h2>
+                        <p class="mt-1 text-sm text-slate-500">Perfis completos com foto, cidade, esporte favorito e posição.</p>
+                    </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    @foreach($newPlayers as $player)
+                        @php
+                            $profile = $player->playerProfile;
+                            $position = $profile?->posicao_favorita ?: $player->posicao;
+                            $profileUrl = $profile && $profile->publico
+                                ? route('peladeiros.show', $profile)
+                                : route('jogadores.show', $player);
+                        @endphp
+
+                        <a href="{{ $profileUrl }}" class="{{ $loop->iteration > 5 ? 'hidden sm:flex' : 'flex' }} group min-w-0 items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-emerald-300 hover:shadow-md">
+                            <x-user-avatar :user="$player" size="md" />
+                            <div class="min-w-0 flex-1">
+                                <div class="flex min-w-0 items-center gap-2">
+                                    <h3 class="truncate text-sm font-black text-slate-950 group-hover:text-emerald-700">{{ $player->name }}</h3>
+                                    @if($player->username)
+                                        <span class="hidden shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 xl:inline">{{ '@'.$player->username }}</span>
+                                    @endif
+                                </div>
+                                <p class="mt-0.5 truncate text-xs font-semibold text-slate-500">{{ $player->cidade }}/{{ $player->estado }}</p>
+                                <p class="mt-0.5 truncate text-xs text-slate-400">{{ $profile?->esportePrincipal?->nome }} · {{ $position }}</p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         <div class="mt-8">
             @if($players === null)
                 <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
