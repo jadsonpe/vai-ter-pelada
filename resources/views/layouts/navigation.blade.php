@@ -13,7 +13,7 @@
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.avaliacoes.*')">Jogador</x-nav-link>
                         <x-nav-link :href="route('jogadores.index')" :active="request()->routeIs('jogadores.index')">Peladeiros</x-nav-link>
-                        <x-nav-link :href="route('player-posts.index')" :active="request()->routeIs('player-posts.*')">Publicações</x-nav-link>
+                        <x-nav-link :href="route('player-posts.index')" :active="request()->routeIs('player-posts.*')">Postar foto</x-nav-link>
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-nav-link>
                         @endif
@@ -36,7 +36,7 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
-                            <x-dropdown-link :href="route('player-posts.index')">Publicações</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-posts.index')">Nova publicação</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'mensagens'])">Mensagens {{ $notificacoesNaoLidas ? '('.$notificacoesNaoLidas.')' : '' }}</x-dropdown-link>
@@ -67,7 +67,7 @@
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Painel do jogador</x-dropdown-link>
-                            <x-dropdown-link :href="route('player-posts.index')">Publicações</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-posts.index')">Publicar foto</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
@@ -90,6 +90,8 @@
             ? 'text-emerald-700'
             : 'text-slate-500 hover:text-emerald-700';
     };
+
+    $publishActive = request()->routeIs('player-posts.*');
 @endphp
 
 <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
@@ -111,12 +113,13 @@
         </a>
 
         @auth
-            <a href="{{ route('player-posts.index') }}" class="flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold {{ $mobileItemClass(request()->routeIs('player-posts.*')) }}">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="5" width="16" height="14" rx="2" />
-                    <circle cx="9" cy="10" r="1.5" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m7 17 4-4 3 3 2-2 3 3" />
-                </svg>
+            <a href="{{ route('player-posts.index') }}" class="group flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-black {{ $publishActive ? 'text-emerald-700' : 'text-slate-600 hover:text-emerald-700' }}" aria-label="Publicar foto">
+                <span class="{{ $publishActive ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' : 'bg-slate-950 text-white shadow-lg shadow-slate-950/20 group-hover:bg-emerald-600 group-hover:shadow-emerald-600/20' }} -mt-5 inline-flex h-11 w-11 items-center justify-center rounded-full transition">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.25-1.5h5.5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v7A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.5v5M9.5 12h5" />
+                    </svg>
+                </span>
                 <span class="block max-w-full truncate leading-none">Publicar</span>
             </a>
 
