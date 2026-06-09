@@ -42,6 +42,11 @@ class PlayerPostController extends Controller
             'media' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'categoria' => ['required', Rule::in(array_keys($this->categoryLabels()))],
             'legenda' => ['nullable', 'string', 'max:220'],
+            'crop_x' => ['nullable', 'numeric', 'min:0'],
+            'crop_y' => ['nullable', 'numeric', 'min:0'],
+            'crop_size' => ['nullable', 'numeric', 'min:1'],
+            'image_width' => ['nullable', 'integer', 'min:1'],
+            'image_height' => ['nullable', 'integer', 'min:1'],
         ], [
             'media.required' => 'Escolha uma imagem para publicar.',
             'media.image' => 'A publicação precisa ser uma imagem válida.',
@@ -49,7 +54,8 @@ class PlayerPostController extends Controller
             'legenda.max' => 'A legenda deve ter no máximo 220 caracteres.',
         ]);
 
-        [$mediaPath, $thumbnailPath] = $this->storeOptimizedImage($request->file('media'), $user->id);
+        $crop = $this->validatedCropData($data);
+        [$mediaPath, $thumbnailPath] = $this->storeOptimizedImage($request->file('media'), $user->id, $crop);
 
         PlayerPost::create([
             'user_id' => $user->id,
@@ -128,7 +134,7 @@ class PlayerPostController extends Controller
     }
 
     /** @return array{0:string,1:string} */
-    private function storeOptimizedImage(UploadedFile $file, int $userId): array
+    private function storeOptimizedImage(UploadedFile $file, int $userId, ?array $crop = null): array
     {
         abort_unless(function_exists('imagewebp'), 422, 'O servidor precisa da extensão GD com suporte a WebP para processar imagens.');
 
@@ -139,6 +145,8 @@ class PlayerPostController extends Controller
             abort(422, 'Não foi possível processar a imagem enviada.');
         }
 
+        $source = $this->normalizeImageOrientation($source, $file);
+
         $baseDirectory = 'player-posts/'.$userId;
         $baseName = Str::uuid()->toString();
         $mediaPath = "{$baseDirectory}/{$baseName}.webp";
@@ -147,11 +155,53 @@ class PlayerPostController extends Controller
         Storage::disk('public')->makeDirectory($baseDirectory);
 
         $this->saveResizedWebp($source, $mediaPath, 1400, 84);
-        $this->saveSquareWebp($source, $thumbnailPath, 720, 80);
+        $this->saveSquareWebp($source, $thumbnailPath, 720, 80, $crop);
 
         imagedestroy($source);
 
         return [$mediaPath, $thumbnailPath];
+    }
+
+    private function normalizeImageOrientation($source, UploadedFile $file)
+    {
+        if (! function_exists('exif_read_data') || ! in_array(strtolower($file->getClientOriginalExtension()), ['jpg', 'jpeg'], true)) {
+            return $source;
+        }
+
+        $exif = @exif_read_data($file->getRealPath());
+        $orientation = (int) ($exif['Orientation'] ?? 1);
+
+        if ($orientation === 1) {
+            return $source;
+        }
+
+        $oriented = match ($orientation) {
+            2 => $this->flipImage($source, IMG_FLIP_HORIZONTAL),
+            3 => imagerotate($source, 180, 0),
+            4 => $this->flipImage($source, IMG_FLIP_VERTICAL),
+            5 => $this->flipImage(imagerotate($source, -90, 0), IMG_FLIP_HORIZONTAL),
+            6 => imagerotate($source, -90, 0),
+            7 => $this->flipImage(imagerotate($source, 90, 0), IMG_FLIP_HORIZONTAL),
+            8 => imagerotate($source, 90, 0),
+            default => $source,
+        };
+
+        if ($oriented && $oriented !== $source) {
+            imagedestroy($source);
+        }
+
+        return $oriented ?: $source;
+    }
+
+    private function flipImage($source, int $mode)
+    {
+        if (! function_exists('imageflip')) {
+            return $source;
+        }
+
+        imageflip($source, $mode);
+
+        return $source;
     }
 
     private function saveResizedWebp($source, string $path, int $maxSize, int $quality): void
@@ -175,13 +225,11 @@ class PlayerPostController extends Controller
         Storage::disk('public')->put($path, $webp);
     }
 
-    private function saveSquareWebp($source, string $path, int $size, int $quality): void
+    private function saveSquareWebp($source, string $path, int $size, int $quality, ?array $cropData = null): void
     {
         $width = imagesx($source);
         $height = imagesy($source);
-        $crop = min($width, $height);
-        $sourceX = (int) (($width - $crop) / 2);
-        $sourceY = (int) (($height - $crop) / 2);
+        [$sourceX, $sourceY, $crop] = $this->squareCropFromData($cropData, $width, $height);
 
         $target = imagecreatetruecolor($size, $size);
         imagealphablending($target, false);
@@ -194,6 +242,52 @@ class PlayerPostController extends Controller
         imagedestroy($target);
 
         Storage::disk('public')->put($path, $webp);
+    }
+
+    private function validatedCropData(array $data): ?array
+    {
+        $keys = ['crop_x', 'crop_y', 'crop_size', 'image_width', 'image_height'];
+
+        foreach ($keys as $key) {
+            if (! isset($data[$key])) {
+                return null;
+            }
+        }
+
+        return [
+            'x' => (float) $data['crop_x'],
+            'y' => (float) $data['crop_y'],
+            'size' => (float) $data['crop_size'],
+            'image_width' => (int) $data['image_width'],
+            'image_height' => (int) $data['image_height'],
+        ];
+    }
+
+    /** @return array{0:int,1:int,2:int} */
+    private function squareCropFromData(?array $cropData, int $width, int $height): array
+    {
+        if (! $cropData) {
+            $crop = min($width, $height);
+
+            return [
+                (int) (($width - $crop) / 2),
+                (int) (($height - $crop) / 2),
+                $crop,
+            ];
+        }
+
+        $scaleX = $width / max(1, $cropData['image_width']);
+        $scaleY = $height / max(1, $cropData['image_height']);
+        $scale = min($scaleX, $scaleY);
+        $crop = max(1, (int) round($cropData['size'] * $scale));
+        $crop = min($crop, $width, $height);
+        $sourceX = (int) round($cropData['x'] * $scaleX);
+        $sourceY = (int) round($cropData['y'] * $scaleY);
+
+        $sourceX = max(0, min($sourceX, $width - $crop));
+        $sourceY = max(0, min($sourceY, $height - $crop));
+
+        return [$sourceX, $sourceY, $crop];
     }
 
     private function removeOldestPostsOverLimit(User $user): void
