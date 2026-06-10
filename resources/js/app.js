@@ -90,6 +90,8 @@ document.addEventListener('click', async (event) => {
     }
 
     if (navigator.share) {
+        event.preventDefault();
+
         try {
             await navigator.share({ title, text, url });
             return;
@@ -98,10 +100,14 @@ document.addEventListener('click', async (event) => {
                 return;
             }
         }
+    } else if (button.matches('a[href]')) {
+        return;
     }
 
+    event.preventDefault();
+
     const message = `${text} ${url}`.trim();
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = button.getAttribute('href') || `https://wa.me/?text=${encodeURIComponent(message)}`;
     const opened = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
     if (! opened && navigator.clipboard) {

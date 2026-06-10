@@ -5,6 +5,8 @@
         $price = $pelada->valor_diarista
             ? 'Diarista R$ '.number_format($pelada->valor_diarista, 2, ',', '.')
             : ($pelada->valor_mensalista ? 'Mensalista R$ '.number_format($pelada->valor_mensalista, 2, ',', '.') : 'Valores a combinar');
+        $shareText = 'Olha esta pelada no Vai Ter Pelada:';
+        $whatsappShareUrl = 'https://wa.me/?text='.rawurlencode($shareText.' '.$shareUrl);
     @endphp
 
     @section('title', $pelada->nome.' | Vai Ter Pelada')
@@ -68,9 +70,9 @@
                                 <a href="{{ route('login', ['redirect' => route('peladas.show', $pelada)]) }}" class="inline-flex items-center justify-center rounded-md border border-emerald-300 bg-white px-4 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-100">
                                     Entrar
                                 </a>
-                                <button type="button" data-share-page data-share-url="{{ $shareUrl }}" data-share-title="{{ $pelada->nome }}" data-share-text="Olha esta pelada no Vai Ter Pelada:" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                                <a href="{{ $whatsappShareUrl }}" target="_blank" rel="noopener noreferrer" data-share-page data-share-url="{{ $shareUrl }}" data-share-title="{{ $pelada->nome }}" data-share-text="{{ $shareText }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">
                                     Compartilhar
-                                </button>
+                                </a>
                             </div>
                         </aside>
                     </div>
