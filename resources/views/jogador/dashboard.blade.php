@@ -710,11 +710,23 @@
 
                             @forelse($membros->take(5) as $membro)
 
-                                <a href="{{ route('peladas.show', $membro->pelada) }}" class="block rounded-md border border-slate-200 p-4 hover:border-emerald-300">
+                                <a href="{{ route('peladas.show', $membro->pelada) }}" class="flex items-center gap-3 rounded-md border border-slate-200 p-4 hover:border-emerald-300">
 
-                                    <p class="font-semibold text-slate-900">{{ $membro->pelada->nome }}</p>
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-100 text-sm font-bold text-emerald-900 shadow-sm">
+                                        @if($membro->pelada->imagemUrl())
+                                            <img src="{{ $membro->pelada->imagemUrl() }}" alt="{{ $membro->pelada->nome }}" class="h-full w-full object-cover">
+                                        @else
+                                            {{ Str::of($membro->pelada->nome ?: 'Pelada')->trim()->substr(0, 1)->upper() }}
+                                        @endif
+                                    </span>
 
-                                    <p class="mt-1 text-sm text-slate-500">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</p>
+                                    <span class="min-w-0">
+
+                                        <span class="block truncate font-semibold text-slate-900">{{ $membro->pelada->nome }}</span>
+
+                                        <span class="mt-1 block truncate text-sm text-slate-500">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</span>
+
+                                    </span>
 
                                 </a>
 

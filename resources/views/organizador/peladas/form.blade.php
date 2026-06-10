@@ -22,9 +22,65 @@
                     <x-pelada-imagem variant="preview" :src="$padrao" :alt="'Imagem padrão do '.$pelada->esporte->nome" class="mt-2 opacity-90" />
                     <p class="mt-1 text-xs text-slate-500">Imagem padrão do esporte. Envie um arquivo abaixo para substituir.</p>
                 @endif
-                <input type="file" name="imagem" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
+                <input id="pelada-image-input" type="file" name="imagem" accept="image/jpeg,image/png,image/webp" class="mt-2 w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700">
+                <input type="hidden" name="image_crop_x" data-image-crop-x>
+                <input type="hidden" name="image_crop_y" data-image-crop-y>
+                <input type="hidden" name="image_crop_width" data-image-crop-width>
+                <input type="hidden" name="image_crop_height" data-image-crop-height>
+                <input type="hidden" name="image_width" data-image-width>
+                <input type="hidden" name="image_height" data-image-height>
+                <input type="hidden" name="image_crop_dirty" value="0" data-image-crop-dirty>
                 <p class="mt-1 text-xs text-slate-500">JPG, PNG ou WebP. Máximo 2 MB. Sem envio, usa a imagem padrão do esporte (public/images/esportes/).</p>
                 <x-input-error :messages="$errors->get('imagem')" class="mt-2" />
+
+                <div data-pelada-image-cropper data-current-image-url="{{ $pelada->temImagemPropria() ? $pelada->imagemPropriaUrl() : '' }}" class="mt-4 hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="bg-slate-950 p-3 sm:p-4">
+                        <canvas
+                            data-pelada-image-canvas
+                            width="960"
+                            height="540"
+                            class="aspect-video w-full cursor-grab touch-none select-none rounded-md bg-slate-900 shadow-inner active:cursor-grabbing"
+                            aria-label="Previa do corte da imagem da pelada"
+                        ></canvas>
+                    </div>
+
+                    <div class="space-y-4 p-4">
+                        <div>
+                            <p class="text-sm font-bold text-slate-900">Enquadramento da pelada</p>
+                            <p class="mt-1 text-xs leading-5 text-slate-500">Arraste a imagem para ajustar o corte 16:9 usado nos cards e na pagina publica.</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-3">
+                                <label for="pelada-image-zoom" class="text-xs font-bold uppercase tracking-wide text-slate-500">Zoom</label>
+                                <span data-pelada-image-zoom-label class="text-xs font-semibold text-slate-500">100%</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" data-pelada-image-zoom-out class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50" aria-label="Diminuir zoom">-</button>
+                                <input
+                                    id="pelada-image-zoom"
+                                    data-pelada-image-zoom
+                                    type="range"
+                                    min="1"
+                                    max="4"
+                                    step="0.01"
+                                    value="1"
+                                    class="min-w-0 flex-1 accent-emerald-600"
+                                >
+                                <button type="button" data-pelada-image-zoom-in class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 text-sm font-bold text-slate-700 hover:bg-slate-50" aria-label="Aumentar zoom">+</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 sm:flex">
+                            <button type="button" data-pelada-image-center class="inline-flex items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                                Centralizar
+                            </button>
+                            <button type="button" data-pelada-image-reset class="inline-flex items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                                Reajustar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <label class="text-sm font-medium">
@@ -163,6 +219,299 @@
 
     <script>
         (() => {
+            const imageInput = document.getElementById('pelada-image-input');
+            const imageCropper = document.querySelector('[data-pelada-image-cropper]');
+            const imageCanvas = document.querySelector('[data-pelada-image-canvas]');
+            const imageZoom = document.querySelector('[data-pelada-image-zoom]');
+            const imageZoomLabel = document.querySelector('[data-pelada-image-zoom-label]');
+            const imageZoomIn = document.querySelector('[data-pelada-image-zoom-in]');
+            const imageZoomOut = document.querySelector('[data-pelada-image-zoom-out]');
+            const imageCenter = document.querySelector('[data-pelada-image-center]');
+            const imageReset = document.querySelector('[data-pelada-image-reset]');
+            const imageFields = {
+                x: document.querySelector('[data-image-crop-x]'),
+                y: document.querySelector('[data-image-crop-y]'),
+                width: document.querySelector('[data-image-crop-width]'),
+                height: document.querySelector('[data-image-crop-height]'),
+                imageWidth: document.querySelector('[data-image-width]'),
+                imageHeight: document.querySelector('[data-image-height]'),
+            };
+            const imageCropDirty = document.querySelector('[data-image-crop-dirty]');
+
+            if (imageInput && imageCropper && imageCanvas && imageZoom) {
+                const ratio = 16 / 9;
+                const ctx = imageCanvas.getContext('2d');
+                const state = {
+                    image: null,
+                    cropX: 0,
+                    cropY: 0,
+                    cropWidth: 1,
+                    cropHeight: 1,
+                    dragging: false,
+                    dragStartX: 0,
+                    dragStartY: 0,
+                    startCropX: 0,
+                    startCropY: 0,
+                    activePointers: new Map(),
+                    pinchStartDistance: 0,
+                    pinchStartZoom: 1,
+                };
+
+                const zoomValue = () => Number(imageZoom.value) || 1;
+
+                const markImageCropDirty = () => {
+                    if (imageCropDirty) {
+                        imageCropDirty.value = '1';
+                    }
+                };
+
+                const updateZoomLabel = () => {
+                    if (imageZoomLabel) {
+                        imageZoomLabel.textContent = `${Math.round(zoomValue() * 100)}%`;
+                    }
+                };
+
+                const baseCrop = () => {
+                    if (! state.image) {
+                        return { width: 1, height: 1 };
+                    }
+
+                    if (state.image.naturalWidth / Math.max(1, state.image.naturalHeight) > ratio) {
+                        return {
+                            width: state.image.naturalHeight * ratio,
+                            height: state.image.naturalHeight,
+                        };
+                    }
+
+                    return {
+                        width: state.image.naturalWidth,
+                        height: state.image.naturalWidth / ratio,
+                    };
+                };
+
+                const clampCrop = () => {
+                    if (! state.image) {
+                        return;
+                    }
+
+                    state.cropX = Math.max(0, Math.min(state.cropX, state.image.naturalWidth - state.cropWidth));
+                    state.cropY = Math.max(0, Math.min(state.cropY, state.image.naturalHeight - state.cropHeight));
+                };
+
+                const syncImageFields = () => {
+                    if (! state.image) {
+                        Object.values(imageFields).forEach((field) => {
+                            if (field) {
+                                field.value = '';
+                            }
+                        });
+                        return;
+                    }
+
+                    imageFields.x.value = Math.round(state.cropX * 100) / 100;
+                    imageFields.y.value = Math.round(state.cropY * 100) / 100;
+                    imageFields.width.value = Math.round(state.cropWidth * 100) / 100;
+                    imageFields.height.value = Math.round(state.cropHeight * 100) / 100;
+                    imageFields.imageWidth.value = state.image.naturalWidth;
+                    imageFields.imageHeight.value = state.image.naturalHeight;
+                };
+
+                const drawImageCrop = () => {
+                    if (! state.image) {
+                        return;
+                    }
+
+                    clampCrop();
+                    ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+                    ctx.drawImage(
+                        state.image,
+                        state.cropX,
+                        state.cropY,
+                        state.cropWidth,
+                        state.cropHeight,
+                        0,
+                        0,
+                        imageCanvas.width,
+                        imageCanvas.height
+                    );
+
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255,255,255,.34)';
+                    ctx.lineWidth = 2;
+                    for (let i = 1; i <= 2; i += 1) {
+                        const x = (imageCanvas.width / 3) * i;
+                        const y = (imageCanvas.height / 3) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, imageCanvas.height);
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(imageCanvas.width, y);
+                        ctx.stroke();
+                    }
+                    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(2.5, 2.5, imageCanvas.width - 5, imageCanvas.height - 5);
+                    ctx.restore();
+
+                    syncImageFields();
+                };
+
+                const setImageZoom = (zoom, keepCenter = true) => {
+                    if (! state.image) {
+                        return;
+                    }
+
+                    const normalizedZoom = Math.max(1, Math.min(4, zoom));
+                    const centerX = state.cropX + state.cropWidth / 2;
+                    const centerY = state.cropY + state.cropHeight / 2;
+                    const crop = baseCrop();
+                    imageZoom.value = normalizedZoom.toString();
+                    updateZoomLabel();
+                    state.cropWidth = crop.width / normalizedZoom;
+                    state.cropHeight = crop.height / normalizedZoom;
+
+                    if (keepCenter) {
+                        state.cropX = centerX - state.cropWidth / 2;
+                        state.cropY = centerY - state.cropHeight / 2;
+                    } else {
+                        state.cropX = (state.image.naturalWidth - state.cropWidth) / 2;
+                        state.cropY = (state.image.naturalHeight - state.cropHeight) / 2;
+                    }
+
+                    drawImageCrop();
+                };
+
+                const changeImageZoom = (amount) => setImageZoom(zoomValue() + amount);
+
+                const loadImageCrop = (file) => {
+                    if (! file) {
+                        state.image = null;
+                        imageCropper.classList.add('hidden');
+                        state.activePointers.clear();
+                        syncImageFields();
+                        return;
+                    }
+
+                    const image = new Image();
+                    const url = URL.createObjectURL(file);
+                    image.onload = () => {
+                        URL.revokeObjectURL(url);
+                        state.image = image;
+                        imageZoom.value = '1';
+                        imageCropper.classList.remove('hidden');
+                        updateZoomLabel();
+                        setImageZoom(1, false);
+                    };
+                    image.src = url;
+                };
+
+                const loadCurrentImageCrop = () => {
+                    const currentImageUrl = imageCropper.dataset.currentImageUrl;
+
+                    if (! currentImageUrl) {
+                        return;
+                    }
+
+                    const image = new Image();
+                    image.onload = () => {
+                        state.image = image;
+                        imageZoom.value = '1';
+                        imageCropper.classList.remove('hidden');
+                        updateZoomLabel();
+                        setImageZoom(1, false);
+                    };
+                    image.src = currentImageUrl;
+                };
+
+                imageInput.addEventListener('change', () => loadImageCrop(imageInput.files?.[0]));
+                imageInput.addEventListener('change', () => markImageCropDirty());
+                imageZoom.addEventListener('input', () => {
+                    markImageCropDirty();
+                    setImageZoom(Number(imageZoom.value));
+                });
+                imageZoomIn?.addEventListener('click', () => {
+                    markImageCropDirty();
+                    changeImageZoom(.15);
+                });
+                imageZoomOut?.addEventListener('click', () => {
+                    markImageCropDirty();
+                    changeImageZoom(-.15);
+                });
+                imageCenter?.addEventListener('click', () => {
+                    markImageCropDirty();
+                    setImageZoom(zoomValue(), false);
+                });
+                imageReset?.addEventListener('click', () => {
+                    markImageCropDirty();
+                    setImageZoom(1, false);
+                });
+
+                imageCanvas.addEventListener('wheel', (event) => {
+                    if (! state.image) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    markImageCropDirty();
+                    changeImageZoom(event.deltaY < 0 ? .08 : -.08);
+                }, { passive: false });
+
+                imageCanvas.addEventListener('pointerdown', (event) => {
+                    if (! state.image) {
+                        return;
+                    }
+
+                    state.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+                    markImageCropDirty();
+                    state.dragging = true;
+                    state.dragStartX = event.clientX;
+                    state.dragStartY = event.clientY;
+                    state.startCropX = state.cropX;
+                    state.startCropY = state.cropY;
+                    imageCanvas.setPointerCapture(event.pointerId);
+
+                    if (state.activePointers.size === 2) {
+                        const [first, second] = [...state.activePointers.values()];
+                        state.pinchStartDistance = Math.hypot(second.x - first.x, second.y - first.y);
+                        state.pinchStartZoom = zoomValue();
+                    }
+                });
+
+                imageCanvas.addEventListener('pointermove', (event) => {
+                    if (! state.dragging || ! state.image || ! state.activePointers.has(event.pointerId)) {
+                        return;
+                    }
+
+                    state.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+                    if (state.activePointers.size === 2 && state.pinchStartDistance > 0) {
+                        const [first, second] = [...state.activePointers.values()];
+                        const distance = Math.hypot(second.x - first.x, second.y - first.y);
+                        setImageZoom(state.pinchStartZoom * (distance / state.pinchStartDistance));
+                        return;
+                    }
+
+                    const rect = imageCanvas.getBoundingClientRect();
+                    const pixelsPerSource = state.cropWidth / Math.max(1, rect.width);
+                    state.cropX = state.startCropX - (event.clientX - state.dragStartX) * pixelsPerSource;
+                    state.cropY = state.startCropY - (event.clientY - state.dragStartY) * pixelsPerSource;
+                    drawImageCrop();
+                });
+
+                const stopImageDrag = (event) => {
+                    state.activePointers.delete(event.pointerId);
+                    state.dragging = state.activePointers.size > 0;
+                    state.pinchStartDistance = 0;
+                    if (imageCanvas.hasPointerCapture?.(event.pointerId)) {
+                        imageCanvas.releasePointerCapture(event.pointerId);
+                    }
+                };
+
+                imageCanvas.addEventListener('pointerup', stopImageDrag);
+                imageCanvas.addEventListener('pointercancel', stopImageDrag);
+                loadCurrentImageCrop();
+            }
+
             const descricao = document.getElementById('descricao');
             const contador = document.getElementById('descricao-count');
             const regras = document.getElementById('regras');

@@ -7,6 +7,7 @@
 
 @php
     $wrapper = match ($variant) {
+        'hero' => 'aspect-[16/9] w-full overflow-hidden bg-slate-100',
         'preview' => 'aspect-[16/9] w-full max-w-sm overflow-hidden rounded-lg border border-slate-200 bg-slate-100',
         'thumb' => 'aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100',
         default => 'h-48 w-full overflow-hidden bg-slate-100 sm:h-52',

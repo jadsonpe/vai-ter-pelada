@@ -12,7 +12,7 @@
 
         <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <div class="grid gap-0 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-                <x-pelada-imagem :src="$pelada->imagemUrl()" :alt="$pelada->nome" class="aspect-[16/9] h-full min-h-[260px] w-full overflow-hidden bg-slate-100 lg:aspect-auto" />
+                <x-pelada-imagem variant="hero" :src="$pelada->imagemUrl()" :alt="$pelada->nome" class="min-h-[220px] lg:min-h-0" />
 
                 <div class="p-6 lg:p-8">
                     <div class="flex flex-wrap items-center gap-2">
