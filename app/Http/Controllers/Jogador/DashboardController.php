@@ -8,6 +8,7 @@ use App\Models\AvaliacaoPartida;
 use App\Models\Pelada;
 use App\Models\PeladaJogo;
 use App\Models\PeladaSolicitacao;
+use App\Models\PlayerProfile;
 use App\Models\PlayerPost;
 use App\Models\PlayerVote;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ class DashboardController extends Controller
 
         $participacoes = $user->participacoes()->with('jogo.pelada')->latest()->take(5)->get();
         $notificacoes = $user->notificacoes()->latest()->take(5)->get();
+        $notificationActors = $this->notificationActors($notificacoes);
         $notificacoesNaoLidas = $user->notificacoes()->whereNull('lida_em')->count();
         $feedUserIds = $user->following()
             ->pluck('users.id')
@@ -134,6 +136,7 @@ class DashboardController extends Controller
             'diaristasCount' => $membros->where('tipo', 'diarista')->where('status', 'ativo')->count(),
             'confirmacoesCount' => $participacoes->where('status', 'confirmado')->count(),
             'notificacoes' => $notificacoes,
+            'notificationActors' => $notificationActors,
             'notificacoesNaoLidasPainel' => $notificacoesNaoLidas,
             'feedPosts' => $feedPosts,
             'discoverPosts' => $discoverPosts,
@@ -146,6 +149,42 @@ class DashboardController extends Controller
             'solicitacoesPendentes' => $solicitacoes->where('status', 'pendente')->count(),
             ...$avaliacoesData,
         ]);
+    }
+
+    private function notificationActors($notificacoes): array
+    {
+        $slugsByNotification = $notificacoes
+            ->mapWithKeys(function ($notificacao): array {
+                if ($notificacao->titulo !== 'Novo seguidor' || ! $notificacao->link) {
+                    return [];
+                }
+
+                $path = parse_url($notificacao->link, PHP_URL_PATH) ?: '';
+
+                if (! preg_match('#/peladeiro/([^/]+)#', $path, $matches)) {
+                    return [];
+                }
+
+                return [$notificacao->id => urldecode($matches[1])];
+            })
+            ->filter();
+
+        if ($slugsByNotification->isEmpty()) {
+            return [];
+        }
+
+        $profiles = PlayerProfile::query()
+            ->with('user')
+            ->whereIn('slug', $slugsByNotification->unique()->values())
+            ->get()
+            ->keyBy('slug');
+
+        return $slugsByNotification
+            ->mapWithKeys(fn (string $slug, int $notificationId): array => [
+                $notificationId => $profiles->get($slug)?->user,
+            ])
+            ->filter()
+            ->all();
     }
 
     private function avaliacoesData(Request $request): array
