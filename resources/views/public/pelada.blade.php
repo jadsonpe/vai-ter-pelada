@@ -30,16 +30,25 @@
 
                     <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <h1 class="text-3xl font-bold text-slate-950 sm:text-4xl">{{ $pelada->nome }}</h1>
-                        <button type="button" data-share-page data-share-url="{{ $shareUrl }}" data-share-title="{{ $pelada->nome }}" data-share-text="Olha esta pelada no Vai Ter Pelada:" class="inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-bold text-emerald-700 hover:bg-emerald-50">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <circle cx="18" cy="5" r="3" />
-                                <circle cx="6" cy="12" r="3" />
-                                <circle cx="18" cy="19" r="3" />
-                                <path d="m8.6 13.5 6.8 4" />
-                                <path d="m15.4 6.5-6.8 4" />
-                            </svg>
-                            Compartilhar
-                        </button>
+                        <div class="flex shrink-0 flex-wrap gap-2">
+                            @auth
+                                @if(! $isOwner && ! $membro && ! $solicitacaoPendente)
+                                    <a href="#participar" class="inline-flex w-fit items-center justify-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+                                        Pedir participação
+                                    </a>
+                                @endif
+                            @endauth
+                            <button type="button" data-share-page data-share-url="{{ $shareUrl }}" data-share-title="{{ $pelada->nome }}" data-share-text="Olha esta pelada no Vai Ter Pelada:" class="inline-flex w-fit items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-bold text-emerald-700 hover:bg-emerald-50">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <circle cx="18" cy="5" r="3" />
+                                    <circle cx="6" cy="12" r="3" />
+                                    <circle cx="18" cy="19" r="3" />
+                                    <path d="m8.6 13.5 6.8 4" />
+                                    <path d="m15.4 6.5-6.8 4" />
+                                </svg>
+                                Compartilhar
+                            </button>
+                        </div>
                     </div>
                     <p class="mt-3 leading-7 text-slate-600">{{ $pelada->descricao ?: 'Pelada recorrente aberta para confirmação de jogadores.' }}</p>
 
@@ -171,7 +180,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-lg border border-emerald-200 bg-white p-6 shadow-sm">
+                <section id="participar" class="scroll-mt-6 rounded-lg border border-emerald-200 bg-white p-6 shadow-sm">
                     @guest
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>

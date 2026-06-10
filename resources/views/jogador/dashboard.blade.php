@@ -884,7 +884,17 @@
 
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 
-                                <div>
+                                <div class="flex min-w-0 flex-1 items-start gap-3">
+
+                                    <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-100 text-sm font-bold text-emerald-900 shadow-sm">
+                                        @if($membro->pelada->imagemUrl())
+                                            <img src="{{ $membro->pelada->imagemUrl() }}" alt="{{ $membro->pelada->nome }}" class="h-full w-full object-cover">
+                                        @else
+                                            {{ Str::of($membro->pelada->nome ?: 'Pelada')->trim()->substr(0, 1)->upper() }}
+                                        @endif
+                                    </span>
+
+                                    <div class="min-w-0">
 
                                     <div class="flex flex-wrap items-center gap-2">
 
@@ -899,6 +909,8 @@
                                     <h3 class="mt-3 text-lg font-bold text-slate-950">{{ $membro->pelada->nome }}</h3>
 
                                     <p class="mt-1 text-sm text-slate-600">{{ $membro->pelada->local_nome ?: $membro->pelada->local }}</p>
+
+                                    </div>
 
                                 </div>
 
@@ -1328,7 +1340,17 @@
 
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
-                                <div class="min-w-0">
+                                <div class="flex min-w-0 flex-1 items-start gap-3">
+
+                                    <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-100 text-sm font-bold text-emerald-900 shadow-sm">
+                                        @if($pelada->imagemUrl())
+                                            <img src="{{ $pelada->imagemUrl() }}" alt="{{ $pelada->nome }}" class="h-full w-full object-cover">
+                                        @else
+                                            {{ Str::of($pelada->nome ?: 'Pelada')->trim()->substr(0, 1)->upper() }}
+                                        @endif
+                                    </span>
+
+                                    <div class="min-w-0">
 
                                     <div class="flex flex-wrap items-center gap-2">
 
@@ -1349,6 +1371,8 @@
                                         <span>{{ $pelada->membros_count }} membro(s)</span>
 
                                         <span>{{ $pelada->jogos_count }} rodada(s)</span>
+
+                                    </div>
 
                                     </div>
 
