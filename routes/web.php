@@ -35,6 +35,7 @@ Route::get('/torneios/{torneio:slug}', [PublicTorneioController::class, 'show'])
 Route::get('/ranking', [PublicController::class, 'ranking'])->name('ranking');
 Route::get('/arenas', [ArenaController::class, 'index'])->name('arenas.index');
 Route::get('/patrocinadores', [PublicPatrocinadorController::class, 'index'])->name('patrocinadores.index');
+Route::get('/p/{pelada:slug}', [PublicController::class, 'peladaPublic'])->name('peladas.public.show');
 Route::get('/peladeiro/{profile:slug}/card.png', [PlayerProfileController::class, 'card'])->name('peladeiros.card');
 Route::get('/peladeiro/{profile:slug}/card.svg', [PlayerProfileController::class, 'legacyCard'])->name('peladeiros.card.legacy');
 Route::get('/peladeiro/{profile:slug}/seguidores', [PlayerProfileController::class, 'followers'])->name('peladeiros.followers');

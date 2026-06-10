@@ -276,6 +276,30 @@ class PublicController extends Controller
         ]);
     }
 
+    public function peladaPublic(Pelada $pelada): View|RedirectResponse
+    {
+        abort_unless($pelada->ativa && $pelada->status === 'ativa', 404);
+
+        if (Auth::check()) {
+            return redirect()->route('peladas.show', $pelada);
+        }
+
+        $pelada->load(['esporte', 'organizador']);
+        $rodadas = $pelada->jogos()
+            ->whereIn('status', ['aberto', 'fechado'])
+            ->where('data_hora', '>=', now()->startOfDay())
+            ->orderBy('data_hora')
+            ->take(3)
+            ->get();
+
+        return view('public.pelada-share', [
+            'pelada' => $pelada,
+            'rodadas' => $rodadas,
+            'membrosAtivosCount' => $pelada->membros()->where('status', 'ativo')->count(),
+            'shareUrl' => route('peladas.public.show', $pelada),
+        ]);
+    }
+
     public function ranking(): View
     {
         return view('public.ranking', [

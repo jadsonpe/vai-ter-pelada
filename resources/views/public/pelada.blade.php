@@ -6,6 +6,7 @@
             $pelada->bairro,
             $pelada->cidade,
         ])->filter()->implode(', ');
+        $shareUrl = route('peladas.public.show', $pelada);
     @endphp
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         @include('shared.status')
@@ -27,7 +28,19 @@
                         </span>
                     </div>
 
-                    <h1 class="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl">{{ $pelada->nome }}</h1>
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <h1 class="text-3xl font-bold text-slate-950 sm:text-4xl">{{ $pelada->nome }}</h1>
+                        <button type="button" data-share-page data-share-url="{{ $shareUrl }}" data-share-title="{{ $pelada->nome }}" data-share-text="Olha esta pelada no Vai Ter Pelada:" class="inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-bold text-emerald-700 hover:bg-emerald-50">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <circle cx="18" cy="5" r="3" />
+                                <circle cx="6" cy="12" r="3" />
+                                <circle cx="18" cy="19" r="3" />
+                                <path d="m8.6 13.5 6.8 4" />
+                                <path d="m15.4 6.5-6.8 4" />
+                            </svg>
+                            Compartilhar
+                        </button>
+                    </div>
                     <p class="mt-3 leading-7 text-slate-600">{{ $pelada->descricao ?: 'Pelada recorrente aberta para confirmação de jogadores.' }}</p>
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-2">

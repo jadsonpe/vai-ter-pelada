@@ -75,7 +75,7 @@ document.addEventListener('submit', async (event) => {
 });
 
 document.addEventListener('click', async (event) => {
-    const button = event.target.closest('[data-share-post]');
+    const button = event.target.closest('[data-share-post], [data-share-page]');
 
     if (! button) {
         return;
