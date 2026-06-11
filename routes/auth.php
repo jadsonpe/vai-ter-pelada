@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\ConfirmPendingEmailController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\GoogleAuthController;
@@ -65,6 +66,10 @@ Route::middleware('auth')->group(function () {
     Route::get('verificar-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
+
+    Route::get('perfil/email/confirmar/{user}/{hash}', ConfirmPendingEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('perfil.email.confirm');
 
     Route::post('email/notificacao-verificacao', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')

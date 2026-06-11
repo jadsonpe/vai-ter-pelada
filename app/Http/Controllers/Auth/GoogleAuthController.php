@@ -27,18 +27,30 @@ class GoogleAuthController extends Controller
             return redirect()->route('login')->with('status', 'Não foi possível autenticar com o Google.');
         }
 
-        $user = User::where('google_id', $googleUser->getId())
-            ->orWhere('email', $googleUser->getEmail())
-            ->first();
+        $user = User::where('google_id', $googleUser->getId())->first();
+
+        if (! $user && $googleUser->getEmail()) {
+            $user = User::where('email', $googleUser->getEmail())->first();
+        }
 
         $created = false;
 
         if ($user) {
-            $user->update([
+            $updates = [
                 'google_id' => $user->google_id ?: $googleUser->getId(),
                 'avatar_url' => $googleUser->getAvatar(),
-                'email_verified_at' => $user->email_verified_at ?: now(),
-            ]);
+                'email_verified_at' => now(),
+                'pending_email' => null,
+            ];
+
+            if (
+                $googleUser->getEmail()
+                && ! User::where('email', $googleUser->getEmail())->whereKeyNot($user->id)->exists()
+            ) {
+                $updates['email'] = $googleUser->getEmail();
+            }
+
+            $user->update($updates);
         } else {
             $user = User::create([
                 'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: 'Jogador',

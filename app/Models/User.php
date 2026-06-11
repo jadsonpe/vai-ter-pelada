@@ -25,6 +25,7 @@ class User extends Authenticatable
         'apelido',
         'username',
         'email',
+        'pending_email',
         'google_id',
         'password',
         'role',

@@ -234,7 +234,23 @@
 
                 <div>
                     <x-input-label for="email" value="Email" />
-                    <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+                    <x-text-input
+                        id="email"
+                        name="email"
+                        type="email"
+                        class="mt-1 block w-full"
+                        :value="old('email', $user->email)"
+                        required
+                        autocomplete="username"
+                        :readonly="(bool) $user->google_id"
+                    />
+                    @if($user->google_id)
+                        <p class="mt-1 text-xs text-slate-500">Seu email e gerenciado pela conta Google conectada.</p>
+                    @elseif($user->pending_email)
+                        <p class="mt-1 text-xs font-medium text-amber-700">Aguardando confirmacao enviada para {{ $user->pending_email }}.</p>
+                    @else
+                        <p class="mt-1 text-xs text-slate-500">Se voce trocar o email, enviaremos um link de confirmacao antes de aplicar a mudanca.</p>
+                    @endif
                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
                 </div>
 
@@ -401,6 +417,26 @@
                     x-init="setTimeout(() => show = false, 4000)"
                     class="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
                 >Perfil salvo com sucesso.</p>
+            @endif
+
+            @if (session('status') === 'email-change-verification-sent')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 6000)"
+                    class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
+                >Enviamos um link para confirmar o novo email.</p>
+            @endif
+
+            @if (session('status') === 'email-change-confirmed')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 5000)"
+                    class="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
+                >Email confirmado e atualizado.</p>
             @endif
         </div>
     </form>

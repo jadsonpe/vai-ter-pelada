@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
@@ -59,6 +60,7 @@ class ProfileUpdateRequest extends FormRequest
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(User::class, 'pending_email')->ignore($this->user()->id),
             ],
             'phone' => ['nullable', 'string', 'max:20'],
             'data_nascimento' => ['nullable', 'date', 'before:today'],
@@ -89,6 +91,24 @@ class ProfileUpdateRequest extends FormRequest
             'social_links.youtube' => ['nullable', 'url', 'max:255'],
             'social_links.whatsapp' => ['nullable', 'string', 'max:30'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $user = $this->user();
+
+            if (! $user?->google_id) {
+                return;
+            }
+
+            if ($this->string('email')->lower()->toString() !== str($user->email)->lower()->toString()) {
+                $validator->errors()->add(
+                    'email',
+                    'Contas conectadas ao Google usam o email confirmado pelo Google. Para trocar, altere o email na sua conta Google.'
+                );
+            }
+        });
     }
 
     public function messages(): array

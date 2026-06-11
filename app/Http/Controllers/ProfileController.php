@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Esporte;
 use App\Models\PlayerProfile;
+use App\Notifications\ConfirmEmailChangeNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -39,6 +41,8 @@ class ProfileController extends Controller
         $data = collect($request->validated())
             ->except(['avatar', 'remover_avatar', 'esporte_perfis', 'player_profile', 'social_links'])
             ->all();
+        $requestedEmail = $data['email'];
+        unset($data['email']);
 
         $user->fill($data);
         $user->forceFill([
@@ -48,9 +52,8 @@ class ProfileController extends Controller
             'complemento' => null,
         ]);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
+        $emailChangeRequested = ! $user->google_id
+            && str($requestedEmail)->lower()->toString() !== str($user->email)->lower()->toString();
 
         if ($request->boolean('remover_avatar') && $user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
@@ -65,9 +68,22 @@ class ProfileController extends Controller
             $user->avatar_path = $request->file('avatar')->store('avatars', 'public');
         }
 
+        if ($user->google_id) {
+            $user->pending_email = null;
+        } elseif ($emailChangeRequested) {
+            $user->pending_email = $requestedEmail;
+        }
+
         $user->save();
         $this->syncEsportePerfis($request, $user);
         $this->syncPlayerProfile($request, $user);
+
+        if ($emailChangeRequested) {
+            Notification::route('mail', $user->pending_email)
+                ->notify(new ConfirmEmailChangeNotification($user));
+
+            return Redirect::route('perfil.edit')->with('status', 'email-change-verification-sent');
+        }
 
         return Redirect::route('perfil.edit')->with('status', 'profile-updated');
     }

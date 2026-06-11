@@ -15,7 +15,7 @@ class ForceHttps
     {
         if (! $request->secure()) {
             // Comente esta linha se precisar desativar o HTTPS localmente.
-            return redirect()->secure($request->getRequestUri());
+            // return redirect()->secure($request->getRequestUri());
         }
 
         return $next($request);
