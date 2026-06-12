@@ -128,6 +128,11 @@ class User extends Authenticatable
         return $this->hasMany(PlayerPost::class);
     }
 
+    public function stories(): HasMany
+    {
+        return $this->hasMany(PlayerStory::class);
+    }
+
     public function likedPosts(): BelongsToMany
     {
         return $this->belongsToMany(PlayerPost::class, 'player_post_likes')->withTimestamps();

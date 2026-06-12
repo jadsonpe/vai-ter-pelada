@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jogador;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PlayerPostController;
+use App\Http\Controllers\PlayerStoryController;
 use App\Models\AvaliacaoPartida;
 use App\Models\Pelada;
 use App\Models\PeladaJogo;
@@ -142,6 +143,7 @@ class DashboardController extends Controller
             'discoverPosts' => $discoverPosts,
             'likedFeedPostIds' => $likedFeedPostIds,
             'postCategoryLabels' => PlayerPostController::categoryLabels(),
+            'storyGroups' => PlayerStoryController::groupsForUser($user),
             'convites' => $convites,
             'solicitacoes' => $solicitacoes,
             'totalJogosProximos' => $membros->sum(fn ($membro) => $membro->pelada->jogos->count()),

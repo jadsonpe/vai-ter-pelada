@@ -20,6 +20,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\JogadorSearchController;
 use App\Http\Controllers\PlayerPostController;
 use App\Http\Controllers\PlayerProfileController;
+use App\Http\Controllers\PlayerStoryController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Public\ArenaController;
@@ -60,11 +61,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/jogador/publicacoes', [PlayerPostController::class, 'store'])->name('player-posts.store');
     Route::delete('/publicacoes/{post}', [PlayerPostController::class, 'destroy'])->name('player-posts.destroy');
     Route::post('/publicacoes/{post}/curtir', [PlayerPostController::class, 'toggleLike'])->name('player-posts.likes.toggle');
+    Route::get('/jogador/stories/novo', [PlayerStoryController::class, 'create'])->name('player-stories.create');
+    Route::post('/jogador/stories', [PlayerStoryController::class, 'store'])->name('player-stories.store');
+    Route::get('/stories/feed', [PlayerStoryController::class, 'feed'])->name('player-stories.feed');
+    Route::post('/stories/itens/{item}/visualizar', [PlayerStoryController::class, 'view'])->name('player-stories.items.view');
+    Route::delete('/stories/{story}', [PlayerStoryController::class, 'destroy'])->name('player-stories.destroy');
     Route::post('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'follow'])->name('peladeiros.follow');
     Route::delete('/peladeiro/{profile:slug}/seguir', [PlayerProfileController::class, 'unfollow'])->name('peladeiros.unfollow');
     Route::post('/denuncias/peladas/{pelada:slug}', [ReportController::class, 'storePelada'])->name('denuncias.peladas.store');
     Route::post('/denuncias/peladeiros/{profile:slug}', [ReportController::class, 'storePlayer'])->name('denuncias.peladeiros.store');
     Route::post('/denuncias/publicacoes/{post}', [ReportController::class, 'storePlayerPost'])->name('denuncias.player-posts.store');
+    Route::post('/denuncias/stories/{story}', [ReportController::class, 'storeStory'])->name('denuncias.stories.store');
 
     Route::prefix('jogador')->name('jogador.')->group(function () {
         Route::get('/avaliacoes', fn () => redirect()->route('dashboard', ['aba' => 'avaliacoes']))->name('avaliacoes.index');

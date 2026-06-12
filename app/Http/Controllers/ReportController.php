@@ -6,6 +6,7 @@ use App\Models\Notificacao;
 use App\Models\Pelada;
 use App\Models\PlayerPost;
 use App\Models\PlayerProfile;
+use App\Models\PlayerStory;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -59,6 +60,24 @@ class ReportController extends Controller
         $this->store($request, $post, 'publicação', $data, $name, $url);
 
         return back()->with('status', 'Denúncia enviada. Nossa equipe vai analisar as informações.');
+    }
+
+    public function storeStory(Request $request, PlayerStory $story): RedirectResponse
+    {
+        abort_unless($story->status === PlayerStory::STATUS_PUBLISHED && $story->expires_at?->isFuture(), 404);
+
+        $data = $this->validateReport($request, 'story');
+
+        if ($story->user_id === $request->user()->id) {
+            return back()->with('status', 'Voce nao pode denunciar o proprio story.');
+        }
+
+        $name = 'Story de '.($story->user?->apelido ?: $story->user?->name ?: 'Peladeiro');
+        $url = $story->profile ? route('peladeiros.show', $story->profile) : route('dashboard');
+
+        $this->store($request, $story, 'story', $data, $name, $url);
+
+        return back()->with('status', 'Denuncia enviada. Nossa equipe vai analisar as informacoes.');
     }
 
     private function validateReport(Request $request, string $type): array

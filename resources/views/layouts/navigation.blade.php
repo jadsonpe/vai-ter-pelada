@@ -13,6 +13,7 @@
                     @auth
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('jogador.peladas.*') || request()->routeIs('jogador.avaliacoes.*')">Jogador</x-nav-link>
                         <x-nav-link :href="route('jogadores.index')" :active="request()->routeIs('jogadores.index')">Peladeiros</x-nav-link>
+                        <x-nav-link :href="route('player-stories.create')" :active="request()->routeIs('player-stories.*')">Story</x-nav-link>
                         <x-nav-link :href="route('player-posts.index')" :active="request()->routeIs('player-posts.*')">Postar foto</x-nav-link>
                         @if(auth()->user()->isAdmin())
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">Admin</x-nav-link>
@@ -36,6 +37,7 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-stories.create')">Novo story</x-dropdown-link>
                             <x-dropdown-link :href="route('player-posts.index')">Nova publicação</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>
@@ -67,6 +69,7 @@
                         <x-slot name="content">
                             <x-dropdown-link :href="route('perfil.edit')">Perfil</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard')">Painel do jogador</x-dropdown-link>
+                            <x-dropdown-link :href="route('player-stories.create')">Novo story</x-dropdown-link>
                             <x-dropdown-link :href="route('player-posts.index')">Publicar foto</x-dropdown-link>
                             <x-dropdown-link :href="route('jogadores.index')">Buscar jogadores</x-dropdown-link>
                             <x-dropdown-link :href="route('dashboard', ['aba' => 'avaliacoes'])">Avaliacoes</x-dropdown-link>

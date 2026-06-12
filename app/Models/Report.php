@@ -34,19 +34,19 @@ class Report extends Model
     public static function reasonsFor(string $type): array
     {
         $common = [
-            'conteudo_ofensivo' => 'Conteúdo ofensivo, discriminatório ou abusivo',
-            'golpe_spam' => 'Golpe, spam ou divulgação enganosa',
-            'dados_falsos' => 'Informações falsas ou perfil enganoso',
-            'risco_seguranca' => 'Risco à segurança dos jogadores',
+            'conteudo_ofensivo' => 'Conteudo ofensivo, discriminatorio ou abusivo',
+            'golpe_spam' => 'Golpe, spam ou divulgacao enganosa',
+            'dados_falsos' => 'Informacoes falsas ou perfil enganoso',
+            'risco_seguranca' => 'Risco a seguranca dos jogadores',
             'outro' => 'Outro motivo',
         ];
 
         if ($type === 'pelada') {
             return [
                 'pelada_inexistente' => 'Pelada inexistente ou falsa',
-                'local_incorreto' => 'Local, horário ou preço incorreto',
-                'cobranca_suspeita' => 'Cobrança suspeita ou problema financeiro',
-                'organizacao_abusiva' => 'Conduta abusiva da organização',
+                'local_incorreto' => 'Local, horario ou preco incorreto',
+                'cobranca_suspeita' => 'Cobranca suspeita ou problema financeiro',
+                'organizacao_abusiva' => 'Conduta abusiva da organizacao',
                 ...$common,
             ];
         }
@@ -55,16 +55,26 @@ class Report extends Model
             return [
                 'imagem_inadequada' => 'Imagem inadequada ou ofensiva',
                 'uso_de_imagem' => 'Uso indevido da imagem de outra pessoa',
-                'legenda_abusiva' => 'Legenda abusiva, ofensiva ou discriminatória',
+                'legenda_abusiva' => 'Legenda abusiva, ofensiva ou discriminatoria',
+                'spam_publicidade' => 'Spam ou publicidade enganosa',
+                ...$common,
+            ];
+        }
+
+        if ($type === 'story') {
+            return [
+                'midia_inadequada' => 'Foto ou video inadequado ou ofensivo',
+                'uso_de_imagem' => 'Uso indevido da imagem de outra pessoa',
+                'conteudo_abusivo' => 'Conteudo abusivo, ofensivo ou discriminatorio',
                 'spam_publicidade' => 'Spam ou publicidade enganosa',
                 ...$common,
             ];
         }
 
         return [
-            'comportamento_abusivo' => 'Comportamento abusivo, ameaça ou assédio',
+            'comportamento_abusivo' => 'Comportamento abusivo, ameaca ou assedio',
             'perfil_falso' => 'Perfil falso ou usando dados de outra pessoa',
-            'foto_inadequada' => 'Foto ou conteúdo inadequado',
+            'foto_inadequada' => 'Foto ou conteudo inadequado',
             'conduta_antiesportiva' => 'Conduta antiesportiva recorrente',
             ...$common,
         ];
